@@ -17,7 +17,7 @@ export default async function Navigation() {
             href="/"
             className="text-lg font-semibold text-zinc-900 dark:text-zinc-100"
           >
-            Better Auth Demo
+            受注管理デモ
           </Link>
           {/* ナビゲーションリンクは管理者とそれ以外で分ける  */}
           <NavLinks isAdmin={isUserAdmin} />

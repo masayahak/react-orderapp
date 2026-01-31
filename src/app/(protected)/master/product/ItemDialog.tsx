@@ -19,10 +19,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { save商品 } from "@/app/(protected)/master/product/actions";
-import { 商品Input, 商品Output, 商品Schema } from "@/db/schema/商品Schema";
+import { 商品Input, 商品Output, 商品Model } from "@/db/model/商品Model";
+import { save商品 } from "./actions";
 
-export function ProductDialog({
+export function ItemDialog({
   target,
   onClose,
 }: {
@@ -32,7 +32,7 @@ export function ProductDialog({
   const isEdit = !!target;
 
   const form = useForm<商品Input>({
-    resolver: zodResolver(商品Schema),
+    resolver: zodResolver(商品Model),
     defaultValues: target
       ? { ...target, 備考: target.備考 ?? "" }
       : {

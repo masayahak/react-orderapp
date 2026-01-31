@@ -1,20 +1,23 @@
 "use server";
 
-import { 商品Repository } from "@/db/repository/商品Repository";
-import { 商品Input, 商品Model } from "@/db/model/商品Model";
+import { 得意先Repository } from "@/db/repository/得意先Repository";
+import { 得意先Input, 得意先Model } from "@/db/model/得意先Model";
 import { revalidatePath } from "next/cache";
 
-export async function save商品(data: 商品Input, isEdit: boolean) {
+export async function save得意先(data: 得意先Input, isEdit: boolean) {
   try {
-    const validated = 商品Model.parse(data);
+    const validated = 得意先Model.parse(data);
     if (isEdit) {
-      await 商品Repository.Update(
-        validated.商品CD,
+      if (!validated.得意先ID) {
+        throw new Error("更新対象のIDが指定されていません。");
+      }
+      await 得意先Repository.Update(
+        validated.得意先ID,
         validated.version,
         validated,
       );
     } else {
-      await 商品Repository.Insert(validated);
+      await 得意先Repository.Insert(validated);
     }
     revalidatePath("/admin/products");
     return { success: true };
@@ -25,9 +28,9 @@ export async function save商品(data: 商品Input, isEdit: boolean) {
   }
 }
 
-export async function delete商品(商品CD: string, version: number) {
+export async function delete得意先(得意先ID: string, version: number) {
   try {
-    await 商品Repository.Delete(商品CD, version);
+    await 得意先Repository.Delete(得意先ID, version);
     revalidatePath("/admin/products");
     return { success: true };
   } catch (e: unknown) {

@@ -17,6 +17,12 @@ export async function proxy(request: NextRequest) {
   // パターンの分岐
   // -------------------------------------------------------------
 
+  // ケース0：ルートへのアクセス
+  if (pathname === "/") {
+    const target = session ? "/dashboard" : "/login";
+    return NextResponse.redirect(new URL(target, request.url));
+  }
+
   // ケース1：未ログイン ＋ 公開パス以外にアクセスしようとした
   if (!session && !isPublicPath) {
     return NextResponse.redirect(new URL("/login", request.url));
@@ -24,8 +30,8 @@ export async function proxy(request: NextRequest) {
 
   // ケース2：ログイン済み ＋ ログイン・登録系ページにアクセスしようとした（逆流防止）
   if (session && isPublicPath) {
-    // 認証済みルート（(protected)/page.tsx すなわち "/"）へリダイレクト
-    return NextResponse.redirect(new URL("/", request.url));
+    // 認証済みルート（(protected)/dashboard/page.tsx ）へリダイレクト
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();

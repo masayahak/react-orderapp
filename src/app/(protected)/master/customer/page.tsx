@@ -1,4 +1,4 @@
-import { 商品Repository } from "@/db/repository/商品Repository";
+import { 得意先Repository } from "@/db/repository/得意先Repository";
 import { ItemList } from "./ItemList";
 
 export default async function Page({
@@ -13,7 +13,7 @@ export default async function Page({
   const pageSize = Number(process.env.PAGE_ROW_COUNT) || 20;
 
   // リポジトリから「データ」と「件数」を両方受け取る
-  const { items, totalCount } = await 商品Repository.Search(
+  const { items, totalCount } = await 得意先Repository.Search(
     query,
     page,
     pageSize,
@@ -21,7 +21,7 @@ export default async function Page({
 
   return (
     <main className="p-8 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">商品マスタメンテナンス</h1>
+      <h1 className="text-2xl font-bold mb-6">得意先マスタメンテナンス</h1>
       <ItemList
         initialData={items}
         totalCount={totalCount}

@@ -1,0 +1,41 @@
+import { 受注Repository } from "@/db/repository/受注Repository";
+import { OrderList } from "./OrderList";
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const params = await searchParams;
+  const page = Number(params.page) || 1;
+  const q = (params.q as string) || "";
+  const startDate = (params.startDate as string) || "";
+  const endDate = (params.endDate as string) || "";
+  const pageSize = 15;
+
+  const { items, totalCount } = await 受注Repository.Search({
+    keyword: q,
+    startDate,
+    endDate,
+    page,
+    pageSize,
+  });
+
+  return (
+    <div className="flex flex-col gap-8 p-8 max-w-[1400px] mx-auto">
+      <div>
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+          受注一覧
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          受注データの検索、確認、および新規登録が行えます。
+        </p>
+      </div>
+      <OrderList
+        initialData={items}
+        totalCount={totalCount}
+        pageSize={pageSize}
+      />
+    </div>
+  );
+}

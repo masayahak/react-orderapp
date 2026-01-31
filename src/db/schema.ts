@@ -137,22 +137,26 @@ export const 得意先 = pgTable("得意先", {
     .notNull(),
 });
 
-export const 受注 = pgTable("受注", {
-  受注ID: text("受注ID")
-    .primaryKey()
-    .$defaultFn(() => uuidv7()),
-  受注日: date("受注日").notNull(),
-  得意先ID: text("得意先ID").notNull(),
-  得意先名: text("得意先").notNull(),
-  合計金額: decimal("合計金額").notNull(),
-  備考: text("備考"),
-  version: integer("version").default(0).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => /* @__PURE__ */ new Date())
-    .notNull(),
-});
+export const 受注 = pgTable(
+  "受注",
+  {
+    受注ID: text("受注ID")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    受注日: date("受注日").notNull(),
+    得意先ID: text("得意先ID").notNull(),
+    得意先名: text("得意先").notNull(),
+    合計金額: decimal("合計金額").notNull(),
+    備考: text("備考"),
+    version: integer("version").default(0).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [index("受注_受注日_idx").on(table.受注日)],
+);
 
 export const 受注明細 = pgTable(
   "受注明細",
@@ -167,15 +171,15 @@ export const 受注明細 = pgTable(
     数量: decimal("数量").notNull(),
     明細金額: decimal("明細金額").notNull(),
   },
-  (table) => [index("T受注明細_受注ID_idx").on(table.受注ID)],
+  (table) => [index("受注明細_受注ID_idx").on(table.受注ID)],
 );
 
-export const T受注Relations = relations(受注, ({ many }) => ({
-  T受注明細s: many(受注明細),
+export const 受注Relations = relations(受注, ({ many }) => ({
+  受注明細: many(受注明細),
 }));
 
-export const T受注明細Relations = relations(受注明細, ({ one }) => ({
-  T受注: one(受注, {
+export const 受注明細Relations = relations(受注明細, ({ one }) => ({
+  受注: one(受注, {
     fields: [受注明細.受注ID],
     references: [受注.受注ID],
   }),

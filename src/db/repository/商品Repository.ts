@@ -1,20 +1,42 @@
 import "server-only"; // クライアント側に混入したらビルドエラーにする
 import { db } from "@/db/drizzle";
-import { and, eq, ilike, or, asc } from "drizzle-orm";
-import { 商品Output, 商品Schema } from "../schema/商品Schema";
+import { and, eq, ilike, or, asc, count } from "drizzle-orm";
+import { 商品Output, 商品Model } from "../model/商品Model";
 import { 商品 } from "../schema";
 
 export const 商品Repository = {
-  async Search(キーワード: string): Promise<商品Output[]> {
+  async Search(
+    キーワード: string,
+    page: number = 1,
+    pageSize: number,
+  ): Promise<{ items: 商品Output[]; totalCount: number }> {
     const pattern = `%${キーワード}%`;
+    const offset = (page - 1) * pageSize;
+    const whereClause = or(
+      ilike(商品.商品CD, pattern),
+      ilike(商品.商品名, pattern),
+    );
+
+    // 1. 全件数を取得（ページング計算用）
+    const countResult = await db
+      .select({ value: count() })
+      .from(商品)
+      .where(whereClause);
+    const totalCount = countResult[0].value;
+
+    // 2. 該当ページ分だけ取得
     const results = await db
       .select()
       .from(商品)
-      .where(or(ilike(商品.商品CD, pattern), ilike(商品.商品名, pattern)))
+      .where(whereClause)
       .orderBy(asc(商品.商品CD))
-      .limit(50); // 大量データ配慮のため制限。必要に応じてPage/Limit引数を追加
+      .limit(pageSize)
+      .offset(offset);
 
-    return results.map((r) => 商品Schema.parse(r));
+    return {
+      items: results.map((r) => 商品Model.parse(r)),
+      totalCount,
+    };
   },
 
   async SearchBy(商品CD: string): Promise<商品Output | null> {
@@ -25,7 +47,7 @@ export const 商品Repository = {
       .limit(1);
 
     const target = results[0];
-    return target ? 商品Schema.parse(target) : null;
+    return target ? 商品Model.parse(target) : null;
   },
 
   async Insert(データ: 商品Output) {
