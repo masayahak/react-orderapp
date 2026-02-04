@@ -11,7 +11,7 @@ export default async function Page({
   const q = (params.q as string) || "";
   const startDate = (params.startDate as string) || "";
   const endDate = (params.endDate as string) || "";
-  const pageSize = 15;
+  const pageSize = Number(process.env.PAGE_ROW_COUNT) || 20;
 
   const { items, totalCount } = await 受注Repository.Search({
     keyword: q,

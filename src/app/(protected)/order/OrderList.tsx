@@ -126,7 +126,7 @@ export function OrderList({
               {/* 新規受注ボタンに遷移処理を追加 */}
               <Button
                 type="button"
-                className="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700"
+                className="w-full md:w-auto bg-blue-600 hover:bg-blue-800"
                 onClick={() => router.push("/order/new")}
               >
                 <Plus className="h-4 w-4 mr-2" /> 新規受注
@@ -192,7 +192,7 @@ export function OrderList({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                      className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
                       onClick={() => router.push(`/order/${order.受注ID}`)}
                     >
                       確認・修正

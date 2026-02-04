@@ -8,7 +8,8 @@ import { 受注Input } from "@/db/model/受注Model";
 
 export async function search得意先(query: string) {
   // 最小文字数チェックなどはフロント側で行っている前提
-  const { items } = await 得意先Repository.Search(query, 1, 20);
+  const pageSize = Number(process.env.PAGE_ROW_COUNT) || 20;
+  const { items } = await 得意先Repository.Search(query, 1, pageSize);
 
   // Comboboxに必要な型 (CustomerSearchRes) に絞って返す
   return items.map((i) => ({
@@ -18,7 +19,8 @@ export async function search得意先(query: string) {
 }
 
 export async function search商品(query: string) {
-  const { items } = await 商品Repository.Search(query, 1, 20);
+  const pageSize = Number(process.env.PAGE_ROW_COUNT) || 20;
+  const { items } = await 商品Repository.Search(query, 1, pageSize);
 
   // Comboboxに必要な型 (ProductSearchRes) に絞って返す
   return items.map((i) => ({

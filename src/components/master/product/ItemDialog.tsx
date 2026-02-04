@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { 商品Input, 商品Output, 商品Model } from "@/db/model/商品Model";
-import { save商品 } from "./actions";
+import { save商品 } from "@/app/(protected)/master/product/actions";
 
 export function ItemDialog({
   target,

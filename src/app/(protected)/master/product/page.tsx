@@ -1,5 +1,5 @@
+import { ItemList } from "@/components/master/product/ItemList";
 import { 商品Repository } from "@/db/repository/商品Repository";
-import { ItemList } from "./ItemList";
 
 export default async function Page({
   searchParams,

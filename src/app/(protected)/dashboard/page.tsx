@@ -5,11 +5,9 @@ import {
   AnalysisInterval,
 } from "@/lib/analysis-utils";
 import { 受注分析Repository } from "@/db/repository/受注分析Repository";
-import { DashboardHeader } from "./DashboardHeader";
-import { KpiCards } from "./KpiCards";
-import { SalesTrendChart } from "./SalesTrendChart";
-import { RankingSection } from "./RankingSection";
-import { Separator } from "@/components/ui/separator";
+import { DashboardHeader } from "../../../components/dashboard/DashboardHeader";
+import { SalesTrendChart } from "../../../components/dashboard/SalesTrendChart";
+import { RankingSection } from "../../../components/dashboard/RankingSection";
 import { Loader2 } from "lucide-react";
 
 interface DashboardPageProps {
@@ -24,21 +22,16 @@ interface DashboardPageProps {
 export default async function DashboardPage({
   searchParams,
 }: DashboardPageProps) {
-  // 1. パラメータの解決（Next.js 15の非同期searchParamsに対応）
   const params = await searchParams;
-
-  // 2. プリセットからデフォルト値を生成
   const preset = params.preset || "month";
   const defaults = getAnalysisDefaults(preset);
 
-  // 3. パラメータの確定（URL優先 ＞ デフォルト）
   const duration = {
     from: params.from || defaults.duration.from,
     to: params.to || defaults.duration.to,
   };
   const interval = params.interval || defaults.interval;
 
-  // 4. データの一括取得（Promise.allによる並列実行でTTFBを最適化）
   const [trendData, topCustomers, topProducts] = await Promise.all([
     受注分析Repository.GetSalesTrend(duration, interval),
     受注分析Repository.GetTopCustomers(duration),
@@ -46,65 +39,52 @@ export default async function DashboardPage({
   ]);
 
   return (
-    <div className="min-h-screen bg-slate-50/30 p-4 md:p-8 space-y-8">
-      {/* 司令塔：期間・単位コントロール */}
-      <DashboardHeader
-        activePreset={preset}
-        from={duration.from}
-        to={duration.to}
-        activeInterval={interval}
-      />
+    <div className="flex flex-col h-[calc(100vh-64px)] bg-slate-50/30 overflow-hidden">
+      <div className="px-3 pt-3 pb-2 shrink-0">
+        <DashboardHeader
+          activePreset={preset}
+          from={duration.from}
+          to={duration.to}
+          activeInterval={interval}
+        />
+      </div>
 
-      <Separator className="bg-slate-200/60" />
-
-      {/* Suspenseで囲むことで、データロード中のUXを担保。
-          （実際はサーバーサイドでPromise.allを待つが、入れ子構造に備える）
-      */}
-      <Suspense
-        fallback={
-          <div className="flex h-96 items-center justify-center">
-            <Loader2 className="animate-spin" />
-          </div>
-        }
-      >
-        <div className="space-y-8">
-          {/* 上段：KPIメトリクス */}
-          <section>
-            <KpiCards data={trendData} />
-          </section>
-
-          {/* 中段：メイン分析エリア */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* 左側 2/3：売上推移グラフ */}
-            <div className="lg:col-span-2 h-fit">
-              <SalesTrendChart data={trendData} interval={interval} />
+      <main className="flex-1 min-h-0 px-3 pb-2">
+        <Suspense
+          fallback={
+            <div className="h-full flex items-center justify-center">
+              <Loader2 className="animate-spin text-slate-400" />
+            </div>
+          }
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 h-full">
+            {/* 左側グラフエリア */}
+            <div className="lg:col-span-8 h-full min-h-0">
+              <section className="bg-white rounded-xl border shadow-sm p-0 h-full overflow-hidden">
+                <SalesTrendChart data={trendData} interval={interval} />
+              </section>
             </div>
 
-            {/* 右側 1/3：ランキングセクション */}
-            <div className="space-y-8">
-              <RankingSection
-                title="得意先別売上"
-                data={topCustomers}
-                type="customer"
-              />
-              <RankingSection
-                title="商品別売上"
-                data={topProducts}
-                type="product"
-              />
+            {/* 右側ランキングエリア */}
+            <div className="lg:col-span-4 flex flex-col gap-3 h-full min-h-0">
+              <div className="flex-1 min-h-0">
+                <RankingSection
+                  title="得意先別売上"
+                  data={topCustomers}
+                  type="customer"
+                />
+              </div>
+              <div className="flex-1 min-h-0">
+                <RankingSection
+                  title="商品別売上"
+                  data={topProducts}
+                  type="product"
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </Suspense>
-
-      {/* フッター：データ整合性メタ情報 */}
-      <footer className="pt-8 text-[10px] text-slate-400 flex justify-between items-center border-t border-dashed">
-        <p>
-          Analysis Range: {duration.from} to {duration.to} (Interval: {interval}
-          )
-        </p>
-        <p className="font-mono">System Date: 2026-01-31</p>
-      </footer>
+        </Suspense>
+      </main>
     </div>
   );
 }

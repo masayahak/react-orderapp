@@ -18,15 +18,14 @@ import {
 } from "@/components/ui/table";
 import { Trash2, Plus, ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner"; // 通知ライブラリ（任意）
+import { toast } from "sonner";
 import { delete受注, save受注, search商品, search得意先 } from "./action";
 
-// 検索結果の型定義
 type CustomerSearchRes = { 得意先ID: string; 得意先名: string };
 type ProductSearchRes = { 商品CD: string; 商品名: string; 単価: number };
 
 interface OrderFormProps {
-  initialData?: 受注Input & { 受注ID: string }; // 既存データ（ID含む）
+  initialData?: 受注Input & { 受注ID: string };
   mode: "create" | "edit";
 }
 
@@ -51,7 +50,6 @@ export function OrderForm({ initialData, mode }: OrderFormProps) {
   const watchDetails = useWatch({ control: form.control, name: "明細" });
   const totalAmount = useWatch({ control: form.control, name: "合計金額" });
 
-  // リアルタイム集計ロジック
   useEffect(() => {
     let total = 0;
     watchDetails?.forEach((item, index) => {
@@ -75,7 +73,6 @@ export function OrderForm({ initialData, mode }: OrderFormProps) {
     { header: "単価", accessorKey: "単価", width: "100px" },
   ];
 
-  // 送信処理（新規・修正共通）
   const onSubmit = async (data: 受注Input) => {
     const res = await save受注(data, mode, initialData?.受注ID);
     if (res.success) {
@@ -89,11 +86,9 @@ export function OrderForm({ initialData, mode }: OrderFormProps) {
     }
   };
 
-  // 削除処理
   const handleDelete = async () => {
     if (!initialData?.受注ID || !confirm("この受注伝票を完全に削除しますか？"))
       return;
-
     const res = await delete受注(initialData.受注ID);
     if (res.success) {
       toast.success("受注を削除しました");
@@ -103,8 +98,8 @@ export function OrderForm({ initialData, mode }: OrderFormProps) {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
-      {/* ヘッダーエリア */}
+    // 修正5: max-w-5xl -> max-w-6xl (横幅拡張)
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
@@ -140,7 +135,6 @@ export function OrderForm({ initialData, mode }: OrderFormProps) {
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* 基本情報カード */}
         <Card className="shadow-sm border-slate-200">
           <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
@@ -180,7 +174,6 @@ export function OrderForm({ initialData, mode }: OrderFormProps) {
           </CardContent>
         </Card>
 
-        {/* 明細テーブルカード */}
         <Card className="shadow-sm border-slate-200 overflow-hidden">
           <div className="bg-slate-50/80 border-b px-6 py-2.5 flex justify-between items-center">
             <h2 className="text-xs font-bold text-slate-600 uppercase tracking-widest">
@@ -194,10 +187,17 @@ export function OrderForm({ initialData, mode }: OrderFormProps) {
             <Table>
               <TableHeader className="bg-slate-50/30">
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="pl-6 text-[11px]">商品名</TableHead>
-                  <TableHead className="w-[100px] text-[11px]">単価</TableHead>
+                  {/* 修正1: 商品CD列を先頭へ */}
+                  <TableHead className="w-[180px] pl-6 text-[11px]">
+                    商品CD
+                  </TableHead>
+                  {/* 修正2: 商品名列を2番目へ */}
+                  <TableHead className="text-[11px]">商品名</TableHead>
+                  {/* 修正3: 単価列の幅を拡張 */}
+                  <TableHead className="w-[140px] text-[11px]">単価</TableHead>
                   <TableHead className="w-[100px] text-[11px]">数量</TableHead>
-                  <TableHead className="w-[140px] text-right pr-6 text-[11px]">
+                  {/* 修正4: 小計列の幅を拡張 */}
+                  <TableHead className="w-[180px] text-right pr-6 text-[11px]">
                     小計
                   </TableHead>
                   <TableHead className="w-[50px]"></TableHead>
@@ -207,18 +207,18 @@ export function OrderForm({ initialData, mode }: OrderFormProps) {
                 {fields.map((field, index) => (
                   <TableRow key={field.id} className="hover:bg-slate-50/20">
                     <TableCell className="pl-6 py-2">
+                      {/* 修正1: displayKeyを商品CDに変更 */}
                       <AdvancedCombobox<ProductSearchRes>
-                        placeholder="商品検索..."
+                        placeholder="CD検索..."
                         searchFn={search商品}
                         columns={productColumns}
-                        displayKey="商品名"
+                        displayKey="商品CD"
                         valueKey="商品CD"
                         initialValue={
                           field.商品CD
                             ? {
                                 商品CD: field.商品CD,
                                 商品名: field.商品名,
-                                // ★ Number() で明示的にキャストして、型を number に一致させる
                                 単価: Number(field.単価),
                               }
                             : undefined
@@ -230,11 +230,21 @@ export function OrderForm({ initialData, mode }: OrderFormProps) {
                         }}
                       />
                     </TableCell>
+                    {/* 修正2: 商品名を読取専用Inputで表示 */}
+                    <TableCell className="py-2">
+                      <Input
+                        {...form.register(`明細.${index}.商品名`)}
+                        readOnly
+                        tabIndex={-1}
+                        className="h-9 bg-transparent border-none text-xs text-slate-500 focus-visible:ring-0"
+                      />
+                    </TableCell>
                     <TableCell className="py-2">
                       <Input
                         type="number"
                         {...form.register(`明細.${index}.単価`)}
                         readOnly
+                        tabIndex={-1}
                         className="h-9 bg-slate-50 border-none font-mono text-right text-xs"
                       />
                     </TableCell>
@@ -287,7 +297,6 @@ export function OrderForm({ initialData, mode }: OrderFormProps) {
           </CardContent>
         </Card>
 
-        {/* 固定フッター：合計と保存 */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-slate-900 text-white p-6 rounded-2xl shadow-xl">
           <div className="flex flex-col">
             <span className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">
@@ -306,7 +315,7 @@ export function OrderForm({ initialData, mode }: OrderFormProps) {
               type="button"
               variant="outline"
               onClick={() => router.back()}
-              className="flex-1 md:flex-none border-slate-700 text-slate-300 hover:bg-slate-800 h-12 px-8"
+              className="flex-1 md:flex-none border-slate-700 text-slate-600 hover:bg-slate-800 h-12 px-8"
             >
               戻る
             </Button>

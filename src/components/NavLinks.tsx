@@ -19,7 +19,7 @@ export default function NavLinks({ isAdmin }: NavLinksProps) {
     const isActive = pathname === "/order";
     return isActive
       ? "bg-blue-600 text-white shadow-sm"
-      : "text-zinc-600 hover:bg-blue-50 hover:text-blue-700 dark:text-zinc-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-200";
+      : "text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:text-zinc-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-200";
   };
 
   // マスタ用のスタイル（Amber系）
@@ -27,7 +27,7 @@ export default function NavLinks({ isAdmin }: NavLinksProps) {
     const isActive = pathname === path;
     return isActive
       ? "bg-amber-600 text-white shadow-sm"
-      : "text-zinc-600 hover:bg-amber-50 hover:text-amber-700 dark:text-zinc-400 dark:hover:bg-amber-900/30 dark:hover:text-amber-200";
+      : "text-zinc-200 hover:bg-amber-50 hover:text-amber-700 dark:text-zinc-400 dark:hover:bg-amber-900/30 dark:hover:text-amber-200";
   };
 
   return (

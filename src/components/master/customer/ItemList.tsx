@@ -14,8 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
-import { delete得意先 } from "./actions";
-import { ItemDialog } from "./ItemDialog";
+import { delete得意先 } from "../../../app/(protected)/master/customer/actions";
+import { ItemDialog } from "../../../app/(protected)/master/customer/ItemDialog";
 import { 得意先Output } from "@/db/model/得意先Model";
 
 export function ItemList({
