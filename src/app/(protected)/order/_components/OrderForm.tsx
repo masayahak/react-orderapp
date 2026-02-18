@@ -19,7 +19,7 @@ import {
 import { Trash2, Plus, ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { delete受注, save受注, search商品, search得意先 } from "./action";
+import { delete受注, save受注, search商品, search得意先 } from "../action";
 
 type CustomerSearchRes = { 得意先ID: string; 得意先名: string };
 type ProductSearchRes = { 商品CD: string; 商品名: string; 単価: number };

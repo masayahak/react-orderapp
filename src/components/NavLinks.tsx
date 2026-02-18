@@ -32,6 +32,18 @@ export default function NavLinks({ isAdmin }: NavLinksProps) {
 
   return (
     <div className="flex items-center gap-1">
+      {/* ダッシュボード */}
+      <Link
+        href="/dashboard"
+        className={`${baseStyle} ${
+          pathname === "/dashboard"
+            ? "bg-indigo-600 text-white shadow-sm"
+            : "text-zinc-200 hover:bg-indigo-50 hover:text-indigo-700 dark:text-zinc-400 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-200"
+        }`}
+      >
+        ダッシュボード
+      </Link>
+
       {/* 受注セクション */}
       <Link href="/order" className={`${baseStyle} ${getOrderStyle()}`}>
         受注

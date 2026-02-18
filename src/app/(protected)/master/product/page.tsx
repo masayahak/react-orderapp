@@ -1,4 +1,4 @@
-import { ItemList } from "@/components/master/product/ItemList";
+import { ItemList } from "@/app/(protected)/master/product/_components/ItemList";
 import { 商品Repository } from "@/db/repository/商品Repository";
 
 export default async function Page({

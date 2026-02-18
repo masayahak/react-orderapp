@@ -11,19 +11,17 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Plus, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { Pencil, Plus, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { delete得意先 } from "../../../app/(protected)/master/customer/actions";
-import { ItemDialog } from "../../../app/(protected)/master/customer/ItemDialog";
-import { 得意先Output } from "@/db/model/得意先Model";
+import { ItemDialog } from "./ItemDialog";
+import { 商品Output } from "@/db/model/商品Model";
 
 export function ItemList({
   initialData,
   totalCount,
   pageSize,
 }: {
-  initialData: 得意先Output[];
+  initialData: 商品Output[];
   totalCount: number;
   pageSize: number;
 }) {
@@ -42,7 +40,7 @@ export function ItemList({
     });
   };
 
-  const [editingItem, setEditingItem] = useState<得意先Output | null>(null);
+  const [editingItem, setEditingItem] = useState<商品Output | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // 検索処理 (URLクエリを更新してServer Componentを再走らせる)
@@ -58,23 +56,12 @@ export function ItemList({
     });
   };
 
-  const onDelete = async (cd: string | undefined, ver: number) => {
-    if (!cd) return;
-    if (!confirm("本当に削除しますか？")) return;
-    const res = await delete得意先(cd, ver);
-    if (res.success) {
-      toast.success("削除しました");
-    } else {
-      toast.error(res.error);
-    }
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center gap-4">
         <div className="relative flex-1 max-w-sm">
           <Input
-            placeholder="得意先名で検索..."
+            placeholder="商品CDまたは名称で検索..."
             onChange={(e) => handleSearch(e.target.value)}
             defaultValue={searchParams.get("q") || ""}
           />
@@ -98,8 +85,9 @@ export function ItemList({
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow>
-              <TableHead className="w-[300px]">得意先名</TableHead>
-              <TableHead className="w-[200px]">電話番号</TableHead>
+              <TableHead className="w-[120px]">商品CD</TableHead>
+              <TableHead className="w-[300px]">商品名</TableHead>
+              <TableHead className="w-[120px] text-right pr-8">単価</TableHead>
               <TableHead className="w-[200px]">備考</TableHead>
               <TableHead className="w-[100px] text-center">操作</TableHead>
             </TableRow>
@@ -108,20 +96,27 @@ export function ItemList({
             {initialData.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={4}
+                  colSpan={5}
                   className="h-24 text-center text-muted-foreground"
                 >
-                  該当する得意先が見つかりません
+                  該当する商品が見つかりません
                 </TableCell>
               </TableRow>
             ) : (
               initialData.map((p) => (
                 <TableRow
-                  key={p.得意先ID}
+                  key={p.商品CD}
                   className="hover:bg-muted/30 transition-colors"
                 >
-                  <TableCell className="font-medium">{p.得意先名}</TableCell>
-                  <TableCell className="text-sm">{p.電話番号}</TableCell>
+                  <TableCell className="font-mono text-sm">
+                    {p.商品CD}
+                  </TableCell>
+                  <TableCell className="font-medium">{p.商品名}</TableCell>
+                  <TableCell className="text-right pr-4">
+                    {/* Output型なので p.単価 は確実に number。
+                        JSの限界値内であれば toLocaleString() で安全にフォーマット可能 */}
+                    ¥{p.単価.toLocaleString()}
+                  </TableCell>
                   <TableCell className="text-muted-foreground text-sm truncate max-w-[200px]">
                     {p.備考}
                   </TableCell>
@@ -136,14 +131,6 @@ export function ItemList({
                         }}
                       >
                         <Pencil className="h-4 w-4 text-blue-600" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => onDelete(p.得意先ID, p.version)}
-                      >
-                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>

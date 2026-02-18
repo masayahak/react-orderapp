@@ -76,7 +76,7 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Better Auth Todo アプリデモ</CardTitle>
+          <CardTitle>受注管理アプリ デモ</CardTitle>
           <CardDescription>ログインしてください</CardDescription>
         </CardHeader>
         <CardContent>

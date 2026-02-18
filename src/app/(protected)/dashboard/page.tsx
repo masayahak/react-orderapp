@@ -5,9 +5,9 @@ import {
   AnalysisInterval,
 } from "@/lib/analysis-utils";
 import { 受注分析Repository } from "@/db/repository/受注分析Repository";
-import { DashboardHeader } from "../../../components/dashboard/DashboardHeader";
-import { SalesTrendChart } from "../../../components/dashboard/SalesTrendChart";
-import { RankingSection } from "../../../components/dashboard/RankingSection";
+import { DashboardHeader } from "./_components/DashboardHeader";
+import { SalesTrendChart } from "./_components/SalesTrendChart";
+import { RankingSection } from "./_components/RankingSection";
 import { Loader2 } from "lucide-react";
 
 interface DashboardPageProps {

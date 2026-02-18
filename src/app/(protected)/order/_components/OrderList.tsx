@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Search, Loader2, FileText } from "lucide-react";
+import { Plus, Search, Loader2, FileText, Pencil } from "lucide-react";
 import { 受注HeaderOutput } from "@/db/model/受注Model";
 
 export function OrderList({
@@ -49,7 +49,7 @@ export function OrderList({
     }).format(amount);
   };
 
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const params = new URLSearchParams(searchParams);
@@ -189,14 +189,17 @@ export function OrderList({
                   </TableCell>
                   <TableCell className="text-center">
                     {/* 確認・修正ボタンに遷移処理を追加 */}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-                      onClick={() => router.push(`/order/${order.受注ID}`)}
-                    >
-                      確認・修正
-                    </Button>
+                    <div className="flex justify-center">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                        onClick={() => router.push(`/order/${order.受注ID}`)}
+                        title="修正"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

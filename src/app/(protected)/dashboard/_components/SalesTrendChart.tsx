@@ -171,6 +171,39 @@ export function SalesTrendChart({ data, interval }: SalesTrendChartProps) {
                 fill={chartConfig[activeChart].color}
                 radius={[4, 4, 0, 0]}
                 maxBarSize={120} // 太さの上限を緩和
+                onClick={(data) => {
+                  if (!data || !data.period) return;
+
+                  const formatDate = (d: Date) => {
+                    if (isNaN(d.getTime())) return "";
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, "0");
+                    const day = String(d.getDate()).padStart(2, "0");
+                    return `${year}-${month}-${day}`;
+                  };
+
+                  const baseDate = new Date(data.period);
+
+                  // 開始日・終了日ともに、必ず yyyy-MM-dd 形式に変換する
+                  const fromStr = formatDate(baseDate);
+                  let toStr = fromStr;
+
+                  if (interval === "month") {
+                    const endOfMonth = new Date(
+                      baseDate.getFullYear(),
+                      baseDate.getMonth() + 1,
+                      0,
+                    );
+                    toStr = formatDate(endOfMonth);
+                  } else if (interval === "week") {
+                    const endOfWeek = new Date(baseDate.getTime());
+                    endOfWeek.setDate(baseDate.getDate() + 6);
+                    toStr = formatDate(endOfWeek);
+                  }
+
+                  window.location.href = `/order?startDate=${fromStr}&endDate=${toStr}`;
+                }}
+                className="cursor-pointer hover:opacity-80 transition-opacity"
               />
             </BarChart>
           </ChartContainer>

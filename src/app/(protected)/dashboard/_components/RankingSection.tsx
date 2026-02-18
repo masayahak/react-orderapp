@@ -36,14 +36,14 @@ export function RankingSection({ title, data, type }: RankingSectionProps) {
   const chartData = useMemo(() => {
     return (data || []).slice(0, 5).map((item) => ({
       ...item,
-      fill: "#4f46e5", // Indigo-600 (確実に青にする)
+      fill: type === "customer" ? "#f97316" : "#10b981", // Customer: Orange, Product: Emerald
     }));
-  }, [data]);
+  }, [data, type]);
 
   const chartConfig = {
     value: {
       label: type === "customer" ? "売上高" : "販売額",
-      color: "#4f46e5",
+      color: type === "customer" ? "#f97316" : "#10b981",
     },
   } satisfies ChartConfig;
 
@@ -61,8 +61,12 @@ export function RankingSection({ title, data, type }: RankingSectionProps) {
     <Card className="flex flex-col border-none shadow-sm bg-white h-full overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between py-4 px-5 shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 bg-indigo-50 rounded-md">
-            <Icon className="h-3.5 w-3.5 text-indigo-600" />
+          <div
+            className={`p-1.5 rounded-md ${type === "customer" ? "bg-indigo-50" : "bg-emerald-50"}`}
+          >
+            <Icon
+              className={`h-3.5 w-3.5 ${type === "customer" ? "text-indigo-600" : "text-emerald-600"}`}
+            />
           </div>
           <CardTitle className="text-xs font-bold text-slate-700 uppercase tracking-wider">
             {title}
@@ -126,7 +130,24 @@ export function RankingSection({ title, data, type }: RankingSectionProps) {
                 dataKey="value"
                 layout="vertical"
                 radius={[0, 4, 4, 0]}
-                fill="#4f46e5"
+                fill={type === "customer" ? "#f97316" : "#10b981"} // Customer: Orange, Product: Emerald
+                onClick={(data) => {
+                  if (!data || !data.name) return;
+                  // URL検索パラメータから期間を取得する（DashboardHeaderがURLを管理しているため）
+                  // Server Component経由ではなく、クライアントサイドで現在のURLSearchParamsを参照
+                  const searchParams = new URLSearchParams(
+                    window.location.search,
+                  );
+                  const from = searchParams.get("from") || "";
+                  const to = searchParams.get("to") || "";
+
+                  // キーワード検索として遷移 (encodeURIComponentはブラウザが自動で行うが、明示的に書くのが安全)
+                  // 受注一覧などへ遷移してフィルタリング
+                  const q = encodeURIComponent(data.name);
+
+                  window.location.href = `/order?startDate=${from}&endDate=${to}&q=${q}`;
+                }}
+                className="cursor-pointer hover:opacity-80 transition-opacity"
               >
                 {/* 右側に数値を表示 */}
                 <LabelList

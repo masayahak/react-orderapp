@@ -21,7 +21,7 @@ export default async function Navigation() {
             <div className="p-2.5 bg-indigo-600 mr-2">
               <BarChart3 className="h-4 w-4" />
             </div>
-            受注管理デモ
+            管理画面
           </Link>
           {/* ナビゲーションリンクは管理者とそれ以外で分ける  */}
           <NavLinks isAdmin={isUserAdmin} />

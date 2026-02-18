@@ -1,4 +1,4 @@
-import { OrderForm } from "@/app/(protected)/order/OrderForm";
+import { OrderForm } from "@/app/(protected)/order/_components/OrderForm";
 
 export default function NewOrderPage() {
   return (
