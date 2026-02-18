@@ -1,5 +1,5 @@
 import { 得意先Repository } from "@/db/repository/得意先Repository";
-import { ItemList } from "./_components/ItemList";
+import { CustomerList } from "./_components/CustomerList";
 
 export default async function Page({
   searchParams,
@@ -22,7 +22,7 @@ export default async function Page({
   return (
     <main className="p-8 max-w-6xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">得意先マスタメンテナンス</h1>
-      <ItemList
+      <CustomerList
         initialData={items}
         totalCount={totalCount}
         pageSize={pageSize}

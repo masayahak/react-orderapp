@@ -14,10 +14,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pencil, Plus, Loader2, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ItemDialog } from "./ItemDialog";
+import { CustomerDialog } from "./CustomerDialog";
 import { 得意先Output } from "@/db/model/得意先Model";
 
-export function ItemList({
+export function CustomerList({
   initialData,
   totalCount,
   pageSize,
@@ -68,7 +68,7 @@ export function ItemList({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Card className="border-none shadow-sm bg-slate-50/50">
         <CardContent className="p-2">
           <form
@@ -203,7 +203,7 @@ export function ItemList({
       </div>
 
       {isDialogOpen && (
-        <ItemDialog
+        <CustomerDialog
           target={editingItem}
           onClose={() => setIsDialogOpen(false)}
         />

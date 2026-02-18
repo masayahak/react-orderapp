@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react"; // useStateを追加
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -9,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-// AlertDialog 関連をインポート
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,7 +37,7 @@ import {
 } from "@/app/(protected)/master/customer/actions";
 import { 得意先Input, 得意先Output, 得意先Model } from "@/db/model/得意先Model";
 
-export function ItemDialog({
+export function CustomerDialog({
   target,
   onClose,
 }: {
@@ -98,7 +97,6 @@ export function ItemDialog({
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-              {/* 各フォームフィールド (変更なし) */}
               <FormField
                 control={form.control}
                 name="得意先名"
@@ -159,7 +157,6 @@ export function ItemDialog({
                     type="button"
                     variant="destructive"
                     disabled={form.formState.isSubmitting}
-                    // クリック時はフラグを立てるだけにする
                     onClick={() => setShowDeleteAlert(true)}
                   >
                     削除

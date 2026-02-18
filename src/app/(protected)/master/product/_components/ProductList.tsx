@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react"; // useTransition を追加
+import { useState, useTransition } from "react";
 import {
   Table,
   TableBody,
@@ -11,12 +11,13 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Pencil, Plus, Loader2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Pencil, Plus, Loader2, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ItemDialog } from "./ItemDialog";
+import { ProductDialog } from "./ProductDialog";
 import { 商品Output } from "@/db/model/商品Model";
 
-export function ItemList({
+export function ProductList({
   initialData,
   totalCount,
   pageSize,
@@ -43,14 +44,18 @@ export function ItemList({
   const [editingItem, setEditingItem] = useState<商品Output | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // 検索処理 (URLクエリを更新してServer Componentを再走らせる)
-  const handleSearch = (q: string) => {
-    const params = new URLSearchParams(searchParams);
-    if (q) params.set("q", q);
-    else params.delete("q");
+  // 検索処理実行
+  const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
+    // フォームのデフォルト送信をキャンセル
+    e.preventDefault();
 
-    params.set("page", "1");
-    // startTransition で包むことで、入力中のもっさり感を防ぐ
+    const formData = new FormData(e.currentTarget);
+    const params = new URLSearchParams(searchParams);
+    const keyword = formData.get("q") as string;
+    if (keyword) params.set("q", keyword);
+    else params.delete("q");
+    params.set("page", "1"); // 検索時は1ページ目に戻す
+
     startTransition(() => {
       router.push(`?${params.toString()}`);
     });
@@ -58,34 +63,59 @@ export function ItemList({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <Input
-            placeholder="商品CDまたは名称で検索..."
-            onChange={(e) => handleSearch(e.target.value)}
-            defaultValue={searchParams.get("q") || ""}
-          />
-          {isPending && (
-            <div className="absolute right-3 top-2.5">
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+      <Card className="border-none shadow-sm bg-slate-50/50">
+        <CardContent className="p-2">
+          <form
+            onSubmit={handleSearch}
+            className="flex flex-col md:flex-row items-end gap-6"
+          >
+            <div className="space-y-2 flex-1 w-full">
+              <label className="text-xs font-semibold text-slate-500 ml-1">
+                キーワード (商品CD・商品名)
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <Input
+                  name="q"
+                  placeholder="検索ワードを入力..."
+                  defaultValue={searchParams.get("q") || ""}
+                  className="pl-10 bg-white"
+                />
+              </div>
             </div>
-          )}
-        </div>
-        <Button
-          onClick={() => {
-            setEditingItem(null);
-            setIsDialogOpen(true);
-          }}
-        >
-          <Plus className="mr-2 h-4 w-4" /> 新規追加
-        </Button>
-      </div>
+
+            <div className="flex gap-2 w-full md:w-auto">
+              <Button
+                type="submit"
+                className="w-full md:w-32"
+                disabled={isPending}
+              >
+                {isPending ? (
+                  <Loader2 className="animate-spin h-4 w-4" />
+                ) : (
+                  "検索"
+                )}
+              </Button>
+              <Button
+                type="button"
+                className=" ml-12 w-full md:w-auto bg-blue-600 hover:bg-blue-800"
+                onClick={() => {
+                  setEditingItem(null);
+                  setIsDialogOpen(true);
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" /> 新規追加
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
       <div className="border rounded-md bg-white">
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow>
-              <TableHead className="w-[120px]">商品CD</TableHead>
+              <TableHead className="pl-8 w-[120px]">商品CD</TableHead>
               <TableHead className="w-[300px]">商品名</TableHead>
               <TableHead className="w-[120px] text-right pr-8">単価</TableHead>
               <TableHead className="w-[200px]">備考</TableHead>
@@ -108,7 +138,7 @@ export function ItemList({
                   key={p.商品CD}
                   className="hover:bg-muted/30 transition-colors"
                 >
-                  <TableCell className="font-mono text-sm">
+                  <TableCell className="pl-8 font-mono text-sm">
                     {p.商品CD}
                   </TableCell>
                   <TableCell className="font-medium">{p.商品名}</TableCell>
@@ -173,7 +203,7 @@ export function ItemList({
       </div>
 
       {isDialogOpen && (
-        <ItemDialog
+        <ProductDialog
           target={editingItem}
           onClose={() => setIsDialogOpen(false)}
         />

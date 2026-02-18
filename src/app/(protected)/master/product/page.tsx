@@ -1,4 +1,4 @@
-import { ItemList } from "@/app/(protected)/master/product/_components/ItemList";
+import { ProductList } from "@/app/(protected)/master/product/_components/ProductList";
 import { 商品Repository } from "@/db/repository/商品Repository";
 
 export default async function Page({
@@ -22,7 +22,7 @@ export default async function Page({
   return (
     <main className="p-8 max-w-6xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">商品マスタメンテナンス</h1>
-      <ItemList
+      <ProductList
         initialData={items}
         totalCount={totalCount}
         pageSize={pageSize}
