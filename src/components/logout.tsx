@@ -1,9 +1,11 @@
 "use client";
-import { signOut } from "@/lib/auth-client";
-import { Button } from "./ui/button";
 import { Loader2, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+
+import { signOut } from "@/lib/auth-client";
+
+import { Button } from "./ui/button";
 
 export function Logout() {
   const [isLoading, setLoading] = useState(false);

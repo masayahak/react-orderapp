@@ -1,7 +1,10 @@
 import "server-only"; // クライアント側に混入したらビルドエラーにする
+
+import { and, asc, count,eq, ilike, or } from "drizzle-orm";
+
 import { db } from "@/db/drizzle";
-import { and, eq, ilike, or, asc, count } from "drizzle-orm";
-import { 商品Output, 商品Model } from "../model/商品Model";
+
+import { 商品Model,商品Output } from "../model/商品Model";
 import { 商品 } from "../schema";
 
 export const 商品Repository = {
@@ -58,6 +61,7 @@ export const 商品Repository = {
         単価: データ.単価.toString(), // 輸送ポッド(string)へ変換
         version: 1, // 初期バージョン
       })
+      .onConflictDoNothing({ target: 商品.商品CD })
       .returning();
   },
 

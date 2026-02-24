@@ -1,8 +1,9 @@
 "use server";
 
-import { 商品Repository } from "@/db/repository/商品Repository";
-import { 商品Input, 商品Model } from "@/db/model/商品Model";
 import { revalidatePath } from "next/cache";
+
+import { 商品Input, 商品Model } from "@/db/model/商品Model";
+import { 商品Repository } from "@/db/repository/商品Repository";
 
 export async function save商品(data: 商品Input, isEdit: boolean) {
   try {
@@ -14,7 +15,10 @@ export async function save商品(data: 商品Input, isEdit: boolean) {
         validated,
       );
     } else {
-      await 商品Repository.Insert(validated);
+      const result = await 商品Repository.Insert(validated);
+      if (result.length === 0) {
+        return { success: false, error: "商品が既に存在します" };
+      }
     }
     revalidatePath("/admin/products");
     return { success: true };

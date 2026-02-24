@@ -1,14 +1,17 @@
-import { Suspense } from "react";
-import {
-  getAnalysisDefaults,
-  AnalysisPreset,
-  AnalysisInterval,
-} from "@/lib/analysis-utils";
-import { 受注分析Repository } from "@/db/repository/受注分析Repository";
-import { DashboardHeader } from "./_components/DashboardHeader";
-import { SalesTrendChart } from "./_components/SalesTrendChart";
-import { RankingSection } from "./_components/RankingSection";
 import { Loader2 } from "lucide-react";
+import { Suspense } from "react";
+
+import { 受注分析Repository } from "@/db/repository/受注分析Repository";
+import {
+  AnalysisInterval,
+  AnalysisPreset,
+  getAnalysisDefaults,
+} from "@/lib/analysis-utils";
+
+import { CustomerRanking } from "./_components/CustomerRanking";
+import { DashboardHeader } from "./_components/DashboardHeader";
+import { ProductRanking } from "./_components/ProductRanking";
+import { SalesTrendChart } from "./_components/SalesTrendChart";
 
 interface DashboardPageProps {
   searchParams: Promise<{
@@ -68,17 +71,17 @@ export default async function DashboardPage({
             {/* 右側ランキングエリア */}
             <div className="lg:col-span-4 flex flex-col gap-3 h-full min-h-0">
               <div className="flex-1 min-h-0">
-                <RankingSection
-                  title="得意先別売上"
+                <CustomerRanking
                   data={topCustomers}
-                  type="customer"
+                  from={duration.from}
+                  to={duration.to}
                 />
               </div>
               <div className="flex-1 min-h-0">
-                <RankingSection
-                  title="商品別売上"
+                <ProductRanking
                   data={topProducts}
-                  type="product"
+                  from={duration.from}
+                  to={duration.to}
                 />
               </div>
             </div>

@@ -1,7 +1,12 @@
 "use client";
 
-import { useTransition } from "react";
+import { FileText, Loader2, Pencil,Plus, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTransition } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -10,10 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Search, Loader2, FileText, Pencil } from "lucide-react";
 import { 受注HeaderOutput } from "@/db/model/受注Model";
 
 export function OrderList({
@@ -42,6 +43,16 @@ export function OrderList({
     }).format(d);
   };
 
+  const getDateColorClass = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "text-slate-600";
+
+    const day = d.getDay();
+    if (day === 0) return "text-red-600"; // 日曜
+    if (day === 6) return "text-blue-600"; // 土曜
+
+    return "text-slate-600"; // 平日（デフォルト）
+  };
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("ja-JP", {
       style: "currency",
@@ -66,7 +77,7 @@ export function OrderList({
     <div className="space-y-6">
       {/* 検索・アクションエリア */}
       <Card className="border-none shadow-sm bg-slate-50/50">
-        <CardContent className="p-6">
+        <CardContent className="p-2">
           <form
             onSubmit={handleSearch}
             className="flex flex-col md:flex-row items-end gap-6"
@@ -111,7 +122,7 @@ export function OrderList({
               </div>
             </div>
 
-            <div className="flex gap-2 w-full md:w-auto">
+            <div className="flex pr-4 gap-20 w-full md:w-auto">
               <Button
                 type="submit"
                 className="w-full md:w-32"
@@ -123,11 +134,13 @@ export function OrderList({
                   "検索"
                 )}
               </Button>
-              {/* 新規受注ボタンに遷移処理を追加 */}
               <Button
                 type="button"
                 className="w-full md:w-auto bg-blue-600 hover:bg-blue-800"
-                onClick={() => router.push("/order/new")}
+                onClick={() => {
+                  const query = searchParams.toString();
+                  router.push(query ? `/order/new?${query}` : "/order/new");
+                }}
               >
                 <Plus className="h-4 w-4 mr-2" /> 新規受注
               </Button>
@@ -141,7 +154,7 @@ export function OrderList({
         <Table>
           <TableHeader className="bg-slate-50">
             <TableRow>
-              <TableHead className="font-bold text-slate-700 py-4">
+              <TableHead className="pl-8 font-bold text-slate-700 py-4">
                 受注ID
               </TableHead>
               <TableHead className="font-bold text-slate-700">受注日</TableHead>
@@ -175,10 +188,12 @@ export function OrderList({
                   key={order.受注ID}
                   className="group hover:bg-slate-50/50 transition-colors"
                 >
-                  <TableCell className="font-mono text-[10px] text-slate-400">
+                  <TableCell className="pl-8 font-mono text-[10px] text-slate-400">
                     {order.受注ID?.substring(0, 8)}
                   </TableCell>
-                  <TableCell className="text-slate-600 font-medium">
+                  <TableCell
+                    className={`font-medium ${getDateColorClass(order.受注日)}`}
+                  >
                     {formatDate(order.受注日)}
                   </TableCell>
                   <TableCell className="font-semibold text-slate-900">
@@ -194,7 +209,14 @@ export function OrderList({
                         variant="ghost"
                         size="icon"
                         className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-                        onClick={() => router.push(`/order/${order.受注ID}`)}
+                        onClick={() => {
+                          const query = searchParams.toString();
+                          router.push(
+                            query
+                              ? `/order/${order.受注ID}?${query}`
+                              : `/order/${order.受注ID}`,
+                          );
+                        }}
                         title="修正"
                       >
                         <Pencil className="h-4 w-4" />
@@ -210,11 +232,10 @@ export function OrderList({
         {/* ページングUI */}
         <div className="flex items-center justify-between px-6 py-4 bg-slate-50/50 border-t">
           <p className="text-sm text-slate-500">
-            全{" "}
-            <span className="font-bold text-slate-900">
-              {totalCount.toLocaleString()}
-            </span>{" "}
-            件
+            全 {totalCount.toLocaleString()} 件中
+            {((currentPage - 1) * pageSize + 1).toLocaleString()} -
+            {Math.min(currentPage * pageSize, totalCount).toLocaleString()}
+            件を表示
           </p>
           <div className="flex gap-2">
             <Button

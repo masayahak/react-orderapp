@@ -1,14 +1,12 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { toast } from "sonner";
+
+import { delete商品,save商品 } from "@/app/(protected)/master/product/actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,20 +17,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { save商品, delete商品 } from "@/app/(protected)/master/product/actions";
-import { 商品Input, 商品Output, 商品Model } from "@/db/model/商品Model";
+import { 商品Input, 商品Model,商品Output } from "@/db/model/商品Model";
 
 export function ProductDialog({
   target,
@@ -65,8 +66,16 @@ export function ProductDialog({
       toast.success(isEdit ? "更新しました" : "登録しました");
       onClose();
     } else {
-      // 排他制御エラー（バージョン不一致）などがここで表示される
-      toast.error(res.error || "保存に失敗しました");
+      // エラーメッセージの内容で商品CDの重複か判定する
+      if (res.error === "商品が既に存在します") {
+        form.setError("商品CD", {
+          type: "manual",
+          message: res.error,
+        });
+      } else {
+        // 排他制御など、全体に関するエラーはトーストで表示
+        toast.error(res.error || "保存に失敗しました");
+      }
     }
   };
 
@@ -101,7 +110,12 @@ export function ProductDialog({
                 name="商品CD"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-semibold">商品CD</FormLabel>
+                    <FormLabel className="flex items-center gap-2 font-semibold">
+                      商品CD
+                      <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-600">
+                        必須
+                      </span>
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -121,7 +135,12 @@ export function ProductDialog({
                 name="商品名"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-semibold">商品名</FormLabel>
+                    <FormLabel className="flex items-center gap-2 font-semibold">
+                      商品名
+                      <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-600">
+                        必須
+                      </span>
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -140,7 +159,12 @@ export function ProductDialog({
                 name="単価"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-semibold">単価</FormLabel>
+                    <FormLabel className="flex items-center gap-2 font-semibold">
+                      単価
+                      <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-600">
+                        必須
+                      </span>
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="number"

@@ -1,8 +1,10 @@
 "use client";
 
-import { useTransition } from "react";
+import { BarChart3, CalendarIcon, Clock,Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTransition } from "react";
+
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -10,9 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { CalendarIcon, Loader2, BarChart3, Clock } from "lucide-react";
-import { AnalysisPreset, AnalysisInterval } from "@/lib/analysis-utils";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AnalysisInterval,AnalysisPreset } from "@/lib/analysis-utils";
 
 interface DashboardHeaderProps {
   activePreset: AnalysisPreset;

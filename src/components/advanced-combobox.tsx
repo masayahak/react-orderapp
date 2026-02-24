@@ -1,9 +1,9 @@
 "use client";
 
+import { Check, ChevronsUpDown, Loader2,Search } from "lucide-react";
 import * as React from "react";
-import { useState, useEffect, useCallback } from "react";
-import { Check, ChevronsUpDown, Search, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useCallback,useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -19,6 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useDebounce } from "@/hooks/use-debounce";
+import { cn } from "@/lib/utils";
 
 /**
  * 列定義の型
@@ -27,6 +28,9 @@ export interface ColumnDef<T> {
   header: string;
   accessorKey: keyof T;
   width?: string;
+  visible?: boolean;
+  align?: "left" | "center" | "right";
+  isCurrency?: boolean;
 }
 
 /**
@@ -61,7 +65,6 @@ export function AdvancedCombobox<T>({
 
   const debouncedQuery = useDebounce(query, 300);
 
-  // 1. 修正モードなどで外部から初期値が変更された場合に同期する
   useEffect(() => {
     if (initialValue) {
       setSelected(initialValue);
@@ -70,7 +73,6 @@ export function AdvancedCombobox<T>({
     }
   }, [initialValue]);
 
-  // 2. 検索実行ロジック
   const fetchResults = useCallback(
     async (q: string) => {
       setIsLoading(true);
@@ -90,6 +92,8 @@ export function AdvancedCombobox<T>({
   useEffect(() => {
     fetchResults(debouncedQuery);
   }, [debouncedQuery, fetchResults]);
+
+  const visibleColumns = columns.filter((col) => col.visible !== false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -135,11 +139,16 @@ export function AdvancedCombobox<T>({
             <CommandGroup>
               {/* ヘッダー行 */}
               <div className="flex items-center px-2 py-1.5 border-b bg-slate-50/50">
-                <div className="w-8" /> {/* Check用スペース */}
-                {columns.map((col) => (
+                <div className="w-8" />
+                {visibleColumns.map((col) => (
                   <div
                     key={String(col.accessorKey)}
-                    className="text-[10px] font-bold text-slate-400 uppercase tracking-wider"
+                    className={cn(
+                      "text-[10px] font-bold text-slate-400 uppercase tracking-wider pr-4",
+                      col.align === "center" && "text-center",
+                      col.align === "right" && "text-right",
+                      (!col.align || col.align === "left") && "text-left",
+                    )}
                     style={{
                       width: col.width || "auto",
                       flex: col.width ? "none" : 1,
@@ -166,7 +175,7 @@ export function AdvancedCombobox<T>({
                     }}
                     className="flex items-center px-2 py-2 cursor-pointer"
                   >
-                    <div className="w-8 flex justify-center">
+                    <div className="w-8 flex justify-center shrink-0">
                       <Check
                         className={cn(
                           "h-4 w-4 text-indigo-600",
@@ -174,23 +183,38 @@ export function AdvancedCombobox<T>({
                         )}
                       />
                     </div>
-                    {columns.map((col) => (
-                      <div
-                        key={String(col.accessorKey)}
-                        className={cn(
-                          "text-xs truncate pr-4",
-                          isSelected
-                            ? "font-bold text-indigo-900"
-                            : "text-slate-700",
-                        )}
-                        style={{
-                          width: col.width || "auto",
-                          flex: col.width ? "none" : 1,
-                        }}
-                      >
-                        {String(item[col.accessorKey])}
-                      </div>
-                    ))}
+                    {visibleColumns.map((col) => {
+                      // 値の取得とフォーマット処理
+                      const rawValue = item[col.accessorKey];
+                      let displayValue = String(rawValue);
+
+                      if (col.isCurrency && !isNaN(Number(rawValue))) {
+                        displayValue = `¥${Number(rawValue).toLocaleString()}`;
+                      }
+
+                      return (
+                        <div
+                          key={String(col.accessorKey)}
+                          className={cn(
+                            "text-xs truncate pr-4",
+                            isSelected
+                              ? "font-bold text-indigo-900"
+                              : "text-slate-700",
+                            col.align === "center" && "text-center",
+                            col.align === "right" && "text-right",
+                            (!col.align || col.align === "left") && "text-left",
+                            // 通貨の場合は等幅フォントを適用して見栄えを良くする
+                            col.isCurrency && "font-mono",
+                          )}
+                          style={{
+                            width: col.width || "auto",
+                            flex: col.width ? "none" : 1,
+                          }}
+                        >
+                          {displayValue}
+                        </div>
+                      );
+                    })}
                   </CommandItem>
                 );
               })}

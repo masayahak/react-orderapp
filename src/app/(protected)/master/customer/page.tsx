@@ -1,4 +1,5 @@
 import { 得意先Repository } from "@/db/repository/得意先Repository";
+
 import { CustomerList } from "./_components/CustomerList";
 
 export default async function Page({

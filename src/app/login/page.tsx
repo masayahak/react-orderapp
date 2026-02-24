@@ -1,5 +1,5 @@
+import { LoginForm } from "@/app/login/_components/LoginForm";
 import { Footer } from "@/components/footer";
-import { LoginForm } from "@/app/login/_components/login-form";
 
 export default function Page() {
   return (

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import { 受注Repository } from "@/db/repository/受注Repository";
+
 import { OrderForm } from "@/app/(protected)/order/_components/OrderForm";
+import { 受注Repository } from "@/db/repository/受注Repository";
 
 interface EditOrderPageProps {
   params: Promise<{ id: string }>;
@@ -21,7 +22,7 @@ export default async function EditOrderPage({ params }: EditOrderPageProps) {
           ...order,
           受注ID: order.受注ID!,
         }}
-      />{" "}
+      />
     </main>
   );
 }

@@ -1,14 +1,15 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  delete得意先,
+  save得意先,
+} from "@/app/(protected)/master/customer/actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,23 +20,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import {
-  save得意先,
-  delete得意先,
-} from "@/app/(protected)/master/customer/actions";
-import { 得意先Input, 得意先Output, 得意先Model } from "@/db/model/得意先Model";
+import { 得意先Input, 得意先Model,得意先Output } from "@/db/model/得意先Model";
 
 export function CustomerDialog({
   target,
@@ -102,7 +103,12 @@ export function CustomerDialog({
                 name="得意先名"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-semibold">得意先名</FormLabel>
+                    <FormLabel className="flex items-center gap-2 font-semibold">
+                      得意先名
+                      <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-600">
+                        必須
+                      </span>
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -119,7 +125,12 @@ export function CustomerDialog({
                 name="電話番号"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-semibold">電話番号</FormLabel>
+                    <FormLabel className="flex items-center gap-2 font-semibold">
+                      電話番号
+                      <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+                        任意
+                      </span>
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}

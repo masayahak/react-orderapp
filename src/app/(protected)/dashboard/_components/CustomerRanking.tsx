@@ -1,5 +1,6 @@
 "use client";
 
+import { Trophy,Users } from "lucide-react";
 import { useMemo } from "react";
 import {
   Bar,
@@ -9,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
@@ -16,36 +18,33 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Users, Package, Trophy } from "lucide-react";
 
-interface RankingData {
+export interface RankingData {
   name: string;
   value: number;
 }
 
-interface RankingSectionProps {
-  title: string;
+interface CustomerRankingProps {
   data: RankingData[];
-  type: "customer" | "product";
+  from: string;
+  to: string;
 }
 
-export function RankingSection({ title, data, type }: RankingSectionProps) {
-  const Icon = type === "customer" ? Users : Package;
+const chartConfig = {
+  value: {
+    label: "売上高",
+    color: "#B07D62",
+  },
+} satisfies ChartConfig;
 
+export function CustomerRanking({ data, from, to }: CustomerRankingProps) {
   // 上位5件のみ
   const chartData = useMemo(() => {
     return (data || []).slice(0, 5).map((item) => ({
       ...item,
-      fill: type === "customer" ? "#f97316" : "#10b981", // Customer: Orange, Product: Emerald
+      fill: chartConfig.value.color,
     }));
-  }, [data, type]);
-
-  const chartConfig = {
-    value: {
-      label: type === "customer" ? "売上高" : "販売額",
-      color: type === "customer" ? "#f97316" : "#10b981",
-    },
-  } satisfies ChartConfig;
+  }, [data]);
 
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat("ja-JP", {
@@ -61,15 +60,11 @@ export function RankingSection({ title, data, type }: RankingSectionProps) {
     <Card className="flex flex-col border-none shadow-sm bg-white h-full overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between py-4 px-5 shrink-0">
         <div className="flex items-center gap-2.5">
-          <div
-            className={`p-1.5 rounded-md ${type === "customer" ? "bg-indigo-50" : "bg-emerald-50"}`}
-          >
-            <Icon
-              className={`h-3.5 w-3.5 ${type === "customer" ? "text-indigo-600" : "text-emerald-600"}`}
-            />
+          <div className="p-1.5 rounded-md bg-indigo-50">
+            <Users className="h-3.5 w-3.5 text-indigo-600" />
           </div>
           <CardTitle className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-            {title}
+            得意先別売上
           </CardTitle>
         </div>
         <Trophy className="h-3.5 w-3.5 text-amber-400 opacity-50" />
@@ -87,17 +82,10 @@ export function RankingSection({ title, data, type }: RankingSectionProps) {
               data={chartData}
               layout="vertical"
               margin={{ top: 0, right: 40, left: 0, bottom: 0 }}
-              // バー間の隙間を調整して太さを確保
               barCategoryGap="20%"
             >
               <CartesianGrid horizontal={false} vertical={false} />
-
               <XAxis type="number" hide />
-
-              {/* Y軸（左側）: 名前を表示
-                width={110} で日本語名を表示するスペースを確保
-                tickLine={false} で線は消す
-              */}
               <YAxis
                 dataKey="name"
                 type="category"
@@ -106,11 +94,10 @@ export function RankingSection({ title, data, type }: RankingSectionProps) {
                 axisLine={false}
                 tick={{
                   fontSize: 11,
-                  fill: "#334155", // slate-700
+                  fill: "#334155",
                   fontWeight: 600,
                 }}
               />
-
               <ChartTooltip
                 cursor={{ fill: "#f1f5f9" }}
                 content={
@@ -125,31 +112,18 @@ export function RankingSection({ title, data, type }: RankingSectionProps) {
                   />
                 }
               />
-
               <Bar
                 dataKey="value"
                 layout="vertical"
                 radius={[0, 4, 4, 0]}
-                fill={type === "customer" ? "#f97316" : "#10b981"} // Customer: Orange, Product: Emerald
+                fill="#f97316"
                 onClick={(data) => {
                   if (!data || !data.name) return;
-                  // URL検索パラメータから期間を取得する（DashboardHeaderがURLを管理しているため）
-                  // Server Component経由ではなく、クライアントサイドで現在のURLSearchParamsを参照
-                  const searchParams = new URLSearchParams(
-                    window.location.search,
-                  );
-                  const from = searchParams.get("from") || "";
-                  const to = searchParams.get("to") || "";
-
-                  // キーワード検索として遷移 (encodeURIComponentはブラウザが自動で行うが、明示的に書くのが安全)
-                  // 受注一覧などへ遷移してフィルタリング
                   const q = encodeURIComponent(data.name);
-
                   window.location.href = `/order?startDate=${from}&endDate=${to}&q=${q}`;
                 }}
                 className="cursor-pointer hover:opacity-80 transition-opacity"
               >
-                {/* 右側に数値を表示 */}
                 <LabelList
                   dataKey="value"
                   position="right"

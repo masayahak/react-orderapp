@@ -1,6 +1,13 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,18 +26,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
-import { signIn } from "@/lib/auth-client"; // Client SDK
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { signIn } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 
+// 画面入力専用のZodスキーマを定義
 const formSchema = z.object({
   email: z.email("正しいメールアドレスの形式で入力してください"),
-
   password: z.string().min(1, "パスワードは必須です"),
 });
 
@@ -38,7 +39,8 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -50,7 +52,7 @@ export function LoginForm({
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setLoading(true);
+    setIsLoading(true);
 
     // Better Auth のクライアントSDKを利用してsignIn
     await signIn.email(
@@ -60,7 +62,7 @@ export function LoginForm({
       },
       {
         onSuccess: () => {
-          router.refresh();
+          router.refresh(); // クッキーがセットされた状態でページをリフレッシュして、認証状態を反映させる
           router.push("/");
         },
         onError: (ctx) => {
@@ -69,7 +71,7 @@ export function LoginForm({
       },
     );
 
-    setLoading(false);
+    setIsLoading(false);
   }
 
   return (
@@ -103,11 +105,24 @@ export function LoginForm({
                     <FormItem>
                       <FormLabel>パスワード</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="********"
-                          {...field}
-                          type="password"
-                        />
+                        <div className="relative">
+                          <Input
+                            placeholder="パスワードを入力"
+                            {...field}
+                            type={showPassword ? "text" : "password"}
+                          />
+                          <button
+                            type="button"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="size-4" />
+                            ) : (
+                              <Eye className="size-4" />
+                            )}
+                          </button>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

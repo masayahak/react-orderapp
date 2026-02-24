@@ -1,4 +1,5 @@
 import { 受注Repository } from "@/db/repository/受注Repository";
+
 import { OrderList } from "./_components/OrderList";
 
 export default async function Page({
@@ -22,14 +23,11 @@ export default async function Page({
   });
 
   return (
-    <div className="flex flex-col gap-8 p-8 max-w-[1400px] mx-auto">
+    <div className="flex flex-col pt-8 max-w-[1400px] mx-auto">
       <div>
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
           受注一覧
         </h1>
-        <p className="text-muted-foreground mt-1">
-          受注データの検索、確認、および新規登録が行えます。
-        </p>
       </div>
       <OrderList
         initialData={items}

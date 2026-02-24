@@ -1,8 +1,10 @@
+import { BarChart3 } from "lucide-react";
 import Link from "next/link";
+
 import { Logout } from "@/components/logout";
 import { requireSession } from "@/lib/auth-guard";
+
 import NavLinks from "./NavLinks";
-import { BarChart3 } from "lucide-react";
 
 export default async function Navigation() {
   const session = await requireSession();

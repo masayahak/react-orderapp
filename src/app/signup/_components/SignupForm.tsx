@@ -1,6 +1,13 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,16 +26,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { z } from "zod";
-
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { ArrowLeft, Loader2 } from "lucide-react";
-
 import { signUp } from "@/lib/auth-client"; // Client SDK
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   email: z.email("正しいメールアドレスの形式で入力してください"),
@@ -58,6 +57,7 @@ export function SignupForm({
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
+    // Better Auth のクライアントSDKを利用してsignUp
     const { error } = await signUp.email({
       email: values.email,
       password: values.password,

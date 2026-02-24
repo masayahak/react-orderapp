@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   ChartConfig,
@@ -30,7 +31,7 @@ export function SalesTrendChart({ data, interval }: SalesTrendChartProps) {
   const chartConfig = {
     totalAmount: {
       label: "売上金額",
-      color: "#4f46e5", // Indigo-600
+      color: "#4A6984", // Indigo-600
     },
     count: {
       label: "受注件数",
@@ -174,6 +175,7 @@ export function SalesTrendChart({ data, interval }: SalesTrendChartProps) {
                 onClick={(data) => {
                   if (!data || !data.period) return;
 
+                  // 選択されたバーの受注日（または期間）の受注一覧へ遷移する
                   const formatDate = (d: Date) => {
                     if (isNaN(d.getTime())) return "";
                     const year = d.getFullYear();

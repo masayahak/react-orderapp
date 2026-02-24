@@ -1,13 +1,13 @@
 import { relations } from "drizzle-orm";
 import {
+  boolean,
+  date,
+  decimal,
+  index,
+  integer,
   pgTable,
   text,
   timestamp,
-  boolean,
-  index,
-  date,
-  integer,
-  decimal,
 } from "drizzle-orm/pg-core";
 import { uuidv7 } from "uuidv7";
 

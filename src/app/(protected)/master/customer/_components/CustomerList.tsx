@@ -1,6 +1,12 @@
 "use client";
 
+import { Loader2, Pencil, Plus, Search } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -9,13 +15,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Pencil, Plus, Loader2, Search } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { CustomerDialog } from "./CustomerDialog";
 import { 得意先Output } from "@/db/model/得意先Model";
+
+import { CustomerDialog } from "./CustomerDialog";
 
 export function CustomerList({
   initialData,
@@ -174,9 +176,9 @@ export function CustomerList({
       {/* ページングUI */}
       <div className="flex items-center justify-between px-2 py-4 border-t">
         <p className="text-sm text-muted-foreground">
-          全 {totalCount.toLocaleString()} 件中{" "}
-          {((currentPage - 1) * pageSize + 1).toLocaleString()} -{" "}
-          {Math.min(currentPage * pageSize, totalCount).toLocaleString()}{" "}
+          全 {totalCount.toLocaleString()} 件中
+          {((currentPage - 1) * pageSize + 1).toLocaleString()} -
+          {Math.min(currentPage * pageSize, totalCount).toLocaleString()}
           件を表示
         </p>
         <div className="flex gap-2">
