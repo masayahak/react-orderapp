@@ -1,6 +1,6 @@
 import { 得意先Repository } from "@/db/repository/得意先Repository";
 
-import { CustomerList } from "./_components/CustomerList";
+import { CustomerList } from "./_components/得意先List";
 
 export default async function Page({
   searchParams,

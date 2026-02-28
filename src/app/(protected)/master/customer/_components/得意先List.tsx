@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 import { 得意先Output } from "@/db/model/得意先Model";
 
-import { CustomerDialog } from "./CustomerDialog";
+import { CustomerDialog } from "./得意先Dialog";
 
 export function CustomerList({
   initialData,

@@ -1,6 +1,6 @@
 import { 受注Repository } from "@/db/repository/受注Repository";
 
-import { OrderList } from "./_components/OrderList";
+import { OrderList } from "./_components/受注List";
 
 export default async function Page({
   searchParams,

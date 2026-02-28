@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { delete商品,save商品 } from "@/app/(protected)/master/product/actions";
+import { delete商品, save商品 } from "@/app/(protected)/master/product/actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,7 +33,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { 商品Input, 商品Model,商品Output } from "@/db/model/商品Model";
+import { 商品Input, 商品Model, 商品Output } from "@/db/model/商品Model";
 
 export function ProductDialog({
   target,
@@ -48,9 +48,10 @@ export function ProductDialog({
 
   const form = useForm<商品Input>({
     resolver: zodResolver(商品Model),
-    defaultValues: target
-      ? { ...target, 備考: target.備考 ?? "" }
+    defaultValues: target // 既存データの修正の場合
+      ? { ...target, 備考: target.備考 ?? "" } // nullの可能性がある列は空文字に変換
       : {
+          // 新規登録の場合
           商品CD: "",
           商品名: "",
           単価: 0,
@@ -59,8 +60,11 @@ export function ProductDialog({
         },
   });
 
+  // useFormで指定した「商品Input」でまずは受け取る
   const onSubmit = async (data: 商品Input) => {
+    // 編集時は商品CDは入力値ではなく、編集前の商品CDを利用
     const payload = isEdit ? { ...data, 商品CD: target?.商品CD } : data;
+    // 「商品Output」型へ変換した結果でDB書き込み
     const res = await save商品(payload as 商品Output, isEdit);
     if (res.success) {
       toast.success(isEdit ? "更新しました" : "登録しました");

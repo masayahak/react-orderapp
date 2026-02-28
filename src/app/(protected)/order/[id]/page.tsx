@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { OrderForm } from "@/app/(protected)/order/_components/OrderForm";
+import { OrderForm } from "@/app/(protected)/order/_components/受注Form";
 import { 受注Repository } from "@/db/repository/受注Repository";
 
 interface EditOrderPageProps {

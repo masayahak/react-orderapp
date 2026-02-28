@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 import { 商品Output } from "@/db/model/商品Model";
 
-import { ProductDialog } from "./ProductDialog";
+import { ProductDialog } from "./商品Dialog";
 
 export function ProductList({
   initialData,

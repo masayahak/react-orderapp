@@ -1,11 +1,11 @@
-import "server-only";
+import "server-only"; // クライアント側に混入したらビルドエラーにする
 
-import { and, asc, count,eq, ilike, or } from "drizzle-orm";
+import { and, asc, count, eq, ilike, or } from "drizzle-orm";
 import { uuidv7 } from "uuidv7"; // UUID v7 生成用
 
 import { db } from "@/db/drizzle";
 
-import { 得意先Model,得意先Output } from "../model/得意先Model";
+import { 得意先Model, 得意先Output } from "../model/得意先Model";
 import { 得意先 } from "../schema";
 
 export const 得意先Repository = {

@@ -7,15 +7,21 @@ export const 受注明細Model = z.object({
   商品名: z.string().min(1, "商品名は必須です"),
   単価: z
     .union([z.number(), z.string()])
+    .refine((v) => String(v).trim() !== "", "単価は必須です")
     .pipe(z.coerce.number())
+    .refine((v) => !Number.isNaN(v), "数値を入力してください")
     .refine((v) => v >= 0, "0以上で入力してください"),
   数量: z
     .union([z.number(), z.string()])
+    .refine((v) => String(v).trim() !== "", "数量は必須です")
     .pipe(z.coerce.number())
-    .refine((v) => v > 0, "1以上で入力してください"),
+    .refine((v) => !Number.isNaN(v), "数値を入力してください")
+    .refine((v) => v >= 0, "0以上で入力してください"),
   明細金額: z
     .union([z.number(), z.string()])
+    .refine((v) => String(v).trim() !== "", "明細金額は必須です")
     .pipe(z.coerce.number())
+    .refine((v) => !Number.isNaN(v), "数値を入力してください")
     .refine((v) => v >= 0, "0以上で入力してください"),
 });
 
@@ -26,7 +32,9 @@ export const 受注Model = z.object({
   得意先名: z.string().min(1, "得意先名は必須です"),
   合計金額: z
     .union([z.number(), z.string()])
+    .refine((v) => String(v).trim() !== "", "合計金額は必須です")
     .pipe(z.coerce.number())
+    .refine((v) => !Number.isNaN(v), "数値を入力してください")
     .refine((v) => v >= 0, "0以上で入力してください"),
   備考: z.string().optional().nullable(),
   version: z.number().default(0),

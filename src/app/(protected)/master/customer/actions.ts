@@ -20,7 +20,7 @@ export async function save得意先(data: 得意先Input, isEdit: boolean) {
     } else {
       await 得意先Repository.Insert(validated);
     }
-    revalidatePath("/admin/products");
+    revalidatePath("/master/products");
     return { success: true };
   } catch (e: unknown) {
     const errorMessage =
@@ -32,7 +32,7 @@ export async function save得意先(data: 得意先Input, isEdit: boolean) {
 export async function delete得意先(得意先ID: string, version: number) {
   try {
     await 得意先Repository.Delete(得意先ID, version);
-    revalidatePath("/admin/products");
+    revalidatePath("/master/products");
     return { success: true };
   } catch (e: unknown) {
     const errorMessage =
