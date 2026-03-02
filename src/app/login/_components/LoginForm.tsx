@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -43,6 +43,11 @@ export function LoginForm({
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
+  // マウント時に遷移先をプリフェッチして高速化
+  useEffect(() => {
+    router.prefetch("/");
+  }, [router]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -62,16 +67,19 @@ export function LoginForm({
       },
       {
         onSuccess: () => {
-          router.refresh(); // クッキーがセットされた状態でページをリフレッシュして、認証状態を反映させる
+          // プリフェッチ済みのルートへ即座に遷移
           router.push("/");
+          router.refresh(); // クッキーがセットされた状態でページをリフレッシュして、認証状態を反映させる
+
+          // 画面遷移が完了するまで「くるくる」を維持するため、
+          // ここでは setIsLoading(false) を意図的に呼ばない
         },
         onError: (ctx) => {
           toast.error("ログインに失敗しました: " + ctx.error.message);
+          setIsLoading(false); // エラー発生時のみローディング表示を解除して入力を再開させる
         },
       },
     );
-
-    setIsLoading(false);
   }
 
   return (

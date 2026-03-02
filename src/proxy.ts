@@ -1,18 +1,18 @@
-import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-import { auth } from "@/lib/auth";
-
-export async function proxy(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 公開パスの定義
   const publicPaths = ["/login", "/signup"];
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  // HTTP(ローカル)とHTTPS(本番)の両方のCookie名で取得を試みる
+  const sessionCookie =
+    request.cookies.get("better-auth.session_token") ||
+    request.cookies.get("__Secure-better-auth.session_token");
+
+  const isAuthenticated = !!sessionCookie;
 
   // -------------------------------------------------------------
   // パターンの分岐
@@ -20,18 +20,18 @@ export async function proxy(request: NextRequest) {
 
   // ケース0：ルートへのアクセス
   if (pathname === "/") {
-    const target = session ? "/dashboard" : "/login";
+    const target = isAuthenticated ? "/dashboard" : "/login";
     return NextResponse.redirect(new URL(target, request.url));
   }
 
   // ケース1：未ログイン ＋ 公開パス以外にアクセスしようとした
-  if (!session && !isPublicPath) {
+  if (!isAuthenticated && !isPublicPath) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
   // ケース2：ログイン済み ＋ ログイン・登録系ページにアクセスしようとした（逆流防止）
-  if (session && isPublicPath) {
-    // 認証済みルート（(protected)/dashboard/page.tsx ）へリダイレクト
+  if (isAuthenticated && isPublicPath) {
+    // 認証済みルートへリダイレクト
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
@@ -39,13 +39,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  /*
-   * 以下のパス以外すべてに proxy を適用する:
-   * 1. api (API routes)
-   * 2. _next/static (static files)
-   * 3. _next/image (image optimization files)
-   * 4. favicon.ico, sitemap.xml, robots.txt (metadata files)
-   */
   matcher: [
     "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
   ],

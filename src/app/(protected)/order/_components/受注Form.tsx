@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle,ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
@@ -29,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { 受注Input,受注Model } from "@/db/model/受注Model";
+import { 受注Input, 受注Model } from "@/db/model/受注Model";
 
 import { delete受注, save受注, search商品, search得意先 } from "../action";
 
@@ -37,11 +37,12 @@ type CustomerSearchRes = { 得意先ID: string; 得意先名: string };
 type ProductSearchRes = { 商品CD: string; 商品名: string; 単価: number };
 
 interface OrderFormProps {
+  serverDate: string; // サーバーサイドで生成した日付を受け取る
   initialData?: 受注Input & { 受注ID: string };
   mode: "create" | "edit";
 }
 
-export function OrderForm({ initialData, mode }: OrderFormProps) {
+export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -51,7 +52,7 @@ export function OrderForm({ initialData, mode }: OrderFormProps) {
   const form = useForm<受注Input>({
     resolver: zodResolver(受注Model),
     defaultValues: initialData || {
-      受注日: new Date().toISOString().split("T")[0],
+      受注日: serverDate,
       得意先ID: "",
       得意先名: "",
       明細: [{ 商品CD: "", 商品名: "", 単価: 0, 数量: 1, 明細金額: 0 }],

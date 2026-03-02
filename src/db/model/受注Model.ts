@@ -27,7 +27,13 @@ export const 受注明細Model = z.object({
 
 export const 受注Model = z.object({
   受注ID: z.string().optional(),
-  受注日: z.string().min(1, "受注日を選択してください"),
+  受注日: z
+    .string()
+    .min(1, "受注日を選択してください")
+    // 1. 形式と妥当性のチェック（2月30日などの不正な日付もここで弾く）
+    .refine((v) => !isNaN(new Date(v).getTime()), {
+      message: "有効な日付を入力してください",
+    }),
   得意先ID: z.string().min(1, "得意先は必須です"),
   得意先名: z.string().min(1, "得意先名は必須です"),
   合計金額: z
