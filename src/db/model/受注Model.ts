@@ -1,28 +1,15 @@
 import { z } from "zod";
 
+import { numericSchema } from "./共通チェック";
+
 export const 受注明細Model = z.object({
   受注明細ID: z.string().optional(),
   受注ID: z.string().optional(),
   商品CD: z.string().min(1, "商品は必須です"),
   商品名: z.string().min(1, "商品名は必須です"),
-  単価: z
-    .union([z.number(), z.string()])
-    .refine((v) => String(v).trim() !== "", "単価は必須です")
-    .pipe(z.coerce.number())
-    .refine((v) => !Number.isNaN(v), "数値を入力してください")
-    .refine((v) => v >= 0, "0以上で入力してください"),
-  数量: z
-    .union([z.number(), z.string()])
-    .refine((v) => String(v).trim() !== "", "数量は必須です")
-    .pipe(z.coerce.number())
-    .refine((v) => !Number.isNaN(v), "数値を入力してください")
-    .refine((v) => v >= 0, "0以上で入力してください"),
-  明細金額: z
-    .union([z.number(), z.string()])
-    .refine((v) => String(v).trim() !== "", "明細金額は必須です")
-    .pipe(z.coerce.number())
-    .refine((v) => !Number.isNaN(v), "数値を入力してください")
-    .refine((v) => v >= 0, "0以上で入力してください"),
+  単価: numericSchema("単価は必須です"),
+  数量: numericSchema("数量は必須です"),
+  明細金額: numericSchema("明細金額は必須です"),
 });
 
 export const 受注Model = z.object({
@@ -30,18 +17,13 @@ export const 受注Model = z.object({
   受注日: z
     .string()
     .min(1, "受注日を選択してください")
-    // 1. 形式と妥当性のチェック（2月30日などの不正な日付もここで弾く）
+    // 形式と妥当性のチェック（2月30日などの不正な日付もここで弾く）
     .refine((v) => !isNaN(new Date(v).getTime()), {
       message: "有効な日付を入力してください",
     }),
   得意先ID: z.string().min(1, "得意先は必須です"),
   得意先名: z.string().min(1, "得意先名は必須です"),
-  合計金額: z
-    .union([z.number(), z.string()])
-    .refine((v) => String(v).trim() !== "", "合計金額は必須です")
-    .pipe(z.coerce.number())
-    .refine((v) => !Number.isNaN(v), "数値を入力してください")
-    .refine((v) => v >= 0, "0以上で入力してください"),
+  合計金額: numericSchema("合計金額は必須です"),
   備考: z.string().optional().nullable(),
   version: z.number().default(0),
   明細: z.array(受注明細Model).min(1, "明細を1件以上入力してください"),

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, exists,gte, ilike, lte, or } from "drizzle-orm";
+import { and, count, desc, eq, exists, gte, ilike, lte, or } from "drizzle-orm";
 import { uuidv7 } from "uuidv7";
 
 import { db } from "@/db/drizzle";
@@ -8,7 +8,6 @@ import { db } from "@/db/drizzle";
 import {
   受注HeaderModel,
   受注HeaderOutput,
-  受注Input,
   受注Model,
   受注Output,
 } from "../model/受注Model";
@@ -99,7 +98,7 @@ export const 受注Repository = {
     });
   },
 
-  async Save(data: 受注Input, mode: "create" | "edit", orderId?: string) {
+  async Save(data: 受注Output, mode: "create" | "edit", orderId?: string) {
     const targetId = mode === "edit" ? orderId! : uuidv7();
 
     // 1. ヘッダーの値を DB 型（string）に適合させる
@@ -116,17 +115,33 @@ export const 受注Repository = {
       商品CD: m.商品CD,
       商品名: m.商品名,
       単価: m.単価.toString(), // numeric型
-      数量: m.数量.toString(), // ★ここも numeric型なら string が必要
+      数量: m.数量.toString(), // numeric型
       明細金額: m.明細金額.toString(), // numeric型
     }));
 
     if (mode === "edit") {
       // batch実行：Update -> Delete -> Insert
-      return await db.batch([
-        db.update(受注).set(headerValues).where(eq(受注.受注ID, targetId)),
+      const [updateResult] = await db.batch([
+        db
+          .update(受注)
+          .set({ ...headerValues, version: data.version + 1 }) // バージョンを上げる
+          .where(
+            and(
+              eq(受注.受注ID, targetId),
+              eq(受注.version, data.version), // 画面を開いた時のバージョンと一致するか
+            ),
+          ),
         db.delete(受注明細).where(eq(受注明細.受注ID, targetId)),
         db.insert(受注明細).values(detailValues),
       ]);
+
+      // 楽観的ロックの判定ロジック
+      if (updateResult.rowCount === 0) {
+        throw new Error(
+          "対象のデータは別のユーザーによって更新されたか、削除されています。",
+        );
+      }
+      return updateResult;
     } else {
       // batch実行：Insert -> Insert
       return await db.batch([
@@ -136,10 +151,21 @@ export const 受注Repository = {
     }
   },
 
-  async Delete(orderId: string) {
-    return await db.batch([
-      db.delete(受注明細).where(eq(受注明細.受注ID, orderId)),
-      db.delete(受注).where(eq(受注.受注ID, orderId)),
-    ]);
+  async Delete(受注ID: string, version: number) {
+    const result = await db.delete(受注).where(
+      and(
+        eq(受注.受注ID, 受注ID),
+        eq(受注.version, version), // 楽観的ロック
+      ),
+    );
+    // なお、受注明細はcascade deleteでDBサーバー側で自動削除
+
+    if (result.rowCount === 0) {
+      throw new Error(
+        "対象のデータは既に別のユーザーによって更新または削除されています。",
+      );
+    }
+
+    return result;
   },
 };

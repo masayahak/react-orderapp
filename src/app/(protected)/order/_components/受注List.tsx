@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Loader2, Pencil,Plus, Search } from "lucide-react";
+import { FileText, Loader2, Pencil, Plus, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
@@ -232,10 +232,9 @@ export function OrderList({
         {/* ページングUI */}
         <div className="flex items-center justify-between px-6 py-4 bg-slate-50/50 border-t">
           <p className="text-sm text-slate-500">
-            全 {totalCount.toLocaleString()} 件中
-            {((currentPage - 1) * pageSize + 1).toLocaleString()} -
-            {Math.min(currentPage * pageSize, totalCount).toLocaleString()}
-            件を表示
+            {totalCount === 0
+              ? "該当データなし"
+              : `全 ${totalCount.toLocaleString()} 件中 ${((currentPage - 1) * pageSize + 1).toLocaleString()} - ${Math.min(currentPage * pageSize, totalCount).toLocaleString()} 件を表示`}
           </p>
           <div className="flex gap-2">
             <Button

@@ -1,12 +1,17 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { ZodError } from "zod";
 
 import { 得意先Input, 得意先Model } from "@/db/model/得意先Model";
 import { 得意先Repository } from "@/db/repository/得意先Repository";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export async function save得意先(data: 得意先Input, isEdit: boolean) {
   try {
+    // 認可判定
+    await requireAdmin();
+
     const validated = 得意先Model.parse(data);
     if (isEdit) {
       if (!validated.得意先ID) {
@@ -20,23 +25,37 @@ export async function save得意先(data: 得意先Input, isEdit: boolean) {
     } else {
       await 得意先Repository.Insert(validated);
     }
-    revalidatePath("/master/products");
+    revalidatePath("/master/customer");
     return { success: true };
   } catch (e: unknown) {
-    const errorMessage =
-      e instanceof Error ? e.message : "予期せぬエラーが発生しました";
-    return { success: false, error: errorMessage };
+    // Zodのバリデーションエラー
+    if (e instanceof ZodError) {
+      return {
+        success: false,
+        error: "入力内容に不備があります。画面の指示に従ってください。",
+      };
+    }
+    // 予期せぬエラー（ネットワーク切断など）の場合のフォールバック
+    return {
+      success: false,
+      error: "予期せぬエラーが発生しました。時間をおいて再度お試しください。",
+    };
   }
 }
 
 export async function delete得意先(得意先ID: string, version: number) {
   try {
+    // 認可判定
+    await requireAdmin();
+
     await 得意先Repository.Delete(得意先ID, version);
-    revalidatePath("/master/products");
+    revalidatePath("/master/customer");
     return { success: true };
   } catch (e: unknown) {
-    const errorMessage =
-      e instanceof Error ? e.message : "予期せぬエラーが発生しました";
-    return { success: false, error: errorMessage };
+    // 予期せぬエラー（ネットワーク切断など）の場合のフォールバック
+    return {
+      success: false,
+      error: "予期せぬエラーが発生しました。時間をおいて再度お試しください。",
+    };
   }
 }

@@ -36,7 +36,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { 得意先Input, 得意先Model,得意先Output } from "@/db/model/得意先Model";
+import { 得意先Input, 得意先Model, 得意先Output } from "@/db/model/得意先Model";
 
 export function CustomerDialog({
   target,
@@ -68,7 +68,7 @@ export function CustomerDialog({
       toast.success(isEdit ? "更新しました" : "登録しました");
       onClose();
     } else {
-      toast.error(res.error || "保存に失敗しました");
+      toast.error(res.error);
     }
   };
 
@@ -82,7 +82,7 @@ export function CustomerDialog({
       setShowDeleteAlert(false); // アラートを閉じる
       onClose(); // 本体のダイアログも閉じる
     } else {
-      toast.error(res.error || "削除に失敗しました");
+      toast.error(res.error);
     }
   };
 

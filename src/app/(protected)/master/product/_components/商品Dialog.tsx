@@ -78,7 +78,7 @@ export function ProductDialog({
         });
       } else {
         // 排他制御など、全体に関するエラーはトーストで表示
-        toast.error(res.error || "保存に失敗しました");
+        toast.error(res.error);
       }
     }
   };
@@ -93,7 +93,7 @@ export function ProductDialog({
       setShowDeleteAlert(false); // アラートを閉じる
       onClose(); // 本体のダイアログも閉じる
     } else {
-      toast.error(res.error || "削除に失敗しました");
+      toast.error(res.error);
     }
   };
 

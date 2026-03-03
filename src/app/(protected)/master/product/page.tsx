@@ -1,5 +1,6 @@
 import { ProductList } from "@/app/(protected)/master/product/_components/商品List";
 import { 商品Repository } from "@/db/repository/商品Repository";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export default async function Page({
   searchParams,
@@ -11,6 +12,9 @@ export default async function Page({
   const page = Number(params.page) || 1;
 
   const pageSize = Number(process.env.PAGE_ROW_COUNT) || 20;
+
+  // 認可判定
+  await requireAdmin();
 
   // リポジトリから「データ」と「件数」を両方受け取る
   const { items, totalCount } = await 商品Repository.Search(

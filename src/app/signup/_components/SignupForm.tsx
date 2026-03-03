@@ -58,21 +58,27 @@ export function SignupForm({
     setIsLoading(true);
 
     // Better Auth のクライアントSDKを利用してsignUp
-    const { error } = await signUp.email({
-      email: values.email,
-      password: values.password,
-      name: values.userName,
-    });
-    if (error) {
-      toast.error("登録に失敗しました: " + error.message);
-      setIsLoading(false);
-      return;
-    }
-    // 成功時
-    toast.success("登録が完了しました");
-    router.push("/");
+    await signUp.email(
+      {
+        email: values.email,
+        password: values.password,
+        name: values.userName,
+      },
+      {
+        onSuccess: () => {
+          router.push("/");
+          router.refresh();
 
-    setIsLoading(false);
+          // 画面遷移が完了するまで「くるくる」を維持するため、
+          // ここでは setIsLoading(false) を意図的に呼ばない
+        },
+        onError: (ctx) => {
+          toast.error("登録に失敗しました: " + ctx.error.message);
+          setIsLoading(false);
+          return;
+        },
+      },
+    );
   }
 
   function onCancel(e: React.MouseEvent<HTMLButtonElement>) {

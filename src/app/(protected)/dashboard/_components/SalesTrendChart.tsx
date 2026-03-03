@@ -1,7 +1,9 @@
 "use client";
 
+// next/router ではなく next/navigation からインポート
+import { useRouter } from "next/navigation";
 import * as React from "react";
-import { useMemo } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -23,23 +25,27 @@ interface SalesTrendChartProps {
 }
 
 export function SalesTrendChart({ data, interval }: SalesTrendChartProps) {
-  const [activeChart, setActiveChart] = React.useState<"totalAmount" | "count">(
+  // App Router 用の useRouter
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  const [activeChart, setActiveChart] = useState<"totalAmount" | "count">(
     "totalAmount",
   );
 
-  // チャート設定（色定義）
+  // チャート設定
   const chartConfig = {
     totalAmount: {
       label: "売上金額",
-      color: "#4A6984", // Indigo-600
+      color: "#4A6984",
     },
     count: {
       label: "受注件数",
-      color: "#64748b", // Slate-500
+      color: "#64748b",
     },
   } satisfies ChartConfig;
 
-  // データ加工（日付フォーマット）
+  // データ加工
   const chartData = useMemo(() => {
     return data.map((item) => {
       const date = new Date(item.period);
@@ -68,7 +74,6 @@ export function SalesTrendChart({ data, interval }: SalesTrendChartProps) {
     [data],
   );
 
-  // Y軸の単位フォーマッタ（億・万対応）
   const formatYAxis = (value: number) => {
     if (activeChart === "count") return value.toLocaleString();
     if (value >= 100000000) return `¥${(value / 100000000).toFixed(1)}億`;
@@ -76,7 +81,6 @@ export function SalesTrendChart({ data, interval }: SalesTrendChartProps) {
     return `¥${value}`;
   };
 
-  // 通貨表示フォーマッタ
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("ja-JP", {
       style: "currency",
@@ -84,15 +88,14 @@ export function SalesTrendChart({ data, interval }: SalesTrendChartProps) {
       maximumFractionDigits: 0,
     }).format(value);
 
-  // 数値表示フォーマッタ
   const formatNumber = (value: number) =>
     new Intl.NumberFormat("ja-JP").format(value);
 
   return (
-    <Card className="h-full flex flex-col border-none shadow-none bg-transparent overflow-hidden">
-      {/* ヘッダーエリア：タブ切り替え */}
+    <Card
+      className={`h-full flex flex-col border-none shadow-none bg-transparent overflow-hidden ${isPending ? "opacity-70" : ""}`}
+    >
       <CardHeader className="flex flex-row items-center space-y-0 border-b p-0 shrink-0">
-        {/* 売上金額タブ */}
         <div
           data-active={activeChart === "totalAmount"}
           className="flex flex-1 flex-col justify-center gap-0.5 px-4 py-3 transition-colors cursor-pointer border-r data-[active=true]:bg-white data-[active=false]:bg-slate-50 hover:bg-slate-100 first:rounded-tl-xl"
@@ -106,7 +109,6 @@ export function SalesTrendChart({ data, interval }: SalesTrendChartProps) {
           </span>
         </div>
 
-        {/* 受注件数タブ */}
         <div
           data-active={activeChart === "count"}
           className="flex flex-1 flex-col justify-center gap-0.5 px-4 py-3 transition-colors cursor-pointer data-[active=true]:bg-white data-[active=false]:bg-slate-50 hover:bg-slate-100 last:rounded-tr-xl"
@@ -124,15 +126,14 @@ export function SalesTrendChart({ data, interval }: SalesTrendChartProps) {
         </div>
       </CardHeader>
 
-      {/* コンテンツエリア：チャート本体 */}
       <CardContent className="flex-1 min-h-0 px-2 pt-4 pb-0">
         <div className="w-full h-full">
           <ChartContainer config={chartConfig} className="w-full h-full">
             <BarChart
               accessibilityLayer
               data={chartData}
-              margin={{ top: 5, right: 10, left: -20, bottom: 0 }} // 左マージンを詰めてスペース確保
-              barCategoryGap="15%" // バーの間隔を詰めて太く見せる
+              margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
+              barCategoryGap="15%"
             >
               <CartesianGrid
                 vertical={false}
@@ -153,7 +154,7 @@ export function SalesTrendChart({ data, interval }: SalesTrendChartProps) {
                 tickLine={false}
                 tick={{ fontSize: 16, fill: "#64748b" }}
                 tickFormatter={formatYAxis}
-                width={120} // 軸の幅を最小限に
+                width={120}
               />
 
               <ChartTooltip
@@ -171,11 +172,11 @@ export function SalesTrendChart({ data, interval }: SalesTrendChartProps) {
                 dataKey={activeChart}
                 fill={chartConfig[activeChart].color}
                 radius={[4, 4, 0, 0]}
-                maxBarSize={120} // 太さの上限を緩和
-                onClick={(data) => {
-                  if (!data || !data.period) return;
+                maxBarSize={120}
+                onClick={(payload) => {
+                  // Recharts の onClick から渡されるデータ構造に合わせる
+                  if (!payload || !payload.period) return;
 
-                  // 選択されたバーの受注日（または期間）の受注一覧へ遷移する
                   const formatDate = (d: Date) => {
                     if (isNaN(d.getTime())) return "";
                     const year = d.getFullYear();
@@ -184,9 +185,7 @@ export function SalesTrendChart({ data, interval }: SalesTrendChartProps) {
                     return `${year}-${month}-${day}`;
                   };
 
-                  const baseDate = new Date(data.period);
-
-                  // 開始日・終了日ともに、必ず yyyy-MM-dd 形式に変換する
+                  const baseDate = new Date(payload.period);
                   const fromStr = formatDate(baseDate);
                   let toStr = fromStr;
 
@@ -203,7 +202,10 @@ export function SalesTrendChart({ data, interval }: SalesTrendChartProps) {
                     toStr = formatDate(endOfWeek);
                   }
 
-                  window.location.href = `/order?startDate=${fromStr}&endDate=${toStr}`;
+                  // 遷移処理を startTransition で囲む（UX向上）
+                  startTransition(() => {
+                    router.push(`/order?startDate=${fromStr}&endDate=${toStr}`);
+                  });
                 }}
                 className="cursor-pointer hover:opacity-80 transition-opacity"
               />

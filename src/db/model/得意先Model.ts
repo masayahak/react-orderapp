@@ -5,7 +5,7 @@ export const 得意先Model = z.object({
   得意先名: z.string().min(1, "必須項目です"),
   電話番号: z.string().optional().nullable(),
   備考: z.string().optional().nullable(),
-  version: z.number().default(1),
+  version: z.number().default(0),
 });
 
 // 入力時の型（フォーム管理・UI用）

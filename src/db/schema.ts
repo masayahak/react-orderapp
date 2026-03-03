@@ -145,7 +145,7 @@ export const 受注 = pgTable(
       .$defaultFn(() => uuidv7()),
     受注日: date("受注日").notNull(),
     得意先ID: text("得意先ID").notNull(),
-    得意先名: text("得意先").notNull(),
+    得意先名: text("得意先名").notNull(),
     合計金額: decimal("合計金額").notNull(),
     備考: text("備考"),
     version: integer("version").default(0).notNull(),
@@ -164,7 +164,9 @@ export const 受注明細 = pgTable(
     受注明細ID: text("受注明細ID")
       .primaryKey()
       .$defaultFn(() => uuidv7()),
-    受注ID: text("受注ID").notNull(),
+    受注ID: text("受注ID")
+      .notNull()
+      .references(() => 受注.受注ID, { onDelete: "cascade" }),
     商品CD: text("商品CD").notNull(),
     商品名: text("商品名").notNull(),
     単価: decimal("単価").notNull(),

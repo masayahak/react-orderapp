@@ -62,7 +62,7 @@ export const 得意先Repository = {
       .values({
         ...データ,
         得意先ID: uuidv7(), // ここで UUID v7 を採番！
-        version: 1,
+        version: 0,
       })
       .returning();
   },

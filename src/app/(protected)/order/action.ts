@@ -1,8 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { ZodError } from "zod";
 
-import { 受注Input } from "@/db/model/受注Model";
+import { 受注Model, 受注Output } from "@/db/model/受注Model";
 import { 受注Repository } from "@/db/repository/受注Repository";
 import { 商品Repository } from "@/db/repository/商品Repository";
 import { 得意先Repository } from "@/db/repository/得意先Repository";
@@ -32,12 +33,14 @@ export async function search商品(query: string) {
 }
 
 export async function save受注(
-  data: 受注Input,
+  data: 受注Output,
   mode: "create" | "edit",
   orderId?: string,
 ) {
   try {
-    await 受注Repository.Save(data, mode, orderId);
+    // サーバーサイドで型を確認
+    const validated = 受注Model.parse(data);
+    await 受注Repository.Save(validated, mode, orderId);
 
     // 関連するページのキャッシュをクリア
     revalidatePath("/dashboard");
@@ -46,13 +49,35 @@ export async function save受注(
     return { success: true };
   } catch (e) {
     console.error("Save Error:", e);
-    return { success: false, error: "データベースへの保存に失敗しました" };
+
+    // Zodのバリデーションエラー
+    if (e instanceof ZodError) {
+      return {
+        success: false,
+        error: "入力内容に不備があります。画面の指示に従ってください。",
+      };
+    }
+
+    // 楽観的排他ロックの失敗など、
+    // Error インスタンスであれば、そのメッセージをフロントに返す
+    if (e instanceof Error) {
+      return {
+        success: false,
+        error: e.message,
+      };
+    }
+
+    // 予期せぬエラー（ネットワーク切断など）の場合のフォールバック
+    return {
+      success: false,
+      error: "予期せぬエラーが発生しました。時間をおいて再度お試しください。",
+    };
   }
 }
 
-export async function delete受注(orderId: string) {
+export async function delete受注(orderId: string, version: number) {
   try {
-    await 受注Repository.Delete(orderId);
+    await 受注Repository.Delete(orderId, version);
 
     revalidatePath("/dashboard");
     revalidatePath("/order");
@@ -60,6 +85,20 @@ export async function delete受注(orderId: string) {
     return { success: true };
   } catch (e) {
     console.error("Delete Error:", e);
-    return { success: false, error: "削除処理に失敗しました" };
+
+    // 楽観的排他ロックの失敗など、
+    // Error インスタンスであれば、そのメッセージをフロントに返す
+    if (e instanceof Error) {
+      return {
+        success: false,
+        error: e.message,
+      };
+    }
+
+    // 予期せぬエラー（ネットワーク切断など）の場合のフォールバック
+    return {
+      success: false,
+      error: "予期せぬエラーが発生しました。時間をおいて再度お試しください。",
+    };
   }
 }

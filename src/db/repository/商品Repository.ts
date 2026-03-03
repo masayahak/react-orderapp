@@ -59,7 +59,7 @@ export const 商品Repository = {
       .values({
         ...データ,
         単価: データ.単価.toString(), // 輸送ポッド(string)へ変換
-        version: 1, // 初期バージョン
+        version: 0, // 初期バージョン
       })
       .onConflictDoNothing({ target: 商品.商品CD })
       .returning();

@@ -1,14 +1,11 @@
 import { z } from "zod";
 
+import { numericSchema } from "./共通チェック";
+
 export const 商品Model = z.object({
   商品CD: z.string().min(1, "必須"),
   商品名: z.string().min(1, "必須"),
-  単価: z
-    .union([z.number(), z.string()])
-    .refine((v) => String(v).trim() !== "", "単価は必須です")
-    .pipe(z.coerce.number())
-    .refine((v) => !Number.isNaN(v), "数値を入力してください")
-    .refine((v) => v >= 0, "0以上で入力してください"),
+  単価: numericSchema("単価は必須です"),
   備考: z.string().optional().nullable(),
   version: z.number().default(0),
 });

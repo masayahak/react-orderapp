@@ -1,4 +1,6 @@
-import { and, desc, eq,gte, lte, sql } from "drizzle-orm";
+import "server-only";
+
+import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 
 import { db } from "@/db/drizzle";
 import { AnalysisDuration, AnalysisInterval } from "@/lib/analysis-utils";

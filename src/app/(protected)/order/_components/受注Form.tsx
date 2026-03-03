@@ -61,6 +61,7 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
     },
   });
 
+  // 動的に変化する明細行を管理する
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "明細",
@@ -99,7 +100,8 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
   ];
 
   const onSubmit = async (data: 受注Input) => {
-    const res = await save受注(data, mode, initialData?.受注ID);
+    const validated = 受注Model.parse(data);
+    const res = await save受注(validated, mode, initialData?.受注ID);
     if (res.success) {
       toast.success(
         mode === "create" ? "受注を登録しました" : "変更を保存しました",
@@ -108,14 +110,18 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
       router.push(query ? `/order?${query}` : "/order");
       router.refresh();
     } else {
-      toast.error("保存に失敗しました");
+      toast.error(res.error);
     }
   };
 
   const handleDelete = async () => {
-    if (!initialData?.受注ID) return;
+    const id = initialData?.受注ID;
+    const ver = initialData?.version;
 
-    const res = await delete受注(initialData.受注ID);
+    // ID または version が欠けている場合は削除不可
+    if (!id || ver === undefined) return;
+
+    const res = await delete受注(id, ver);
     if (res.success) {
       toast.success("受注を削除しました");
       setShowDeleteAlert(false);
@@ -123,7 +129,7 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
       router.push(query ? `/order?${query}` : "/order");
       router.refresh();
     } else {
-      toast.error(res.error || "削除に失敗しました");
+      toast.error(res.error);
     }
   };
 
@@ -298,7 +304,6 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                   {fields.map((field, index) => (
                     <TableRow key={field.id} className="hover:bg-slate-50/20">
                       <TableCell className="pl-6 py-2">
-                        {/* 修正1: displayKeyを商品CDに変更 */}
                         <AdvancedCombobox<ProductSearchRes>
                           placeholder="CD検索..."
                           searchFn={search商品}
