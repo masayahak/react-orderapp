@@ -36,7 +36,7 @@ export function ProductList({
   const totalPages = Math.ceil(totalCount / pageSize);
 
   const handlePageChange = (newPage: number) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     params.set("page", newPage.toString());
     startTransition(() => {
       router.push(`?${params.toString()}`);
@@ -52,7 +52,7 @@ export function ProductList({
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     const keyword = formData.get("q") as string;
     if (keyword) params.set("q", keyword);
     else params.delete("q");

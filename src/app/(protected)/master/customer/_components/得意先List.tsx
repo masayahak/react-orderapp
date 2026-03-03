@@ -37,7 +37,7 @@ export function CustomerList({
 
   const handlePageChange = (newPage: number) => {
     // 現在のURLクエリ文字列をベースに新しいクエリを作成
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
 
     // ページ番号を更新（または追加）
     params.set("page", newPage.toString());
@@ -58,7 +58,7 @@ export function CustomerList({
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     const keyword = formData.get("q") as string;
     if (keyword) params.set("q", keyword);
     else params.delete("q");

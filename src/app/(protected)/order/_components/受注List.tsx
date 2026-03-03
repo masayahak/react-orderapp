@@ -63,7 +63,7 @@ export function OrderList({
   const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
 
     params.set("q", formData.get("q") as string);
     params.set("startDate", formData.get("startDate") as string);
@@ -243,7 +243,7 @@ export function OrderList({
               disabled={currentPage === 1}
               className="bg-white"
               onClick={() => {
-                const params = new URLSearchParams(searchParams);
+                const params = new URLSearchParams(searchParams.toString());
                 params.set("page", (currentPage - 1).toString());
                 startTransition(() => router.push(`?${params.toString()}`));
               }}
@@ -261,7 +261,7 @@ export function OrderList({
               disabled={currentPage === totalPages}
               className="bg-white"
               onClick={() => {
-                const params = new URLSearchParams(searchParams);
+                const params = new URLSearchParams(searchParams.toString());
                 params.set("page", (currentPage + 1).toString());
                 startTransition(() => router.push(`?${params.toString()}`));
               }}
