@@ -7,8 +7,12 @@ import { 受注Model, 受注Output } from "@/db/model/受注Model";
 import { 受注Repository } from "@/db/repository/受注Repository";
 import { 商品Repository } from "@/db/repository/商品Repository";
 import { 得意先Repository } from "@/db/repository/得意先Repository";
+import { requireSession } from "@/lib/auth-guard";
 
 export async function search得意先(query: string) {
+  // 認証ガード
+  await requireSession();
+
   // 最小文字数チェックなどはフロント側で行っている前提
   const pageSize = Number(process.env.PAGE_ROW_COUNT) || 20;
   const { items } = await 得意先Repository.Search(query, 1, pageSize);
@@ -21,6 +25,9 @@ export async function search得意先(query: string) {
 }
 
 export async function search商品(query: string) {
+  // 認証ガード
+  await requireSession();
+
   const pageSize = Number(process.env.PAGE_ROW_COUNT) || 20;
   const { items } = await 商品Repository.Search(query, 1, pageSize);
 
@@ -37,6 +44,9 @@ export async function save受注(
   mode: "create" | "edit",
   orderId?: string,
 ) {
+  // 認証ガード
+  await requireSession();
+
   try {
     // サーバーサイドで型を確認
     const validated = 受注Model.parse(data);
@@ -76,6 +86,9 @@ export async function save受注(
 }
 
 export async function delete受注(orderId: string, version: number) {
+  // 認証ガード
+  await requireSession();
+
   try {
     await 受注Repository.Delete(orderId, version);
 

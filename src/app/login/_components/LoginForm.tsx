@@ -31,8 +31,10 @@ import { cn } from "@/lib/utils";
 
 // 画面入力専用のZodスキーマを定義
 const formSchema = z.object({
-  email: z.email("正しいメールアドレスの形式で入力してください"),
-  password: z.string().min(1, "パスワードは必須です"),
+  email: z
+    .email({ message: "正しいメールアドレスの形式で入力してください" })
+    .trim(),
+  password: z.string().min(1, { message: "パスワードは必須です" }).trim(),
 });
 
 export function LoginForm({
