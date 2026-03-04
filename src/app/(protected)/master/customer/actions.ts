@@ -8,10 +8,10 @@ import { 得意先Repository } from "@/db/repository/得意先Repository";
 import { requireAdmin } from "@/lib/auth-guard";
 
 export async function save得意先(data: 得意先Input, isEdit: boolean) {
-  try {
-    // 認可判定
-    await requireAdmin();
+  // 認可判定
+  await requireAdmin();
 
+  try {
     const validated = 得意先Model.parse(data);
     if (isEdit) {
       if (!validated.得意先ID) {
@@ -44,10 +44,10 @@ export async function save得意先(data: 得意先Input, isEdit: boolean) {
 }
 
 export async function delete得意先(得意先ID: string, version: number) {
-  try {
-    // 認可判定
-    await requireAdmin();
+  // 認可判定
+  await requireAdmin();
 
+  try {
     await 得意先Repository.Delete(得意先ID, version);
     revalidatePath("/master/customer");
     return { success: true };
