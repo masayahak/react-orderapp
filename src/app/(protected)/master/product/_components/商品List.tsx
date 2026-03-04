@@ -46,18 +46,18 @@ export function ProductList({
   const [editingItem, setEditingItem] = useState<商品Output | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // 検索処理実行
+  // 検索処理（URLパラメータの書き換え）
   const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
-    // フォームのデフォルト送信をキャンセル
     e.preventDefault();
-
     const formData = new FormData(e.currentTarget);
     const params = new URLSearchParams(searchParams.toString());
     const keyword = formData.get("q") as string;
+
     if (keyword) params.set("q", keyword);
     else params.delete("q");
     params.set("page", "1"); // 検索時は1ページ目に戻す
 
+    // トランジションで包むことで、サーバー通信中のUIフリーズを防ぐ
     startTransition(() => {
       router.push(`?${params.toString()}`);
     });
@@ -87,6 +87,7 @@ export function ProductList({
             </div>
 
             <div className="flex gap-2 w-full md:w-auto">
+              {/* 検索ボタンのローディング制御 */}
               <Button
                 type="submit"
                 className="w-full md:w-32"
