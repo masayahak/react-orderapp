@@ -1,6 +1,7 @@
 "use client";
 
-import { Trophy,Users } from "lucide-react";
+import { Trophy, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import {
   Bar,
@@ -18,6 +19,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { AnalysisDuration, formatCurrency } from "@/lib/analysis-utils";
 
 export interface RankingData {
   name: string;
@@ -26,8 +28,7 @@ export interface RankingData {
 
 interface CustomerRankingProps {
   data: RankingData[];
-  from: string;
-  to: string;
+  duration: AnalysisDuration;
 }
 
 const chartConfig = {
@@ -37,7 +38,9 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function CustomerRanking({ data, from, to }: CustomerRankingProps) {
+export function CustomerRanking({ data, duration }: CustomerRankingProps) {
+  const router = useRouter();
+
   // 上位5件のみ
   const chartData = useMemo(() => {
     return (data || []).slice(0, 5).map((item) => ({
@@ -46,25 +49,15 @@ export function CustomerRanking({ data, from, to }: CustomerRankingProps) {
     }));
   }, [data]);
 
-  const formatCurrency = (val: number) =>
-    new Intl.NumberFormat("ja-JP", {
-      style: "currency",
-      currency: "JPY",
-      notation: "compact",
-      maximumFractionDigits: 1,
-    })
-      .format(val)
-      .replace("￥", "¥");
-
   return (
     <Card className="flex flex-col border-none shadow-sm bg-white h-full overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between py-4 px-5 shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-md bg-indigo-50">
-            <Users className="h-3.5 w-3.5 text-indigo-600" />
+          <div className="p-1.5 rounded-md bg-amber-50">
+            <Users className="h-3.5 w-3.5 text-amber-600" />
           </div>
           <CardTitle className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-            得意先別売上
+            得意先別売上(上位5件のみ)
           </CardTitle>
         </div>
         <Trophy className="h-3.5 w-3.5 text-amber-400 opacity-50" />
@@ -120,7 +113,9 @@ export function CustomerRanking({ data, from, to }: CustomerRankingProps) {
                 onClick={(data) => {
                   if (!data || !data.name) return;
                   const q = encodeURIComponent(data.name);
-                  window.location.href = `/order?startDate=${from}&endDate=${to}&q=${q}`;
+                  router.push(
+                    `/order?startDate=${duration.from}&endDate=${duration.to}&q=${q}`,
+                  );
                 }}
                 className="cursor-pointer hover:opacity-80 transition-opacity"
               >

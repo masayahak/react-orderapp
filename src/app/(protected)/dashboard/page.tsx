@@ -26,9 +26,10 @@ export default async function DashboardPage({
   searchParams,
 }: DashboardPageProps) {
   const params = await searchParams;
+
+  // 指定がない場合は「月間」を初期値
   const preset = params.preset || "month";
   const defaults = getAnalysisDefaults(preset);
-
   const duration = {
     from: params.from || defaults.duration.from,
     to: params.to || defaults.duration.to,
@@ -64,25 +65,22 @@ export default async function DashboardPage({
             {/* 左側グラフエリア */}
             <div className="lg:col-span-8 h-full min-h-0">
               <section className="bg-white rounded-xl border shadow-sm p-0 h-full overflow-hidden">
-                <SalesTrendChart data={trendData} interval={interval} />
+                <SalesTrendChart
+                  data={trendData}
+                  preset={preset}
+                  duration={duration}
+                  interval={interval}
+                />
               </section>
             </div>
 
             {/* 右側ランキングエリア */}
             <div className="lg:col-span-4 flex flex-col gap-3 h-full min-h-0">
               <div className="flex-1 min-h-0">
-                <CustomerRanking
-                  data={topCustomers}
-                  from={duration.from}
-                  to={duration.to}
-                />
+                <CustomerRanking data={topCustomers} duration={duration} />
               </div>
               <div className="flex-1 min-h-0">
-                <ProductRanking
-                  data={topProducts}
-                  from={duration.from}
-                  to={duration.to}
-                />
+                <ProductRanking data={topProducts} duration={duration} />
               </div>
             </div>
           </div>

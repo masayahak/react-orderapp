@@ -51,7 +51,7 @@ export async function delete得意先(得意先ID: string, version: number) {
     await 得意先Repository.Delete(得意先ID, version);
     revalidatePath("/master/customer");
     return { success: true };
-  } catch (e: unknown) {
+  } catch {
     // 予期せぬエラー（ネットワーク切断など）の場合のフォールバック
     return {
       success: false,

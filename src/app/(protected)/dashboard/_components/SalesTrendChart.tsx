@@ -1,8 +1,6 @@
 "use client";
 
-// next/router ではなく next/navigation からインポート
 import { useRouter } from "next/navigation";
-import * as React from "react";
 import { useMemo, useState, useTransition } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
@@ -13,59 +11,116 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { AnalysisInterval } from "@/lib/analysis-utils";
+import {
+  AnalysisDuration,
+  AnalysisInterval,
+  AnalysisPreset,
+  dateFormatJPLocal,
+  formatCurrency,
+  formatNumber,
+  generateEmptyTrendData,
+} from "@/lib/analysis-utils";
 
 interface SalesTrendChartProps {
-  data: {
-    period: string;
-    totalAmount: number;
-    count: number;
-  }[];
+  data: { period: string; totalAmount: number; count: number }[];
+  preset: AnalysisPreset;
   interval: AnalysisInterval;
+  duration: AnalysisDuration;
 }
 
-export function SalesTrendChart({ data, interval }: SalesTrendChartProps) {
-  // App Router 用の useRouter
+type ChartType = "totalAmount" | "count";
+
+interface CustomTickProps {
+  x: number;
+  y: number;
+  payload: { value: string };
+}
+
+/**
+ * X軸のカスタムラベル：土日の色分けをインラインスタイルで強制適用
+ */
+const CustomXAxisTick = ({ x, y, payload }: CustomTickProps) => {
+  const label = payload.value;
+  let color = "#64748b";
+  let fontWeight = "normal";
+
+  if (label.includes("日")) {
+    color = "#ef4444";
+    fontWeight = "bold";
+  } else if (label.includes("土")) {
+    color = "#3b82f6";
+    fontWeight = "bold";
+  }
+
+  return (
+    <text
+      x={x}
+      y={y + 16}
+      fontSize={12}
+      textAnchor="middle"
+      className="select-none"
+      style={{ fill: color, fontWeight }}
+    >
+      {label}
+    </text>
+  );
+};
+
+export function SalesTrendChart({
+  data,
+  preset,
+  interval,
+  duration,
+}: SalesTrendChartProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [activeChart, setActiveChart] = useState<ChartType>("totalAmount");
 
-  const [activeChart, setActiveChart] = useState<"totalAmount" | "count">(
-    "totalAmount",
-  );
-
-  // チャート設定
   const chartConfig = {
-    totalAmount: {
-      label: "売上金額",
-      color: "#4A6984",
-    },
-    count: {
-      label: "受注件数",
-      color: "#64748b",
-    },
+    totalAmount: { label: "売上金額", color: "#4A6984" },
+    count: { label: "受注件数", color: "#64748b" },
   } satisfies ChartConfig;
 
-  // データ加工
   const chartData = useMemo(() => {
-    return data.map((item) => {
-      const date = new Date(item.period);
-      let label = "";
-      switch (interval) {
-        case "day":
-          label = `${date.getMonth() + 1}/${date.getDate()}`;
-          break;
-        case "week":
-          label = `${date.getMonth() + 1}/${date.getDate()}~`;
-          break;
-        case "month":
-          label = `${date.getFullYear()}/${date.getMonth() + 1}`;
-          break;
-      }
-      return { ...item, displayPeriod: label };
-    });
-  }, [data, interval]);
+    const emptyData = generateEmptyTrendData(duration, interval);
+    const dataMap = new Map(
+      data.map((item) => [dateFormatJPLocal(new Date(item.period)), item]),
+    );
+    const dayLabels = ["日", "月", "火", "水", "木", "金", "土"];
 
-  // 合計値計算
+    return emptyData.map((slot) => {
+      const actual = dataMap.get(slot.period);
+      const merged = actual ? { ...slot, ...actual } : slot;
+      const date = new Date(merged.period.replace(/-/g, "/"));
+
+      let displayPeriod = "";
+
+      if (interval === "day") {
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const dayLabel = dayLabels[date.getDay()];
+
+        // 月間表示（30日〜31日分）の場合、ラベルを短縮
+        if (preset === "month") {
+          // 1日だけ「月」を表示し、それ以外は「日(曜)」のみ
+          displayPeriod =
+            day === 1 ? `${month}/${day}(${dayLabel})` : `${day}${dayLabel}`;
+        } else {
+          // 週間表示などは従来通り m/d(曜)
+          displayPeriod = `${month}/${day}(${dayLabel})`;
+        }
+      } else {
+        // 年間表示（月単位）
+        const month = date.getMonth() + 1;
+        // 1月だけ年を表示
+        displayPeriod =
+          month === 1 ? `${date.getFullYear()}年1月` : `${month}月`;
+      }
+
+      return { ...merged, displayPeriod };
+    });
+  }, [data, interval, duration, preset]);
+
   const totals = useMemo(
     () => ({
       totalAmount: data.reduce((acc, curr) => acc + curr.totalAmount, 0),
@@ -76,142 +131,97 @@ export function SalesTrendChart({ data, interval }: SalesTrendChartProps) {
 
   const formatYAxis = (value: number) => {
     if (activeChart === "count") return value.toLocaleString();
-    if (value >= 100000000) return `¥${(value / 100000000).toFixed(1)}億`;
-    if (value >= 10000) return `¥${(value / 10000).toFixed(0)}万`;
-    return `¥${value}`;
+    if (value >= 100000000) return `${(value / 100000000).toFixed(1)}億円`;
+    if (value >= 10000) return `${(value / 10000).toFixed(0)}万円`;
+    return `${value}円`;
   };
-
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat("ja-JP", {
-      style: "currency",
-      currency: "JPY",
-      maximumFractionDigits: 0,
-    }).format(value);
-
-  const formatNumber = (value: number) =>
-    new Intl.NumberFormat("ja-JP").format(value);
 
   return (
     <Card
       className={`h-full flex flex-col border-none shadow-none bg-transparent overflow-hidden ${isPending ? "opacity-70" : ""}`}
     >
       <CardHeader className="flex flex-row items-center space-y-0 border-b p-0 shrink-0">
-        <div
-          data-active={activeChart === "totalAmount"}
-          className="flex flex-1 flex-col justify-center gap-0.5 px-4 py-3 transition-colors cursor-pointer border-r data-[active=true]:bg-white data-[active=false]:bg-slate-50 hover:bg-slate-100 first:rounded-tl-xl"
-          onClick={() => setActiveChart("totalAmount")}
-        >
-          <span className="text-[10px] text-muted-foreground font-medium">
-            売上金額 (合計)
-          </span>
-          <span className="text-xl font-black text-indigo-600 sm:text-2xl leading-none">
-            {formatCurrency(totals.totalAmount)}
-          </span>
-        </div>
-
-        <div
-          data-active={activeChart === "count"}
-          className="flex flex-1 flex-col justify-center gap-0.5 px-4 py-3 transition-colors cursor-pointer data-[active=true]:bg-white data-[active=false]:bg-slate-50 hover:bg-slate-100 last:rounded-tr-xl"
-          onClick={() => setActiveChart("count")}
-        >
-          <span className="text-[10px] text-muted-foreground font-medium">
-            受注件数 (合計)
-          </span>
-          <span className="text-xl font-black text-slate-700 sm:text-2xl leading-none">
-            {formatNumber(totals.count)}
-            <span className="text-xs ml-1 text-muted-foreground font-normal">
-              件
-            </span>
-          </span>
-        </div>
+        {(["totalAmount", "count"] as const).map((key, i) => {
+          const isActive = activeChart === key;
+          const isAmount = key === "totalAmount";
+          return (
+            <div
+              key={key}
+              data-active={isActive}
+              className={`flex flex-1 flex-col justify-center gap-0.5 px-4 py-3 transition-colors cursor-pointer ${i === 0 ? "border-r" : ""} data-[active=true]:bg-white data-[active=false]:bg-slate-50 hover:bg-slate-100`}
+              onClick={() => setActiveChart(key)}
+            >
+              <span className="text-[10px] text-muted-foreground font-medium">
+                {isAmount ? "売上金額 (合計)" : "受注件数 (合計)"}
+              </span>
+              <span
+                className={`text-xl font-black ${isAmount ? "text-indigo-600" : "text-slate-700"} sm:text-2xl leading-none`}
+              >
+                {isAmount
+                  ? formatCurrency(totals.totalAmount)
+                  : `${formatNumber(totals.count)}件`}
+              </span>
+            </div>
+          );
+        })}
       </CardHeader>
 
       <CardContent className="flex-1 min-h-0 px-2 pt-4 pb-0">
-        <div className="w-full h-full">
-          <ChartContainer config={chartConfig} className="w-full h-full">
-            <BarChart
-              accessibilityLayer
-              data={chartData}
-              margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
-              barCategoryGap="15%"
-            >
-              <CartesianGrid
-                vertical={false}
-                strokeDasharray="3 3"
-                stroke="#e2e8f0"
-              />
-
-              <XAxis
-                dataKey="displayPeriod"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                tick={{ fontSize: 16, fill: "#64748b" }}
-              />
-
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 16, fill: "#64748b" }}
-                tickFormatter={formatYAxis}
-                width={120}
-              />
-
-              <ChartTooltip
-                cursor={{ fill: "#f1f5f9" }}
-                content={
-                  <ChartTooltipContent
-                    className="w-[140px] bg-white border-slate-200"
-                    nameKey={activeChart}
-                    labelKey="displayPeriod"
-                  />
-                }
-              />
-
-              <Bar
-                dataKey={activeChart}
-                fill={chartConfig[activeChart].color}
-                radius={[4, 4, 0, 0]}
-                maxBarSize={120}
-                onClick={(payload) => {
-                  // Recharts の onClick から渡されるデータ構造に合わせる
-                  if (!payload || !payload.period) return;
-
-                  const formatDate = (d: Date) => {
-                    if (isNaN(d.getTime())) return "";
-                    const year = d.getFullYear();
-                    const month = String(d.getMonth() + 1).padStart(2, "0");
-                    const day = String(d.getDate()).padStart(2, "0");
-                    return `${year}-${month}-${day}`;
-                  };
-
-                  const baseDate = new Date(payload.period);
-                  const fromStr = formatDate(baseDate);
-                  let toStr = fromStr;
-
-                  if (interval === "month") {
-                    const endOfMonth = new Date(
-                      baseDate.getFullYear(),
-                      baseDate.getMonth() + 1,
-                      0,
-                    );
-                    toStr = formatDate(endOfMonth);
-                  } else if (interval === "week") {
-                    const endOfWeek = new Date(baseDate.getTime());
-                    endOfWeek.setDate(baseDate.getDate() + 6);
-                    toStr = formatDate(endOfWeek);
-                  }
-
-                  // 遷移処理を startTransition で囲む（UX向上）
-                  startTransition(() => {
-                    router.push(`/order?startDate=${fromStr}&endDate=${toStr}`);
-                  });
-                }}
-                className="cursor-pointer hover:opacity-80 transition-opacity"
-              />
-            </BarChart>
-          </ChartContainer>
-        </div>
+        <ChartContainer config={chartConfig} className="w-full h-full">
+          <BarChart
+            data={chartData}
+            margin={{ top: 5, right: 10, left: -20, bottom: 20 }}
+          >
+            <CartesianGrid
+              vertical={false}
+              strokeDasharray="3 3"
+              stroke="#e2e8f0"
+            />
+            <XAxis
+              dataKey="displayPeriod"
+              tickLine={false}
+              axisLine={false}
+              interval={preset === "month" ? "preserveStartEnd" : 0}
+              tick={(props: CustomTickProps) => <CustomXAxisTick {...props} />}
+              height={50}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 12, fill: "#64748b" }}
+              tickFormatter={formatYAxis}
+              width={100}
+            />
+            <ChartTooltip
+              cursor={{ fill: "#f1f5f9" }}
+              content={
+                <ChartTooltipContent
+                  className="w-[140px] bg-white border-slate-200"
+                  nameKey={activeChart}
+                />
+              }
+            />
+            <Bar
+              dataKey={activeChart}
+              fill={chartConfig[activeChart].color}
+              radius={[4, 4, 0, 0]}
+              onClick={(p) => {
+                if (!p?.period) return;
+                const d = new Date(p.period.replace(/-/g, "/"));
+                const end =
+                  interval === "month"
+                    ? new Date(d.getFullYear(), d.getMonth() + 1, 0)
+                    : d;
+                startTransition(() =>
+                  router.push(
+                    `/order?startDate=${dateFormatJPLocal(d)}&endDate=${dateFormatJPLocal(end)}`,
+                  ),
+                );
+              }}
+              className="cursor-pointer hover:opacity-80 transition-opacity"
+            />
+          </BarChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );

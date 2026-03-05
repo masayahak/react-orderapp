@@ -1,6 +1,7 @@
 "use client";
 
 import { Package, Trophy } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import {
   Bar,
@@ -18,13 +19,13 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { AnalysisDuration, formatCurrency } from "@/lib/analysis-utils";
 
 import type { RankingData } from "./CustomerRanking"; // 共通の型がある場合はインポート
 
 interface ProductRankingProps {
   data: RankingData[];
-  from: string;
-  to: string;
+  duration: AnalysisDuration;
 }
 
 const chartConfig = {
@@ -34,7 +35,9 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function ProductRanking({ data, from, to }: ProductRankingProps) {
+export function ProductRanking({ data, duration }: ProductRankingProps) {
+  const router = useRouter();
+
   // 上位5件のみ
   const chartData = useMemo(() => {
     return (data || []).slice(0, 5).map((item) => ({
@@ -42,16 +45,6 @@ export function ProductRanking({ data, from, to }: ProductRankingProps) {
       fill: chartConfig.value.color, // ここで参照
     }));
   }, [data]);
-
-  const formatCurrency = (val: number) =>
-    new Intl.NumberFormat("ja-JP", {
-      style: "currency",
-      currency: "JPY",
-      notation: "compact",
-      maximumFractionDigits: 1,
-    })
-      .format(val)
-      .replace("￥", "¥");
 
   return (
     <Card className="flex flex-col border-none shadow-sm bg-white h-full overflow-hidden">
@@ -61,7 +54,7 @@ export function ProductRanking({ data, from, to }: ProductRankingProps) {
             <Package className="h-3.5 w-3.5 text-emerald-600" />
           </div>
           <CardTitle className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-            商品別売上
+            商品別売上(上位5件のみ)
           </CardTitle>
         </div>
         <Trophy className="h-3.5 w-3.5 text-amber-400 opacity-50" />
@@ -117,7 +110,9 @@ export function ProductRanking({ data, from, to }: ProductRankingProps) {
                 onClick={(data) => {
                   if (!data || !data.name) return;
                   const q = encodeURIComponent(data.name);
-                  window.location.href = `/order?startDate=${from}&endDate=${to}&q=${q}`;
+                  router.push(
+                    `/order?startDate=${duration.from}&endDate=${duration.to}&q=${q}`,
+                  );
                 }}
                 className="cursor-pointer hover:opacity-80 transition-opacity"
               >
