@@ -1,71 +1,61 @@
 "use client";
 
-import { BarChart3, CalendarIcon, Clock, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, BarChart3, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  AnalysisInterval,
+  AnalysisDirection,
+  AnalysisParams,
   AnalysisPreset,
-  getAnalysisDefaults,
+  calculateAnalysisParams,
 } from "@/lib/analysis-utils";
 
 interface DashboardHeaderProps {
-  activePreset: AnalysisPreset;
-  from: string;
-  to: string;
-  activeInterval: AnalysisInterval;
+  params: AnalysisParams;
 }
 
-export function DashboardHeader({
-  activePreset,
-  from,
-  to,
-  activeInterval,
-}: DashboardHeaderProps) {
+export function DashboardHeader({ params }: DashboardHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const updateParams = (newParams: Record<string, string>) => {
-    const params = new URLSearchParams(searchParams.toString());
-    Object.entries(newParams).forEach(([key, value]) => params.set(key, value));
+  // URLパラメータの更新：interval は preset から導出されるため、URLからは除外
+  const navigate = (next: AnalysisParams) => {
+    const urlParams = new URLSearchParams(searchParams.toString());
+    urlParams.set("preset", next.preset);
+    urlParams.set("from", next.duration.from);
+    urlParams.set("to", next.duration.to);
+
+    // interval の set を削除
+    urlParams.delete("interval");
+
     startTransition(() => {
-      router.push(`?${params.toString()}`);
+      router.push(`?${urlParams.toString()}`);
     });
   };
 
   const handlePresetChange = (preset: string) => {
-    // ユーティリティから初期値を取得 (四半期ロジックは削除済み)
-    const defaults = getAnalysisDefaults(preset as AnalysisPreset);
-    updateParams({
-      preset,
-      from: defaults.duration.from,
-      to: defaults.duration.to,
-      interval: defaults.interval,
+    const next = calculateAnalysisParams(params, {
+      preset: preset as AnalysisPreset,
+      direction: "current",
     });
+    navigate(next);
   };
 
-  const handleDateChange = (type: "from" | "to", value: string) => {
-    updateParams({ [type]: value });
+  const handleShift = (direction: AnalysisDirection) => {
+    const next = calculateAnalysisParams(params, { direction });
+    navigate(next);
   };
 
-  const handleIntervalChange = (interval: string) => {
-    updateParams({ interval });
-  };
+  const displayFrom = params.duration.from.replace(/-/g, "/");
+  const displayTo = params.duration.to.replace(/-/g, "/");
 
   return (
     <div className="flex flex-wrap md:flex-nowrap items-center gap-4 bg-white px-6 py-4 rounded-xl border shadow-md min-h-[80px]">
-      {/* 1. 左エリア：ブランド表示（シンプルに） */}
+      {/* 1. 左エリア：ブランド */}
       <div className="flex items-center gap-3 shrink-0 mr-4">
         <div className="p-2 bg-slate-900 rounded-lg shadow-inner">
           <BarChart3 className="h-5 w-5 text-indigo-100" />
@@ -77,10 +67,10 @@ export function DashboardHeader({
         </div>
       </div>
 
-      {/* 2. 中央エリア：操作のメインハブ */}
-      <div className="flex-1 flex items-center justify-center gap-6">
+      {/* 2. 中央エリア：操作ハブ */}
+      <div className="flex-1 flex items-center justify-center gap-8">
         <Tabs
-          value={activePreset}
+          value={params.preset}
           onValueChange={handlePresetChange}
           className="shrink-0 shadow-lg shadow-indigo-100 rounded-lg p-1 bg-slate-100"
         >
@@ -89,7 +79,7 @@ export function DashboardHeader({
               value="week"
               className="flex-1 text-sm font-black data-[state=active]:bg-indigo-600 data-[state=active]:text-white transition-all"
             >
-              直近7日間
+              週間
             </TabsTrigger>
             <TabsTrigger
               value="month"
@@ -106,55 +96,48 @@ export function DashboardHeader({
           </TabsList>
         </Tabs>
 
-        {/* 垂直セパレーター */}
         <div className="h-8 w-px bg-slate-200 hidden md:block" />
 
-        {/* 期間と単位をセットで配置 */}
-        <div className="flex items-center gap-3">
-          <div className="flex mr-6 items-center gap-2 bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm transition-all focus-within:ring-2 focus-within:ring-indigo-500/20">
-            <CalendarIcon className="h-4 w-4 text-slate-400" />
-            <div className="flex items-center gap-1">
-              <Input
-                type="date"
-                value={from}
-                onChange={(e) => handleDateChange("from", e.target.value)}
-                className="h-5 w-[115px] border-none bg-transparent text-xs font-bold p-0 focus-visible:ring-0 cursor-pointer"
-              />
-              <span className="text-slate-300 font-light">→</span>
-              <Input
-                type="date"
-                value={to}
-                onChange={(e) => handleDateChange("to", e.target.value)}
-                className="h-5 w-[115px] border-none bg-transparent text-xs font-bold p-0 focus-visible:ring-0 cursor-pointer"
-              />
-            </div>
+        {/* 期間ナビゲーター */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handleShift("prev")}
+            disabled={isPending}
+            className="size-7 rounded-[min(var(--radius-md),12px)] border-border bg-background hover:bg-muted hover:text-foreground shadow-sm transition-all"
+            aria-label="Go Back"
+          >
+            <ArrowLeft className="size-4" />
+          </Button>
+
+          <div className="flex items-center justify-center bg-white px-4 py-1.5 rounded-lg border border-slate-200 shadow-sm min-w-[210px] select-none">
+            <span className="text-[13px] font-bold text-slate-700 tracking-tight font-mono">
+              {displayFrom}
+            </span>
+            <span className="mx-2 text-slate-300">→</span>
+            <span className="text-[13px] font-bold text-slate-700 tracking-tight font-mono">
+              {displayTo}
+            </span>
           </div>
 
-          <Select value={activeInterval} onValueChange={handleIntervalChange}>
-            <SelectTrigger className="h-10 w-[110px] text-xs font-bold bg-slate-50 border-slate-200 hover:bg-white transition-colors">
-              <div className="flex items-center gap-2">
-                <Clock className="h-3.5 w-3.5 text-slate-500" />
-                <SelectValue />
-              </div>
-            </SelectTrigger>
-            <SelectContent align="end">
-              <SelectItem value="day" className="font-medium">
-                日単位
-              </SelectItem>
-              <SelectItem value="month" className="font-medium">
-                月単位
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handleShift("next")}
+            disabled={isPending}
+            className="size-7 rounded-[min(var(--radius-md),12px)] border-border bg-background hover:bg-muted hover:text-foreground shadow-sm transition-all"
+            aria-label="Go Forward"
+          >
+            <ArrowRight className="size-4" />
+          </Button>
         </div>
       </div>
 
       {/* 3. 右エリア：状態表示 */}
-      <div className="flex items-center justify-end w-[60px] shrink-0">
+      <div className="flex items-center justify-end w-[40px] shrink-0">
         {isPending ? (
-          <div className="flex items-center gap-2 text-indigo-600">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </div>
+          <Loader2 className="h-5 w-5 animate-spin text-indigo-600" />
         ) : (
           <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
         )}

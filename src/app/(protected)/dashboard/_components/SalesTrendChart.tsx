@@ -12,9 +12,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import {
-  AnalysisDuration,
-  AnalysisInterval,
-  AnalysisPreset,
+  AnalysisParams,
   dateFormatJPLocal,
   formatCurrency,
   formatNumber,
@@ -23,9 +21,7 @@ import {
 
 interface SalesTrendChartProps {
   data: { period: string; totalAmount: number; count: number }[];
-  preset: AnalysisPreset;
-  interval: AnalysisInterval;
-  duration: AnalysisDuration;
+  params: AnalysisParams; // 構造体で一括受け取り
 }
 
 type ChartType = "totalAmount" | "count";
@@ -44,6 +40,7 @@ const CustomXAxisTick = ({ x, y, payload }: CustomTickProps) => {
   let color = "#64748b";
   let fontWeight = "normal";
 
+  // 文字列に「日」または「土」が含まれるかで判定
   if (label.includes("日")) {
     color = "#ef4444";
     fontWeight = "bold";
@@ -66,15 +63,12 @@ const CustomXAxisTick = ({ x, y, payload }: CustomTickProps) => {
   );
 };
 
-export function SalesTrendChart({
-  data,
-  preset,
-  interval,
-  duration,
-}: SalesTrendChartProps) {
+export function SalesTrendChart({ data, params }: SalesTrendChartProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [activeChart, setActiveChart] = useState<ChartType>("totalAmount");
+
+  const { duration, interval, preset } = params;
 
   const chartConfig = {
     totalAmount: { label: "売上金額", color: "#4A6984" },
@@ -100,26 +94,23 @@ export function SalesTrendChart({
         const day = date.getDate();
         const dayLabel = dayLabels[date.getDay()];
 
-        // 月間表示（30日〜31日分）の場合、ラベルを短縮
+        // 月間表示の場合、ラベルを短縮
         if (preset === "month") {
-          // 1日だけ「月」を表示し、それ以外は「日(曜)」のみ
           displayPeriod =
             day === 1 ? `${month}/${day}(${dayLabel})` : `${day}${dayLabel}`;
         } else {
-          // 週間表示などは従来通り m/d(曜)
           displayPeriod = `${month}/${day}(${dayLabel})`;
         }
       } else {
         // 年間表示（月単位）
         const month = date.getMonth() + 1;
-        // 1月だけ年を表示
         displayPeriod =
           month === 1 ? `${date.getFullYear()}年1月` : `${month}月`;
       }
 
       return { ...merged, displayPeriod };
     });
-  }, [data, interval, duration, preset]);
+  }, [data, duration, interval, preset]);
 
   const totals = useMemo(
     () => ({

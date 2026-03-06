@@ -19,13 +19,13 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { AnalysisDuration, formatCurrency } from "@/lib/analysis-utils";
+import { AnalysisParams, formatCurrency } from "@/lib/analysis-utils";
 
-import type { RankingData } from "./CustomerRanking"; // 共通の型がある場合はインポート
+import type { RankingData } from "./CustomerRanking";
 
 interface ProductRankingProps {
   data: RankingData[];
-  duration: AnalysisDuration;
+  params: AnalysisParams; // 構造体で受け取り
 }
 
 const chartConfig = {
@@ -35,14 +35,14 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function ProductRanking({ data, duration }: ProductRankingProps) {
+export function ProductRanking({ data, params }: ProductRankingProps) {
   const router = useRouter();
 
   // 上位5件のみ
   const chartData = useMemo(() => {
     return (data || []).slice(0, 5).map((item) => ({
       ...item,
-      fill: chartConfig.value.color, // ここで参照
+      fill: chartConfig.value.color,
     }));
   }, [data]);
 
@@ -106,12 +106,13 @@ export function ProductRanking({ data, duration }: ProductRankingProps) {
                 dataKey="value"
                 layout="vertical"
                 radius={[0, 4, 4, 0]}
-                fill="#10b981"
-                onClick={(data) => {
-                  if (!data || !data.name) return;
-                  const q = encodeURIComponent(data.name);
+                fill={chartConfig.value.color}
+                // 型安全なクリックイベント
+                onClick={(payload: RankingData) => {
+                  if (!payload?.name) return;
+                  const q = encodeURIComponent(payload.name);
                   router.push(
-                    `/order?startDate=${duration.from}&endDate=${duration.to}&q=${q}`,
+                    `/order?startDate=${params.duration.from}&endDate=${params.duration.to}&q=${q}`,
                   );
                 }}
                 className="cursor-pointer hover:opacity-80 transition-opacity"
