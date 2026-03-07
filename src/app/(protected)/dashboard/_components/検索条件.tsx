@@ -13,11 +13,11 @@ import {
   calculateAnalysisParams,
 } from "@/lib/analysis-utils";
 
-interface DashboardHeaderProps {
+interface SearchConditionProps {
   params: AnalysisParams;
 }
 
-export function DashboardHeader({ params }: DashboardHeaderProps) {
+export function SearchCondition({ params }: SearchConditionProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();

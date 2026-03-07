@@ -9,10 +9,10 @@ import {
   getIntervalByPreset,
 } from "@/lib/analysis-utils";
 
-import { CustomerRanking } from "./_components/CustomerRanking";
-import { DashboardHeader } from "./_components/DashboardHeader";
-import { ProductRanking } from "./_components/ProductRanking";
-import { SalesTrendChart } from "./_components/SalesTrendChart";
+import { ProductRanking } from "./_components/商品Ranking";
+import { SalesTrendChart } from "./_components/売上推移Chart";
+import { CustomerRanking } from "./_components/得意先Ranking";
+import { SearchCondition } from "./_components/検索条件";
 
 interface DashboardPageProps {
   searchParams: Promise<{
@@ -56,7 +56,7 @@ export default async function DashboardPage({
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] bg-slate-50/30 overflow-hidden">
       <div className="px-3 pt-3 pb-2 shrink-0">
-        <DashboardHeader params={params} />
+        <SearchCondition params={params} />
       </div>
 
       <main className="flex-1 min-h-0 px-3 pb-2">

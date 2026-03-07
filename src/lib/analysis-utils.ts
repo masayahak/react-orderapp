@@ -1,5 +1,5 @@
 // =============================================
-// 分析用型定義
+// 分析条件用の型定義
 // =============================================
 export type AnalysisPreset = "week" | "month" | "year";
 export type AnalysisInterval = "day" | "month";
@@ -54,7 +54,7 @@ export const formatCurrency = (val: number): string => {
 };
 
 // =============================================
-// 分析用初期値取得
+// 分析用初期条件取得
 // =============================================
 
 // プリセットに基づいたデフォルトの期間と集計単位を取得
@@ -93,7 +93,7 @@ export const getAnalysisDefaults = (preset: AnalysisPreset) => {
   };
 };
 
-// 指定された期間内の「売上0」で埋められた初期データ配列を生成
+// 指定された期間内に「受注0」で埋められた初期データ配列を生成
 export const generateEmptyTrendData = (
   duration: AnalysisDuration,
   interval: AnalysisInterval,

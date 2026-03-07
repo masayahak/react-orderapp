@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/chart";
 import { AnalysisParams, formatCurrency } from "@/lib/analysis-utils";
 
-import type { RankingData } from "./CustomerRanking";
+import type { RankingData } from "./得意先Ranking";
 
 interface ProductRankingProps {
   data: RankingData[];

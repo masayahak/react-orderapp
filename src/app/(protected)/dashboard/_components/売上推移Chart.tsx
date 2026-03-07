@@ -82,9 +82,9 @@ export function SalesTrendChart({ data, params }: SalesTrendChartProps) {
     );
     const dayLabels = ["日", "月", "火", "水", "木", "金", "土"];
 
-    return emptyData.map((slot) => {
-      const actual = dataMap.get(slot.period);
-      const merged = actual ? { ...slot, ...actual } : slot;
+    return emptyData.map((emptyRow) => {
+      const dataRow = dataMap.get(emptyRow.period);
+      const merged = dataRow ? { ...emptyRow, ...dataRow } : emptyRow;
       const date = new Date(merged.period.replace(/-/g, "/"));
 
       let displayPeriod = "";

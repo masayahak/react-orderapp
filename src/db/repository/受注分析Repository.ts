@@ -12,9 +12,10 @@ export const 受注分析Repository = {
    * 売上高推移の取得
    */
   async GetSalesTrend(duration: AnalysisDuration, interval: AnalysisInterval) {
-    // 1. interval を sql.raw で埋め込む。
-    // これにより、SQL上は $1 ではなく 'day' や 'month' というリテラルになる。
-    const period = sql<string>`date_trunc(${sql.raw(`'${interval}'`)}, ${受注.受注日})`;
+    const period =
+      interval === "month"
+        ? sql<string>`date_trunc('month', ${受注.受注日})`
+        : sql<string>`date_trunc('day', ${受注.受注日})`;
 
     return await db
       .select({
@@ -26,8 +27,7 @@ export const 受注分析Repository = {
       .where(
         and(gte(受注.受注日, duration.from), lte(受注.受注日, duration.to)),
       )
-      // 2. 同じ 'period' オブジェクト（中身は同一リテラルを含む式）を使うことで
-      // Postgres に「同一の集計キーである」と完全に理解させる
+      // 変数 period を再利用することで、SELECT 句と GROUP BY 句の式を完全に一致させる
       .groupBy(period)
       .orderBy(period);
   },
