@@ -7,14 +7,14 @@ export default async function Page({
 }: {
   searchParams: Promise<{ q?: string; page?: string }>;
 }) {
+  // 認可判定
+  await requireAdmin();
+
   const params = await searchParams;
   const query = params.q || "";
   const page = Number(params.page) || 1;
 
   const pageSize = Number(process.env.PAGE_ROW_COUNT) || 20;
-
-  // 認可判定
-  await requireAdmin();
 
   // リポジトリから「データ」と「件数」を両方受け取る
   const { items, totalCount } = await 商品Repository.Search(
