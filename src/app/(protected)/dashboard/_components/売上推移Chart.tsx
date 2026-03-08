@@ -131,30 +131,45 @@ export function SalesTrendChart({ data, params }: SalesTrendChartProps) {
     <Card
       className={`h-full flex flex-col border-none shadow-none bg-transparent overflow-hidden ${isPending ? "opacity-70" : ""}`}
     >
-      <CardHeader className="flex flex-row items-center space-y-0 border-b p-0 shrink-0">
-        {(["totalAmount", "count"] as const).map((key, i) => {
-          const isActive = activeChart === key;
-          const isAmount = key === "totalAmount";
-          return (
-            <div
-              key={key}
-              data-active={isActive}
-              className={`flex flex-1 flex-col justify-center gap-0.5 px-4 py-3 transition-colors cursor-pointer ${i === 0 ? "border-r" : ""} data-[active=true]:bg-white data-[active=false]:bg-slate-50 hover:bg-slate-100`}
-              onClick={() => setActiveChart(key)}
-            >
-              <span className="text-[10px] text-muted-foreground font-medium">
-                {isAmount ? "売上金額 (合計)" : "受注件数 (合計)"}
-              </span>
-              <span
-                className={`text-xl font-black ${isAmount ? "text-indigo-600" : "text-slate-700"} sm:text-2xl leading-none`}
-              >
-                {isAmount
-                  ? formatCurrency(totals.totalAmount)
-                  : `${formatNumber(totals.count)}件`}
-              </span>
-            </div>
-          );
-        })}
+      <CardHeader className="flex flex-row items-stretch space-y-0 border-b p-0 shrink-0 overflow-hidden">
+        {/* 売上金額セクション */}
+        <div
+          data-active={activeChart === "totalAmount"}
+          className="group flex flex-1 flex-col justify-center gap-1.5 px-6 py-4 transition-all cursor-pointer border-r
+                    data-[active=true]:bg-white data-[active=true]:relative
+                    data-[active=false]:bg-slate-50/50 data-[active=false]:hover:bg-slate-100"
+          onClick={() => setActiveChart("totalAmount")}
+        >
+          {/* 選択時のみ表示される上部の強調ライン */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-indigo-600 opacity-0 group-data-[active=true]:opacity-100" />
+
+          <span className="text-xs text-muted-foreground font-bold tracking-wider group-data-[active=true]:text-indigo-600">
+            売上金額 (合計)
+          </span>
+          <span className="text-2xl font-black leading-none text-slate-400 group-data-[active=true]:text-indigo-700 sm:text-3xl">
+            {formatCurrency(totals.totalAmount)}
+          </span>
+        </div>
+
+        {/* 受注件数セクション */}
+        <div
+          data-active={activeChart === "count"}
+          className="group flex flex-1 flex-col justify-center gap-1.5 px-6 py-4 transition-all cursor-pointer
+                  data-[active=true]:bg-white data-[active=true]:relative
+                  data-[active=false]:bg-slate-50/50 data-[active=false]:hover:bg-slate-100"
+          onClick={() => setActiveChart("count")}
+        >
+          {/* 選択時のみ表示される上部の強調ライン */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-slate-800 opacity-0 group-data-[active=true]:opacity-100" />
+
+          <span className="text-xs text-muted-foreground font-bold tracking-wider group-data-[active=true]:text-slate-900">
+            受注件数 (合計)
+          </span>
+          <span className="text-2xl font-black leading-none text-slate-400 group-data-[active=true]:text-slate-900 sm:text-3xl">
+            {formatNumber(totals.count)}
+            <span className="text-sm ml-1 font-bold">件</span>
+          </span>
+        </div>
       </CardHeader>
 
       <CardContent className="flex-1 min-h-0 px-2 pt-4 pb-0">
