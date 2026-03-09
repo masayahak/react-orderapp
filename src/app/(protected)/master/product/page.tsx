@@ -1,36 +1,31 @@
-import { ProductList } from "@/app/(protected)/master/product/_components/商品List";
-import { 商品Repository } from "@/db/repository/商品Repository";
+import { Loader2 } from "lucide-react";
+import { Suspense } from "react";
+
 import { requireAdmin } from "@/lib/auth-guard";
+
+import { ProductListServer } from "./_components/商品ListServer";
 
 export default async function Page({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string; page?: string }>;
 }) {
-  // 認可判定
   await requireAdmin();
-
   const params = await searchParams;
-  const query = params.q || "";
-  const page = Number(params.page) || 1;
-
-  const pageSize = Number(process.env.PAGE_ROW_COUNT) || 20;
-
-  // リポジトリから「データ」と「件数」を両方受け取る
-  const { items, totalCount } = await 商品Repository.Search(
-    query,
-    page,
-    pageSize,
-  );
 
   return (
     <main className="p-8 max-w-6xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">商品マスタメンテナンス</h1>
-      <ProductList
-        initialData={items}
-        totalCount={totalCount}
-        pageSize={pageSize}
-      />
+      {/* 検索条件ごとにSuspenseで境界を作ることで、UXを向上させる */}
+      <Suspense
+        key={JSON.stringify(params)}
+        fallback={<Loader2 className="animate-spin m-auto" />}
+      >
+        <ProductListServer
+          query={params.q || ""}
+          page={Number(params.page) || 1}
+        />
+      </Suspense>
     </main>
   );
 }

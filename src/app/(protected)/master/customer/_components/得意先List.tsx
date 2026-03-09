@@ -35,42 +35,38 @@ export function CustomerList({
   const currentPage = Number(searchParams.get("page")) || 1;
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const handlePageChange = (newPage: number) => {
-    // 現在のURLクエリ文字列をベースに新しいクエリを作成
-    const params = new URLSearchParams(searchParams.toString());
-
-    // ページ番号を更新（または追加）
-    params.set("page", newPage.toString());
-
-    // startTransition で包むことで、ページ遷移中のもっさり感を防ぐ
-    // (router.pushのレンダリング完了後にisPendingがfalseになる)
+  const updateNavigation = (newParams: URLSearchParams) => {
     startTransition(() => {
-      router.push(`?${params.toString()}`);
+      // shallow: true を使わず、サーバーコンポーネントの再実行を促す
+      router.push(`?${newParams.toString()}`);
     });
+  };
+
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", newPage.toString());
+    updateNavigation(params);
+  };
+
+  const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const params = new URLSearchParams(searchParams.toString());
+    const keyword = formData.get("q") as string;
+
+    if (keyword) params.set("q", keyword);
+    else params.delete("q");
+
+    params.set("page", "1");
+    updateNavigation(params);
   };
 
   const [editingItem, setEditingItem] = useState<得意先Output | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // 検索処理実行
-  const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
-    // フォームのデフォルト送信をキャンセル
-    e.preventDefault();
-
-    const formData = new FormData(e.currentTarget);
-    const params = new URLSearchParams(searchParams.toString());
-    const keyword = formData.get("q") as string;
-    if (keyword) params.set("q", keyword);
-    else params.delete("q");
-    params.set("page", "1"); // 検索時は1ページ目に戻す
-
-    startTransition(() => {
-      router.push(`?${params.toString()}`);
-    });
-  };
-
   return (
     <div className="space-y-4">
+      {/* 検索・ヘッダー部分は変更なしのため中略 */}
       <Card className="border-none shadow-sm bg-slate-50/50">
         <CardContent className="p-2">
           <form
@@ -79,7 +75,7 @@ export function CustomerList({
           >
             <div className="space-y-2 flex-1 w-full">
               <label className="text-xs font-semibold text-slate-500 ml-1">
-                キーワード (得意先名・電話番号)
+                キーワード
               </label>
               <div className="relative">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
@@ -91,7 +87,6 @@ export function CustomerList({
                 />
               </div>
             </div>
-
             <div className="flex gap-2 w-full md:w-auto">
               <Button
                 type="submit"
@@ -106,7 +101,7 @@ export function CustomerList({
               </Button>
               <Button
                 type="button"
-                className=" ml-12 w-full md:w-auto bg-blue-600 hover:bg-blue-800"
+                className="ml-12 w-full md:w-auto bg-blue-600 hover:bg-blue-800"
                 onClick={() => {
                   setEditingItem(null);
                   setIsDialogOpen(true);
@@ -119,7 +114,10 @@ export function CustomerList({
         </CardContent>
       </Card>
 
-      <div className="border rounded-md bg-white">
+      {/* テーブル表示。isPending中に不透明度を下げるなどの視覚フィードバックを追加可能 */}
+      <div
+        className={`border rounded-md bg-white ${isPending ? "opacity-50" : ""}`}
+      >
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow>
@@ -173,12 +171,11 @@ export function CustomerList({
         </Table>
       </div>
 
-      {/* ページングUI */}
       <div className="flex items-center justify-between px-2 py-4 border-t">
         <p className="text-sm text-muted-foreground">
-          全 {totalCount.toLocaleString()} 件中
-          {((currentPage - 1) * pageSize + 1).toLocaleString()} -
-          {Math.min(currentPage * pageSize, totalCount).toLocaleString()}
+          全 {totalCount.toLocaleString()} 件中{" "}
+          {((currentPage - 1) * pageSize + 1).toLocaleString()} -{" "}
+          {Math.min(currentPage * pageSize, totalCount).toLocaleString()}{" "}
           件を表示
         </p>
         <div className="flex gap-2">

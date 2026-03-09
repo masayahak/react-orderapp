@@ -1,15 +1,17 @@
-import "server-only"; // クライアント側に混入したらビルドエラーにする
+import "server-only";
 
 import { and, asc, count, eq, ilike, or } from "drizzle-orm";
-import { uuidv7 } from "uuidv7"; // UUID v7 生成用
+import { cache } from "react";
+import { uuidv7 } from "uuidv7";
 
 import { db } from "@/db/drizzle";
 
 import { 得意先Model, 得意先Output } from "../model/得意先Model";
 import { 得意先 } from "../schema";
 
-export const 得意先Repository = {
-  async Search(
+// --- 1. 内部実装用の実体 (外部からは見えない) ---
+const _impl = {
+  async search(
     キーワード: string,
     page: number = 1,
     pageSize: number,
@@ -17,20 +19,17 @@ export const 得意先Repository = {
     const pattern = `%${キーワード}%`;
     const offset = (page - 1) * pageSize;
 
-    // 検索対象は「名称」と「電話番号」
     const whereClause = or(
       ilike(得意先.得意先名, pattern),
       ilike(得意先.電話番号, pattern),
     );
 
-    // 1. 全件数を取得
     const countResult = await db
       .select({ value: count() })
       .from(得意先)
       .where(whereClause);
     const totalCount = countResult[0].value;
 
-    // 2. 該当ページ分を取得（名前順でソート）
     const results = await db
       .select()
       .from(得意先)
@@ -45,7 +44,7 @@ export const 得意先Repository = {
     };
   },
 
-  async SearchBy(得意先ID: string): Promise<得意先Output | null> {
+  async findById(得意先ID: string): Promise<得意先Output | null> {
     const results = await db
       .select()
       .from(得意先)
@@ -56,18 +55,18 @@ export const 得意先Repository = {
     return target ? 得意先Model.parse(target) : null;
   },
 
-  async Insert(データ: Omit<得意先Output, "得意先ID">) {
+  async insert(データ: Omit<得意先Output, "得意先ID" | "version">) {
     return await db
       .insert(得意先)
       .values({
         ...データ,
-        得意先ID: uuidv7(), // ここで UUID v7 を採番！
+        得意先ID: uuidv7(),
         version: 0,
       })
       .returning();
   },
 
-  async Update(
+  async update(
     得意先ID: string,
     現在のversion: number,
     データ: Omit<得意先Output, "得意先ID" | "version">,
@@ -91,7 +90,7 @@ export const 得意先Repository = {
     return result;
   },
 
-  async Delete(得意先ID: string, 現在のversion: number) {
+  async delete(得意先ID: string, 現在のversion: number) {
     const result = await db
       .delete(得意先)
       .where(
@@ -105,4 +104,16 @@ export const 得意先Repository = {
     }
     return result;
   },
+};
+
+// --- 2. 外部公開用オブジェクト (メソッド名を維持) ---
+export const 得意先Repository = {
+  // 参照系は cache でラップして Request Memoization を有効化
+  Search: cache(_impl.search),
+  SearchBy: cache(_impl.findById),
+
+  // 更新系は副作用を伴うため cache しない
+  Insert: _impl.insert,
+  Update: _impl.update,
+  Delete: _impl.delete,
 };

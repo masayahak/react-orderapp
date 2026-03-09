@@ -1,7 +1,7 @@
-import { notFound } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { Suspense } from "react";
 
-import { OrderForm } from "@/app/(protected)/order/_components/受注Form";
-import { 受注Repository } from "@/db/repository/受注Repository";
+import { OrderFormServer } from "../_components/受注FormServer";
 
 interface EditOrderPageProps {
   params: Promise<{ id: string }>;
@@ -9,26 +9,18 @@ interface EditOrderPageProps {
 
 export default async function EditOrderPage({ params }: EditOrderPageProps) {
   const { id } = await params;
-  const order = await 受注Repository.GetById(id);
-  if (!order) {
-    notFound();
-  }
-  // サーバーサイドで日本時間の「今日」を生成
-  // Intl を使えばライブラリなしで安全に取得可能
-  const today = new Intl.DateTimeFormat("sv-SE", {
-    timeZone: "Asia/Tokyo",
-  }).format(new Date()); // "2026-03-02"
 
   return (
     <main className="min-h-screen bg-slate-50/50 py-8">
-      <OrderForm
-        mode="edit"
-        serverDate={today}
-        initialData={{
-          ...order,
-          受注ID: order.受注ID!,
-        }}
-      />
+      <Suspense
+        fallback={
+          <div className="flex justify-center pt-20">
+            <Loader2 className="animate-spin h-10 w-10 text-slate-400" />
+          </div>
+        }
+      >
+        <OrderFormServer mode={"edit"} id={id} />
+      </Suspense>
     </main>
   );
 }

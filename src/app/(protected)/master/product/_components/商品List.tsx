@@ -35,18 +35,19 @@ export function ProductList({
   const currentPage = Number(searchParams.get("page")) || 1;
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const handlePageChange = (newPage: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", newPage.toString());
+  const updateNavigation = (newParams: URLSearchParams) => {
     startTransition(() => {
-      router.push(`?${params.toString()}`);
+      // shallow: true を使わず、サーバーコンポーネントの再実行を促す
+      router.push(`?${newParams.toString()}`);
     });
   };
 
-  const [editingItem, setEditingItem] = useState<商品Output | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", newPage.toString());
+    updateNavigation(params);
+  };
 
-  // 検索処理（URLパラメータの書き換え）
   const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -55,13 +56,13 @@ export function ProductList({
 
     if (keyword) params.set("q", keyword);
     else params.delete("q");
-    params.set("page", "1"); // 検索時は1ページ目に戻す
 
-    // トランジションで包むことで、サーバー通信中のUIフリーズを防ぐ
-    startTransition(() => {
-      router.push(`?${params.toString()}`);
-    });
+    params.set("page", "1");
+    updateNavigation(params);
   };
+
+  const [editingItem, setEditingItem] = useState<商品Output | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
     <div className="space-y-4">

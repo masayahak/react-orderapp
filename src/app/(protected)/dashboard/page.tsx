@@ -1,25 +1,23 @@
 import { Loader2 } from "lucide-react";
 import { Suspense } from "react";
 
-import { 受注分析Repository } from "@/db/repository/受注分析Repository";
 import {
-  AnalysisParams,
+  analysisParamsSchema,
   AnalysisPreset,
   getAnalysisDefaults,
-  getIntervalByPreset,
 } from "@/lib/analysis-utils";
 
-import { ProductRanking } from "./_components/商品Ranking";
-import { SalesTrendChart } from "./_components/売上推移Chart";
-import { CustomerRanking } from "./_components/得意先Ranking";
+import { ProductRankingServer } from "./_components/商品RankingServer";
+import { SalesTrendServer } from "./_components/売上推移ChartServer";
+import { CustomerRankingServer } from "./_components/得意先RankingServer";
 import { SearchCondition } from "./_components/検索条件";
 
 interface DashboardPageProps {
   searchParams: Promise<{
-    preset?: AnalysisPreset;
+    preset?: string;
     from?: string;
     to?: string;
-    // interval は外部から受け取らないため削除
+    direction?: string;
   }>;
 }
 
@@ -28,30 +26,32 @@ export default async function DashboardPage({
 }: DashboardPageProps) {
   const sParams = await searchParams;
 
-  // 1. まずプリセットを確定
-  const preset = sParams.preset || "month";
-
-  // 2. プリセットに応じたデフォルト期間を取得
+  // 1. プリセットの決定
+  const preset = (sParams.preset as AnalysisPreset) || "month";
   const defaults = getAnalysisDefaults(preset);
 
-  // 3. AnalysisParams 構造体を組み立てる
-  const params: AnalysisParams = {
-    preset,
-    duration: {
-      from: sParams.from || defaults.duration.from,
-      to: sParams.to || defaults.duration.to,
-    },
-    // URLではなく、確定した preset から関数従属で決定
-    interval: getIntervalByPreset(preset),
-    direction: "current",
-  };
+  // 2. パラメータをZodで検証（ここに入力値を集約）
+  const result = analysisParamsSchema.safeParse({
+    preset: preset,
+    from: sParams.from || defaults.duration.from,
+    to: sParams.to || defaults.duration.to,
+    direction: sParams.direction || "current",
+  });
 
-  // 4. 組み立てた params を使用してデータを取得
-  const [trendData, topCustomers, topProducts] = await Promise.all([
-    受注分析Repository.GetSalesTrend(params.duration, params.interval),
-    受注分析Repository.GetTopCustomers(params.duration),
-    受注分析Repository.GetTopProducts(params.duration),
-  ]);
+  // 3. バリデーション失敗時の処理
+  if (!result.success) {
+    return (
+      <div className="p-10 text-center">
+        <p className="text-red-500 font-bold">不正な分析条件です。</p>
+        <p className="text-sm text-slate-500">
+          URLのパラメータを確認してください。
+        </p>
+      </div>
+    );
+  }
+
+  // 4. transform済みのデータを取得
+  const params = result.data;
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] bg-slate-50/30 overflow-hidden">
@@ -60,31 +60,45 @@ export default async function DashboardPage({
       </div>
 
       <main className="flex-1 min-h-0 px-3 pb-2">
-        <Suspense
-          fallback={
-            <div className="h-full flex items-center justify-center">
-              <Loader2 className="animate-spin text-slate-400" />
-            </div>
-          }
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 h-full">
-            <div className="lg:col-span-8 h-full min-h-0">
-              <section className="bg-white rounded-xl border shadow-sm p-0 h-full overflow-hidden">
-                <SalesTrendChart data={trendData} params={params} />
-              </section>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 h-full">
+          <div className="lg:col-span-8 h-full min-h-0">
+            <Suspense
+              key={JSON.stringify(params.duration)}
+              fallback={<LoadingCard label="売上推移を計算中..." />}
+            >
+              <SalesTrendServer params={params} />
+            </Suspense>
+          </div>
 
-            <div className="lg:col-span-4 flex flex-col gap-3 h-full min-h-0">
-              <div className="flex-1 min-h-0">
-                <CustomerRanking data={topCustomers} params={params} />
-              </div>
-              <div className="flex-1 min-h-0">
-                <ProductRanking data={topProducts} params={params} />
-              </div>
+          <div className="lg:col-span-4 flex flex-col gap-3 h-full min-h-0">
+            <div className="flex-1 min-h-0">
+              <Suspense
+                key={`customer-${params.duration.from}`}
+                fallback={<LoadingCard label="得意先別集計中..." />}
+              >
+                <CustomerRankingServer params={params} />
+              </Suspense>
+            </div>
+            <div className="flex-1 min-h-0">
+              <Suspense
+                key={`product-${params.duration.from}`}
+                fallback={<LoadingCard label="商品別集計中..." />}
+              >
+                <ProductRankingServer params={params} />
+              </Suspense>
             </div>
           </div>
-        </Suspense>
+        </div>
       </main>
+    </div>
+  );
+}
+
+function LoadingCard({ label }: { label: string }) {
+  return (
+    <div className="w-full h-full bg-white rounded-xl border shadow-sm flex flex-col items-center justify-center gap-3">
+      <Loader2 className="h-8 w-8 animate-spin text-slate-300" />
+      <p className="text-xs text-slate-400 font-medium">{label}</p>
     </div>
   );
 }

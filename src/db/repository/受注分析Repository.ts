@@ -1,17 +1,19 @@
 import "server-only";
 
 import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { cache } from "react";
 
 import { db } from "@/db/drizzle";
 import { AnalysisDuration, AnalysisInterval } from "@/lib/analysis-utils";
 
 import { 受注, 受注明細 } from "../schema";
 
-export const 受注分析Repository = {
+// --- 1. 内部実装用の実体 (外部からは直接見えない) ---
+const _impl = {
   /**
    * 売上高推移の取得
    */
-  async GetSalesTrend(duration: AnalysisDuration, interval: AnalysisInterval) {
+  async getSalesTrend(duration: AnalysisDuration, interval: AnalysisInterval) {
     const period =
       interval === "month"
         ? sql<string>`date_trunc('month', ${受注.受注日})`
@@ -27,7 +29,6 @@ export const 受注分析Repository = {
       .where(
         and(gte(受注.受注日, duration.from), lte(受注.受注日, duration.to)),
       )
-      // 変数 period を再利用することで、SELECT 句と GROUP BY 句の式を完全に一致させる
       .groupBy(period)
       .orderBy(period);
   },
@@ -35,8 +36,7 @@ export const 受注分析Repository = {
   /**
    * 得意先別売上ランキング
    */
-  async GetTopCustomers(duration: AnalysisDuration, limit = 5) {
-    // 1. 集計式を変数として定義
+  async getTopCustomers(duration: AnalysisDuration, limit = 5) {
     const totalAmount = sql<number>`sum(${受注.合計金額})`.mapWith(Number);
 
     return await db
@@ -56,7 +56,7 @@ export const 受注分析Repository = {
   /**
    * 商品別売上ランキング
    */
-  async GetTopProducts(duration: AnalysisDuration, limit = 5) {
+  async getTopProducts(duration: AnalysisDuration, limit = 5) {
     const totalAmount = sql<number>`sum(${受注明細.明細金額})`.mapWith(Number);
 
     return await db
@@ -73,4 +73,22 @@ export const 受注分析Repository = {
       .orderBy(desc(totalAmount))
       .limit(limit);
   },
+};
+
+// --- 2. 外部公開用オブジェクト (メソッド名を維持し、すべて参照系のため cache を適用) ---
+export const 受注分析Repository = {
+  /**
+   * 売上高推移の取得 (同一リクエスト内メモ化対象)
+   */
+  GetSalesTrend: cache(_impl.getSalesTrend),
+
+  /**
+   * 得意先別売上ランキング (同一リクエスト内メモ化対象)
+   */
+  GetTopCustomers: cache(_impl.getTopCustomers),
+
+  /**
+   * 商品別売上ランキング (同一リクエスト内メモ化対象)
+   */
+  GetTopProducts: cache(_impl.getTopProducts),
 };

@@ -29,7 +29,7 @@ export async function save商品(data: 商品Input, isEdit: boolean) {
       }
     }
     // 現在表示中の商品情報キャッシュの破棄
-    revalidatePath("/master/products");
+    revalidatePath("/master/product");
     return { success: true };
   } catch (e: unknown) {
     // Zodのバリデーションエラー
