@@ -51,7 +51,18 @@ export async function delete得意先(得意先ID: string, version: number) {
     await 得意先Repository.Delete(得意先ID, version);
     revalidatePath("/master/customer");
     return { success: true };
-  } catch {
+  } catch (e: unknown) {
+    console.error("Delete Error:", e);
+
+    // 楽観的排他ロックの失敗など、
+    // Error インスタンスであれば、そのメッセージをフロントに返す
+    if (e instanceof Error) {
+      return {
+        success: false,
+        error: e.message,
+      };
+    }
+
     // 予期せぬエラー（ネットワーク切断など）の場合のフォールバック
     return {
       success: false,

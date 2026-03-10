@@ -57,7 +57,7 @@ export async function save受注(
     revalidatePath("/order");
 
     return { success: true };
-  } catch (e) {
+  } catch (e: unknown) {
     console.error("Save Error:", e);
 
     // Zodのバリデーションエラー
@@ -96,7 +96,7 @@ export async function delete受注(orderId: string, version: number) {
     revalidatePath("/order");
 
     return { success: true };
-  } catch (e) {
+  } catch (e: unknown) {
     console.error("Delete Error:", e);
 
     // 楽観的排他ロックの失敗など、

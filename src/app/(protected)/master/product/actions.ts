@@ -53,9 +53,20 @@ export async function delete商品(商品CD: string, version: number) {
 
   try {
     await 商品Repository.Delete(商品CD, version);
-    revalidatePath("/master/products");
+    revalidatePath("/master/product");
     return { success: true };
   } catch (e: unknown) {
+    console.error("Delete Error:", e);
+
+    // 楽観的排他ロックの失敗など、
+    // Error インスタンスであれば、そのメッセージをフロントに返す
+    if (e instanceof Error) {
+      return {
+        success: false,
+        error: e.message,
+      };
+    }
+
     // 予期せぬエラー（ネットワーク切断など）の場合のフォールバック
     return {
       success: false,

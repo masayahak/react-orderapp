@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -147,7 +148,8 @@ export function LoginForm({
                     )}
                   </Button>
                   <FieldDescription className="text-center">
-                    初めてのご利用ですか？ <a href="/signup">アカウント作成</a>
+                    初めてのご利用ですか？{" "}
+                    <Link href="/signup">アカウント作成</Link>
                   </FieldDescription>
                 </Field>
               </FieldGroup>
