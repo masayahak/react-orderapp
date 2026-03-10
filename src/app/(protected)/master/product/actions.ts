@@ -32,11 +32,22 @@ export async function save商品(data: 商品Input, isEdit: boolean) {
     revalidatePath("/master/product");
     return { success: true };
   } catch (e: unknown) {
+    console.error("Delete Error:", e);
+
     // Zodのバリデーションエラー
     if (e instanceof ZodError) {
       return {
         success: false,
         error: "入力内容に不備があります。画面の指示に従ってください。",
+      };
+    }
+
+    // 楽観的排他ロックの失敗など、
+    // Error インスタンスであれば、そのメッセージをフロントに返す
+    if (e instanceof Error) {
+      return {
+        success: false,
+        error: e.message,
       };
     }
     // 予期せぬエラー（ネットワーク切断など）の場合のフォールバック

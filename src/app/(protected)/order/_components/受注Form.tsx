@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/table";
 import { 受注Input, 受注Model } from "@/db/model/受注Model";
 
-import { delete受注, save受注, search商品, search得意先 } from "../action";
+import { delete受注, save受注, search商品, search得意先 } from "../actions";
 
 type CustomerSearchRes = { 得意先ID: string; 得意先名: string };
 type ProductSearchRes = { 商品CD: string; 商品名: string; 単価: number };

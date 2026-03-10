@@ -28,6 +28,8 @@ export async function save得意先(data: 得意先Input, isEdit: boolean) {
     revalidatePath("/master/customer");
     return { success: true };
   } catch (e: unknown) {
+    console.error("Delete Error:", e);
+
     // Zodのバリデーションエラー
     if (e instanceof ZodError) {
       return {
@@ -35,6 +37,16 @@ export async function save得意先(data: 得意先Input, isEdit: boolean) {
         error: "入力内容に不備があります。画面の指示に従ってください。",
       };
     }
+
+    // 楽観的排他ロックの失敗など、
+    // Error インスタンスであれば、そのメッセージをフロントに返す
+    if (e instanceof Error) {
+      return {
+        success: false,
+        error: e.message,
+      };
+    }
+
     // 予期せぬエラー（ネットワーク切断など）の場合のフォールバック
     return {
       success: false,
