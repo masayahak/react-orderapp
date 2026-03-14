@@ -7,7 +7,7 @@ import { OrderFormServer } from "../_components/受注FormServer";
 
 export default async function NewOrderPage() {
   // 認証判定
-  requireSession();
+  await requireSession();
 
   return (
     <main className="min-h-screen bg-slate-50/50 py-8">

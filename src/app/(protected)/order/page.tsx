@@ -11,7 +11,7 @@ export default async function Page({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   // 認証判定
-  requireSession();
+  await requireSession();
 
   const params = await searchParams;
 

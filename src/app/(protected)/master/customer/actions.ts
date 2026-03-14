@@ -28,7 +28,7 @@ export async function save得意先(data: 得意先Input, isEdit: boolean) {
     revalidatePath("/master/customer");
     return { success: true };
   } catch (e: unknown) {
-    console.error("Delete Error:", e);
+    console.error("Save Error:", e);
 
     // Zodのバリデーションエラー
     if (e instanceof ZodError) {

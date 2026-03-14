@@ -70,7 +70,7 @@ const _impl = {
       .offset(offset);
 
     return {
-      items: items.map((i) => 受注HeaderModel.parse({ ...i, 明細: [] })),
+      items: items.map((i) => 受注HeaderModel.parse({ ...i })),
       totalCount,
     };
   },

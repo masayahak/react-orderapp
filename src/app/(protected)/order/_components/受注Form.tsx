@@ -57,7 +57,7 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
       得意先名: "",
       明細: [{ 商品CD: "", 商品名: "", 単価: 0, 数量: 1, 明細金額: 0 }],
       合計金額: 0,
-      version: 1,
+      version: 0,
     },
   });
 

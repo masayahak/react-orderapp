@@ -32,7 +32,7 @@ export async function save商品(data: 商品Input, isEdit: boolean) {
     revalidatePath("/master/product");
     return { success: true };
   } catch (e: unknown) {
-    console.error("Delete Error:", e);
+    console.error("Save Error:", e);
 
     // Zodのバリデーションエラー
     if (e instanceof ZodError) {

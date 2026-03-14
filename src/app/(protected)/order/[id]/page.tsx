@@ -11,7 +11,7 @@ interface EditOrderPageProps {
 
 export default async function EditOrderPage({ params }: EditOrderPageProps) {
   // 認証判定
-  requireSession();
+  await requireSession();
 
   const { id } = await params;
 
