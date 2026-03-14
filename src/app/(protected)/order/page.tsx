@@ -1,6 +1,8 @@
 import { Loader2 } from "lucide-react";
 import { Suspense } from "react";
 
+import { requireSession } from "@/lib/auth-guard";
+
 import { OrderListServer } from "./_components/受注ListServer";
 
 export default async function Page({
@@ -8,6 +10,9 @@ export default async function Page({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  // 認証判定
+  requireSession();
+
   const params = await searchParams;
 
   return (

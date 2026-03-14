@@ -6,6 +6,7 @@ import {
   AnalysisPreset,
   getAnalysisDefaults,
 } from "@/lib/analysis-utils";
+import { requireSession } from "@/lib/auth-guard";
 
 import { ProductRankingServer } from "./_components/商品RankingServer";
 import { SalesTrendServer } from "./_components/売上推移ChartServer";
@@ -24,6 +25,9 @@ interface DashboardPageProps {
 export default async function DashboardPage({
   searchParams,
 }: DashboardPageProps) {
+  // 認証判定
+  requireSession();
+
   const sParams = await searchParams;
 
   // 1. プリセットの決定

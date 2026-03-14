@@ -1,6 +1,8 @@
 import { Loader2 } from "lucide-react";
 import { Suspense } from "react";
 
+import { requireSession } from "@/lib/auth-guard";
+
 import { OrderFormServer } from "../_components/受注FormServer";
 
 interface EditOrderPageProps {
@@ -8,6 +10,9 @@ interface EditOrderPageProps {
 }
 
 export default async function EditOrderPage({ params }: EditOrderPageProps) {
+  // 認証判定
+  requireSession();
+
   const { id } = await params;
 
   return (

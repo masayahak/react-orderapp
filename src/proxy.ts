@@ -25,7 +25,6 @@ export function proxy(request: NextRequest) {
 
   // ログイン済み（Cookieあり）で /login へ行くケースの「逆流防止」はここでは行わない。
   // ここでリダイレクトすると、偽装Cookie時に無限ループの原因となるため。
-
   return NextResponse.next();
 }
 
