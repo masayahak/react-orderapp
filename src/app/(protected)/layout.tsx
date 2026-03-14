@@ -1,4 +1,4 @@
-import Navigation from "@/components/Navigation";
+import NavigationServer from "@/components/NavigationServer";
 
 export default async function ProtectedLayout({
   children,
@@ -8,7 +8,7 @@ export default async function ProtectedLayout({
   return (
     <>
       {/* 認証者へのみナビゲーションを表示する */}
-      <Navigation />
+      <NavigationServer />
       {children}
     </>
   );

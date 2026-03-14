@@ -1,45 +1,76 @@
-import { BarChart3 } from "lucide-react";
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-import { Logout } from "@/components/logout";
-import { requireSession } from "@/lib/auth-guard";
+type NavigationProps = {
+  isAdmin: boolean;
+};
 
-import NavLinks from "./NavLinks";
+export default function Navigation({ isAdmin }: NavigationProps) {
+  const pathname = usePathname();
 
-export default async function Navigation() {
-  const session = await requireSession();
-  const isUserAdmin = session?.user.role === "admin";
-  const userName = session.user.name;
-  const userRole = session.user.role;
+  // 共通のベーススタイル
+  const baseStyle =
+    "rounded-md px-4 py-2 text-sm font-medium transition-colors";
+
+  // 受注用のスタイル（Blue系）
+  const getOrderStyle = () => {
+    const isActive = pathname === "/order";
+    return isActive
+      ? "bg-blue-600 text-white shadow-sm"
+      : "text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:text-zinc-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-200";
+  };
+
+  // マスタ用のスタイル（Amber系）
+  const getMasterStyle = (path: string) => {
+    const isActive = pathname === path;
+    return isActive
+      ? "bg-amber-600 text-white shadow-sm"
+      : "text-zinc-200 hover:bg-amber-50 hover:text-amber-700 dark:text-zinc-400 dark:hover:bg-amber-900/30 dark:hover:text-amber-200";
+  };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-zinc-700 bg-indigo-900 shadow-sm backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-        <div className="flex items-center gap-8">
+    <div className="flex items-center gap-1">
+      {/* ダッシュボード */}
+      <Link
+        href="/dashboard"
+        className={`${baseStyle} ${
+          pathname === "/dashboard"
+            ? "bg-indigo-600 text-white shadow-sm"
+            : "text-zinc-200 hover:bg-indigo-50 hover:text-indigo-700 dark:text-zinc-400 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-200"
+        }`}
+      >
+        ダッシュボード
+      </Link>
+
+      {/* 受注セクション */}
+      <Link href="/order" className={`${baseStyle} ${getOrderStyle()}`}>
+        受注
+      </Link>
+
+      {/* 区切り線（オプション：視覚的なセパレーター） */}
+      {isAdmin && (
+        <div className="mx-2 h-4 w-px bg-zinc-200 dark:bg-zinc-800" />
+      )}
+
+      {/* 管理者用マスタセクション */}
+      {isAdmin && (
+        <>
           <Link
-            href="/"
-            className="flex items-center justify-center text-lg font-semibold text-zinc-100 dark:text-zinc-100"
+            href="/master/product"
+            className={`${baseStyle} ${getMasterStyle("/master/product")}`}
           >
-            <div className="p-2.5 bg-indigo-600 mr-2">
-              <BarChart3 className="h-4 w-4" />
-            </div>
-            受注管理システム
+            商品マスタ
           </Link>
-          {/* ナビゲーションリンクは管理者とそれ以外で分ける  */}
-          <NavLinks isAdmin={isUserAdmin} />
-        </div>
-        <div className="flex items-center gap-4">
-          <>
-            <span className="text-zinc-100">
-              {userName}
-              <span className="ml-2 rounded-full bg-amber-500 px-2 py-0.5 font-medium text-zinc-700">
-                {userRole}
-              </span>
-            </span>
-            <Logout />
-          </>
-        </div>
-      </div>
-    </nav>
+          <Link
+            href="/master/customer"
+            className={`${baseStyle} ${getMasterStyle("/master/customer")}`}
+          >
+            得意先マスタ
+          </Link>
+        </>
+      )}
+    </div>
   );
 }

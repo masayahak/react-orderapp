@@ -71,8 +71,8 @@ export function LoginForm({
       {
         onSuccess: () => {
           // プリフェッチ済みのルートへ即座に遷移
+          router.refresh();
           router.push("/");
-          router.refresh(); // クッキーがセットされた状態でページをリフレッシュして、認証状態を反映させる
 
           // 画面遷移が完了するまで「くるくる」を維持するため、
           // ここでは setIsLoading(false) を意図的に呼ばない
