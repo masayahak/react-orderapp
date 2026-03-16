@@ -116,28 +116,27 @@ const _impl = {
     }));
 
     if (mode === "edit") {
-      const [updateResult] = await db.batch([
-        db
+      await db.transaction(async (tx) => {
+        const updateResult = await tx
           .update(受注)
           .set({ ...headerValues, version: data.version + 1 })
           .where(
             and(eq(受注.受注ID, targetId), eq(受注.version, data.version)),
-          ),
-        db.delete(受注明細).where(eq(受注明細.受注ID, targetId)),
-        db.insert(受注明細).values(detailValues),
-      ]);
+          );
 
-      if (updateResult.rowCount === 0) {
-        throw new Error(
-          "対象のデータは別のユーザーによって更新されたか、削除されています。",
-        );
-      }
-      return updateResult;
+        if (updateResult.rowCount === 0) {
+          throw new Error(
+            "対象のデータは別のユーザーによって更新されたか、削除されています。",
+          );
+        }
+        await tx.delete(受注明細).where(eq(受注明細.受注ID, targetId));
+        await tx.insert(受注明細).values(detailValues);
+      });
     } else {
-      return await db.batch([
-        db.insert(受注).values({ ...headerValues, 受注ID: targetId }),
-        db.insert(受注明細).values(detailValues),
-      ]);
+      await db.transaction(async (tx) => {
+        await tx.insert(受注).values({ ...headerValues, 受注ID: targetId });
+        await tx.insert(受注明細).values(detailValues);
+      });
     }
   },
 

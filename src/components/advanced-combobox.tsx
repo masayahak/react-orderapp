@@ -1,8 +1,7 @@
 "use client";
 
-import { Check, ChevronsUpDown, Loader2,Search } from "lucide-react";
-import * as React from "react";
-import { useCallback,useEffect, useState } from "react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -65,14 +64,6 @@ export function AdvancedCombobox<T>({
 
   const debouncedQuery = useDebounce(query, 300);
 
-  useEffect(() => {
-    if (initialValue) {
-      setSelected(initialValue);
-    } else {
-      setSelected(null);
-    }
-  }, [initialValue]);
-
   const fetchResults = useCallback(
     async (q: string) => {
       setIsLoading(true);
@@ -119,7 +110,6 @@ export function AdvancedCombobox<T>({
       >
         <Command shouldFilter={false}>
           <div className="flex items-center border-b px-3">
-            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
             <CommandInput
               placeholder="検索キーワードを入力..."
               value={query}

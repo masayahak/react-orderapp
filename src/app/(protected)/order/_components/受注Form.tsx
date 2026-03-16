@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -68,19 +68,6 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
   });
 
   const watchDetails = useWatch({ control: form.control, name: "明細" });
-  const totalAmount = useWatch({ control: form.control, name: "合計金額" });
-
-  useEffect(() => {
-    let total = 0;
-    watchDetails?.forEach((item, index) => {
-      const subtotal = (Number(item.単価) || 0) * (Number(item.数量) || 0);
-      if (item.明細金額 !== subtotal) {
-        form.setValue(`明細.${index}.明細金額`, subtotal);
-      }
-      total += subtotal;
-    });
-    form.setValue("合計金額", total);
-  }, [watchDetails, form]);
 
   const customerColumns: ColumnDef<CustomerSearchRes>[] = [
     { header: "得意先名", accessorKey: "得意先名" },
@@ -100,6 +87,17 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
   ];
 
   const onSubmit = async (data: 受注Input) => {
+    // 合計金額をサーバーサイドで計算してセット
+    const total = data.明細.reduce(
+      (sum, item) => sum + (Number(item.単価) || 0) * (Number(item.数量) || 0),
+      0,
+    );
+    data.合計金額 = total;
+    data.明細 = data.明細.map((item) => ({
+      ...item,
+      明細金額: (Number(item.単価) || 0) * (Number(item.数量) || 0),
+    }));
+
     const validated = 受注Model.parse(data);
     const res = await save受注(validated, mode, initialData?.受注ID);
     if (res.success) {
@@ -232,6 +230,7 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                   </span>
                 </label>
                 <AdvancedCombobox<CustomerSearchRes>
+                  key={initialData?.得意先ID ?? "new-customer"}
                   placeholder="得意先を検索..."
                   searchFn={search得意先}
                   columns={customerColumns}
@@ -305,6 +304,7 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                     <TableRow key={field.id} className="hover:bg-slate-50/20">
                       <TableCell className="pl-6 py-2">
                         <AdvancedCombobox<ProductSearchRes>
+                          key={field.商品CD || `new-product-${index}`}
                           placeholder="CD検索..."
                           searchFn={search商品}
                           columns={productColumns}
@@ -376,7 +376,7 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                         <Input
                           readOnly
                           tabIndex={-1}
-                          value={`¥${(watchDetails?.[index]?.明細金額 || 0).toLocaleString()}`}
+                          value={`¥${((Number(watchDetails?.[index]?.単価) || 0) * (Number(watchDetails?.[index]?.数量) || 0)).toLocaleString()}`}
                           className="h-9 bg-slate-50 border-none font-mono text-right text-xs"
                         />
                       </TableCell>
@@ -426,7 +426,14 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
               <div className="flex items-baseline gap-2">
                 <span className="text-lg font-medium text-slate-400">¥</span>
                 <span className="text-4xl font-black tabular-nums tracking-tighter">
-                  {(totalAmount || 0).toLocaleString()}
+                  {(
+                    watchDetails?.reduce(
+                      (sum, item) =>
+                        sum +
+                        (Number(item.単価) || 0) * (Number(item.数量) || 0),
+                      0,
+                    ) || 0
+                  ).toLocaleString()}
                 </span>
               </div>
             </div>
