@@ -86,19 +86,17 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
     },
   ];
 
+  // 推奨
   const onSubmit = async (data: 受注Input) => {
-    // 合計金額をサーバーサイドで計算してセット
-    const total = data.明細.reduce(
-      (sum, item) => sum + (Number(item.単価) || 0) * (Number(item.数量) || 0),
-      0,
-    );
-    data.合計金額 = total;
-    data.明細 = data.明細.map((item) => ({
+    const 明細 = data.明細.map((item) => ({
       ...item,
       明細金額: (Number(item.単価) || 0) * (Number(item.数量) || 0),
     }));
-
-    const validated = 受注Model.parse(data);
+    const validated = 受注Model.parse({
+      ...data,
+      合計金額: 明細.reduce((sum, item) => sum + item.明細金額, 0),
+      明細,
+    });
     const res = await save受注(validated, mode, initialData?.受注ID);
     if (res.success) {
       toast.success(
@@ -106,7 +104,6 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
       );
       const query = searchParams.toString();
       router.push(query ? `/order?${query}` : "/order");
-      router.refresh();
     } else {
       toast.error(res.error);
     }
