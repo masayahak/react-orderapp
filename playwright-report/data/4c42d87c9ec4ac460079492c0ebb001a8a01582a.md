@@ -1,0 +1,96 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - link "受注管理システム" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - img [ref=e7]
+          - text: 受注管理システム
+        - generic [ref=e9]:
+          - link "ダッシュボード" [ref=e10] [cursor=pointer]:
+            - /url: /dashboard
+          - link "受注" [ref=e11] [cursor=pointer]:
+            - /url: /order
+      - generic [ref=e12]:
+        - generic [ref=e13]: テスト太郎user
+        - button "ログアウト" [ref=e14]:
+          - text: ログアウト
+          - img
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - generic [ref=e18]:
+        - button [ref=e19]:
+          - img
+        - heading "受注起票" [level=1] [ref=e21]
+      - generic [ref=e22]:
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - generic [ref=e26]:
+              - text: 受注日
+              - generic [ref=e27]: 必須
+              - generic [ref=e28]: (水)
+            - textbox [ref=e29]: 2026-03-18
+          - generic [ref=e30]:
+            - generic [ref=e31]:
+              - text: 得意先
+              - generic [ref=e32]: 必須
+            - combobox [ref=e33]:
+              - generic [ref=e34]: ジオン公国
+              - img
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - heading "受注明細" [level=2] [ref=e37]
+            - generic [ref=e38]:
+              - img [ref=e39]
+              - text: 最大10行まで
+          - generic [ref=e41]:
+            - table [ref=e43]:
+              - rowgroup [ref=e44]:
+                - row "商品CD 必須 商品名 単価 数量必須 小計" [ref=e45]:
+                  - columnheader "商品CD 必須" [ref=e46]:
+                    - generic [ref=e47]:
+                      - text: 商品CD
+                      - generic [ref=e48]: 必須
+                  - columnheader "商品名" [ref=e49]
+                  - columnheader "単価" [ref=e50]
+                  - columnheader "数量必須" [ref=e51]
+                  - columnheader "小計" [ref=e52]
+                  - columnheader [ref=e53]
+              - rowgroup [ref=e54]:
+                - row "商品は必須です ¥0 ¥0" [ref=e55]:
+                  - cell "商品は必須です" [ref=e56]:
+                    - combobox [ref=e57]:
+                      - generic [ref=e58]: CD検索...
+                      - img
+                    - paragraph [ref=e59]: 商品は必須です
+                  - cell [ref=e60]:
+                    - textbox [active] [ref=e61]
+                  - cell "¥0" [ref=e62]:
+                    - textbox [ref=e63]: ¥0
+                  - cell [ref=e64]:
+                    - spinbutton [ref=e65]: "5"
+                  - cell "¥0" [ref=e66]:
+                    - textbox [ref=e67]: ¥0
+                  - cell [ref=e68]:
+                    - button [disabled]:
+                      - img
+            - button "明細行を追加" [ref=e70]:
+              - img
+              - text: 明細行を追加
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - generic [ref=e73]: 合計金額
+            - generic [ref=e74]:
+              - generic [ref=e75]: ¥
+              - generic [ref=e76]: "0"
+          - generic [ref=e77]:
+            - button "戻る" [ref=e78]
+            - button "受注を確定する" [ref=e79]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e85] [cursor=pointer]:
+    - img [ref=e86]
+  - alert [ref=e89]
+```
