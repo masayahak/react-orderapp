@@ -57,7 +57,7 @@ export function CustomerDialog({
           得意先名: "",
           電話番号: "",
           備考: "",
-          version: 1,
+          version: 0,
         },
   });
 

@@ -26,7 +26,7 @@ export default async function DashboardPage({
   searchParams,
 }: DashboardPageProps) {
   // 認証判定
-  requireSession();
+  await requireSession();
 
   const sParams = await searchParams;
 
