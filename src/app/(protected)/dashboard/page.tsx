@@ -77,7 +77,7 @@ export default async function DashboardPage({
           <div className="lg:col-span-4 flex flex-col gap-3 h-full min-h-0">
             <div className="flex-1 min-h-0">
               <Suspense
-                key={`customer-${params.duration.from}`}
+                key={JSON.stringify(params.duration)}
                 fallback={<LoadingCard label="得意先別集計中..." />}
               >
                 <CustomerRankingServer params={params} />
@@ -85,7 +85,7 @@ export default async function DashboardPage({
             </div>
             <div className="flex-1 min-h-0">
               <Suspense
-                key={`product-${params.duration.from}`}
+                key={JSON.stringify(params.duration)}
                 fallback={<LoadingCard label="商品別集計中..." />}
               >
                 <ProductRankingServer params={params} />

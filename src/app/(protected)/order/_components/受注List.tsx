@@ -240,7 +240,7 @@ export function OrderList({
             <Button
               variant="outline"
               size="sm"
-              disabled={currentPage === 1}
+              disabled={currentPage <= 1}
               className="bg-white"
               onClick={() => {
                 const params = new URLSearchParams(searchParams.toString());
@@ -258,7 +258,7 @@ export function OrderList({
             <Button
               variant="outline"
               size="sm"
-              disabled={currentPage === totalPages}
+              disabled={currentPage >= totalPages}
               className="bg-white"
               onClick={() => {
                 const params = new URLSearchParams(searchParams.toString());
