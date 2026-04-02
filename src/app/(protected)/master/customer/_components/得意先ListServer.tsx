@@ -1,4 +1,5 @@
 import { 得意先Repository } from "@/db/repository/得意先Repository";
+import { env } from "@/env";
 
 import { CustomerList } from "./得意先List";
 
@@ -9,7 +10,7 @@ export async function CustomerListServer({
   query: string;
   page: number;
 }) {
-  const pageSize = Number(process.env.PAGE_ROW_COUNT) || 20;
+  const pageSize = env.PAGE_ROW_COUNT;
 
   // データフェッチをコンポーネントのすぐそばで行う
   const { items, totalCount } = await 得意先Repository.Search(

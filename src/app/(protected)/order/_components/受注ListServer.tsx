@@ -1,4 +1,5 @@
 import { 受注Repository } from "@/db/repository/受注Repository";
+import { env } from "@/env";
 
 import { OrderList } from "./受注List";
 
@@ -12,7 +13,7 @@ export async function OrderListServer({
   const q = (params.q as string) || "";
   const startDate = (params.startDate as string) || "";
   const endDate = (params.endDate as string) || "";
-  const pageSize = Number(process.env.PAGE_ROW_COUNT) || 20;
+  const pageSize = env.PAGE_ROW_COUNT;
 
   // データフェッチをコンポーネントのすぐそばで行う
   const { items, totalCount } = await 受注Repository.Search({
