@@ -12,6 +12,8 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
+      reportsDirectory: "tests-results/unit/coverage",
+      exclude: ["src/components/ui/**"],
     },
   },
 });
