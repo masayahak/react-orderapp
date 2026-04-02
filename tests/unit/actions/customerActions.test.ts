@@ -36,6 +36,36 @@ const validCustomerData = {
 
 // ─── テスト ───────────────────────────────────────────
 
+// ─── 認可チェック ─────────────────────────────────────
+
+describe("認可チェック", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("save得意先 実行時に requireAdmin が呼ばれること", async () => {
+    const { requireAdmin } = await import("@/lib/auth-guard");
+    const { 得意先Repository } = await import("@/db/repository/得意先Repository");
+    vi.mocked(得意先Repository.Insert).mockResolvedValueOnce([]);
+
+    await save得意先(validCustomerData, false);
+
+    expect(requireAdmin).toHaveBeenCalledOnce();
+  });
+
+  it("delete得意先 実行時に requireAdmin が呼ばれること", async () => {
+    const { requireAdmin } = await import("@/lib/auth-guard");
+    const { 得意先Repository } = await import("@/db/repository/得意先Repository");
+    vi.mocked(得意先Repository.Delete).mockResolvedValueOnce(undefined as never);
+
+    await delete得意先("customer-uuid-001", 0);
+
+    expect(requireAdmin).toHaveBeenCalledOnce();
+  });
+});
+
+// ─── save得意先 ────────────────────────────────────────
+
 describe("save得意先 (新規登録)", () => {
   beforeEach(() => {
     vi.clearAllMocks();

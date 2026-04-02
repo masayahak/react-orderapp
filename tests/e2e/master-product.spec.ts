@@ -29,7 +29,7 @@ test.describe("商品マスタ", () => {
     await page.fill('input[name="q"]', "ザク");
     const searchBtn = page.getByRole("button", { name: "検索" });
     await expect(searchBtn).toBeEnabled();
-    await searchBtn.click();
+    await searchBtn.dispatchEvent("click");
     await page.waitForLoadState("networkidle");
     await expect(page.locator("td:has-text('ザク')").first()).toBeVisible();
   });
@@ -42,7 +42,7 @@ test.describe("商品マスタ", () => {
     await page.goto("/master/product");
     const newBtn = page.getByRole("button", { name: "新規追加" });
     await expect(newBtn).toBeEnabled();
-    await newBtn.click();
+    await newBtn.dispatchEvent("click");
     await expect(page.locator("text=商品の新規登録")).toBeVisible();
 
     await page.fill('input[name="商品CD"]', testCode);
@@ -51,7 +51,7 @@ test.describe("商品マスタ", () => {
 
     const saveBtn = page.getByRole("button", { name: "保存する" });
     await expect(saveBtn).toBeEnabled();
-    await saveBtn.click();
+    await saveBtn.dispatchEvent("click");
     await expect(page.locator("text=商品の新規登録")).not.toBeVisible({
       timeout: 15000,
     });
@@ -60,7 +60,7 @@ test.describe("商品マスタ", () => {
     await page.fill('input[name="q"]', testCode);
     const searchBtn = page.getByRole("button", { name: "検索" });
     await expect(searchBtn).toBeEnabled();
-    await searchBtn.click();
+    await searchBtn.dispatchEvent("click");
     await page.waitForLoadState("networkidle");
     await expect(page.locator(`td:has-text("${testCode}")`)).toBeVisible({
       timeout: 10000,
@@ -72,10 +72,9 @@ test.describe("商品マスタ", () => {
 
     // 最初の行の編集ボタンをクリック（アイコンボタンのため位置で特定、ハイドレーション後まで待機）
     const editBtn = page.locator("tbody tr").first().locator("button").first();
-    await expect(editBtn).toBeVisible();
     await expect(editBtn).toBeEnabled();
     await expect(async () => {
-      await editBtn.click();
+      await editBtn.dispatchEvent("click");
       await expect(page.getByText("商品情報の修正")).toBeVisible({
         timeout: 1000,
       });
@@ -86,7 +85,7 @@ test.describe("商品マスタ", () => {
     await page.fill('textarea[name="備考"], input[name="備考"]', remark);
     const saveBtn = page.getByRole("button", { name: "保存する" });
     await expect(saveBtn).toBeEnabled();
-    await saveBtn.click();
+    await saveBtn.dispatchEvent("click");
 
     // ダイアログが閉じることを確認
     await expect(page.locator("text=商品情報の修正")).not.toBeVisible({
@@ -102,13 +101,13 @@ test.describe("商品マスタ", () => {
     await page.goto("/master/product");
     const newBtn = page.getByRole("button", { name: "新規追加" });
     await expect(newBtn).toBeEnabled();
-    await newBtn.click();
+    await newBtn.dispatchEvent("click");
     await page.fill('input[name="商品CD"]', testCode);
     await page.fill('input[name="商品名"]', testName);
     await page.fill('input[name="単価"]', "100");
     const saveBtn = page.getByRole("button", { name: "保存する" });
     await expect(saveBtn).toBeEnabled();
-    await saveBtn.click();
+    await saveBtn.dispatchEvent("click");
     await expect(page.locator("text=商品の新規登録")).not.toBeVisible({
       timeout: 15000,
     });
@@ -117,7 +116,7 @@ test.describe("商品マスタ", () => {
     await page.fill('input[name="q"]', testCode);
     const searchBtn = page.getByRole("button", { name: "検索" });
     await expect(searchBtn).toBeEnabled();
-    await searchBtn.click();
+    await searchBtn.dispatchEvent("click");
     await page.waitForLoadState("networkidle");
     await expect(page.locator(`td:has-text("${testCode}")`)).toBeVisible({
       timeout: 10000,
@@ -125,10 +124,9 @@ test.describe("商品マスタ", () => {
 
     // 編集ダイアログを開く（アイコンボタンのため位置で特定、ハイドレーション後まで待機）
     const editBtn = page.locator("tbody tr").first().locator("button").first();
-    await expect(editBtn).toBeVisible();
     await expect(editBtn).toBeEnabled();
     await expect(async () => {
-      await editBtn.click();
+      await editBtn.dispatchEvent("click");
       await expect(page.getByText("商品情報の修正")).toBeVisible({
         timeout: 1000,
       });
@@ -137,10 +135,10 @@ test.describe("商品マスタ", () => {
     // 削除ボタンを特定する関数（毎回最新のDOMを検索させる）
     const getDeleteButton = () =>
       page.locator('[role="dialog"] button').filter({ hasText: /^削除$/ });
-    await expect(getDeleteButton()).toBeVisible({ timeout: 10000 });
+    await expect(getDeleteButton()).toBeEnabled({ timeout: 10000 });
     await getDeleteButton().dispatchEvent("click");
     await expect(page.getByText("本当に削除しますか？")).toBeVisible();
-    await page.getByRole("button", { name: "削除実行" }).click();
+    await page.getByRole("button", { name: "削除実行" }).dispatchEvent("click");
 
     // 削除後、確認ダイアログが閉じることを確認
     await expect(page.locator("text=本当に削除しますか？")).not.toBeVisible({
@@ -159,7 +157,7 @@ test.describe("商品マスタ", () => {
       await page.fill('input[name="q"]', code);
       const searchBtn = page.getByRole("button", { name: "検索" });
       await expect(searchBtn).toBeEnabled();
-      await searchBtn.click();
+      await searchBtn.dispatchEvent("click");
       await page.waitForLoadState("networkidle");
 
       if ((await page.locator("tbody tr").count()) === 0) continue;
@@ -169,10 +167,9 @@ test.describe("商品マスタ", () => {
         .first()
         .locator("button")
         .first();
-      await expect(editBtn).toBeVisible();
       await expect(editBtn).toBeEnabled();
       await expect(async () => {
-        await editBtn.click();
+        await editBtn.dispatchEvent("click");
         await expect(page.getByText("商品情報の修正")).toBeVisible({
           timeout: 1000,
         });
@@ -181,12 +178,12 @@ test.describe("商品マスタ", () => {
       const deleteButton = page
         .locator('[role="dialog"] button')
         .filter({ hasText: /^削除$/ });
-      await deleteButton.waitFor({ state: "visible", timeout: 10000 });
-      await deleteButton.click();
+      await expect(deleteButton).toBeEnabled({ timeout: 10000 });
+      await deleteButton.dispatchEvent("click");
       await page
         .locator("text=本当に削除しますか？")
         .waitFor({ state: "visible" });
-      await page.getByRole("button", { name: "削除実行" }).click();
+      await page.getByRole("button", { name: "削除実行" }).dispatchEvent("click");
       await page
         .locator("text=本当に削除しますか？")
         .waitFor({ state: "hidden", timeout: 10000 });

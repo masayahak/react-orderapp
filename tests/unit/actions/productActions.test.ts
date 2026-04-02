@@ -37,6 +37,36 @@ const validProductData = {
 
 // ─── テスト ───────────────────────────────────────────
 
+// ─── 認可チェック ─────────────────────────────────────
+
+describe("認可チェック", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("save商品 実行時に requireAdmin が呼ばれること", async () => {
+    const { requireAdmin } = await import("@/lib/auth-guard");
+    const { 商品Repository } = await import("@/db/repository/商品Repository");
+    vi.mocked(商品Repository.Insert).mockResolvedValueOnce([{ 商品CD: "PROD-001" }]);
+
+    await save商品(validProductData, false);
+
+    expect(requireAdmin).toHaveBeenCalledOnce();
+  });
+
+  it("delete商品 実行時に requireAdmin が呼ばれること", async () => {
+    const { requireAdmin } = await import("@/lib/auth-guard");
+    const { 商品Repository } = await import("@/db/repository/商品Repository");
+    vi.mocked(商品Repository.Delete).mockResolvedValueOnce(undefined);
+
+    await delete商品("PROD-001", 0);
+
+    expect(requireAdmin).toHaveBeenCalledOnce();
+  });
+});
+
+// ─── save商品 ──────────────────────────────────────────
+
 describe("save商品 (新規登録)", () => {
   beforeEach(() => {
     vi.clearAllMocks();

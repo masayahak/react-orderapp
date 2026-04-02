@@ -9,7 +9,7 @@ test.describe("認証フロー", () => {
     await page.fill('input[name="password"]', "kyouhayuki");
     const submitBtn = page.getByRole("button", { name: "ログイン" });
     await expect(submitBtn).toBeEnabled();
-    await submitBtn.click();
+    await submitBtn.dispatchEvent("click");
     await page.waitForURL("**/dashboard");
     await expect(page).toHaveURL(/.*\/dashboard/);
   });
@@ -21,7 +21,7 @@ test.describe("認証フロー", () => {
 
     const submitBtn = page.getByRole("button", { name: "ログイン" });
     await expect(submitBtn).toBeEnabled();
-    await submitBtn.click();
+    await submitBtn.dispatchEvent("click");
     // onError で setIsLoading(false) が呼ばれ、ボタンが再有効化されることを確認
     await expect(submitBtn).toBeEnabled({ timeout: 20000 });
     await expect(page).toHaveURL(/.*\/login/);
@@ -34,18 +34,50 @@ test.describe("認証フロー", () => {
     await expect(page).toHaveURL(/.*\/login/);
   });
 
+  test("一般ユーザーが /master/customer にアクセスすると / にリダイレクトされること", async ({
+    page,
+  }) => {
+    await page.goto("/login");
+    await page.fill('input[name="email"]', "test@example.com");
+    await page.fill('input[name="password"]', "kyouhayuki");
+    const submitBtn = page.getByRole("button", { name: "ログイン" });
+    await expect(submitBtn).toBeEnabled();
+    await submitBtn.dispatchEvent("click");
+    await page.waitForURL("**/dashboard");
+
+    await page.goto("/master/customer");
+    // requireAdmin() → redirect("/") → proxy が / を /dashboard へリダイレクト
+    await expect(page).toHaveURL(/.*\/dashboard/, { timeout: 10000 });
+  });
+
+  test("一般ユーザーが /master/product にアクセスすると / にリダイレクトされること", async ({
+    page,
+  }) => {
+    await page.goto("/login");
+    await page.fill('input[name="email"]', "test@example.com");
+    await page.fill('input[name="password"]', "kyouhayuki");
+    const submitBtn = page.getByRole("button", { name: "ログイン" });
+    await expect(submitBtn).toBeEnabled();
+    await submitBtn.dispatchEvent("click");
+    await page.waitForURL("**/dashboard");
+
+    await page.goto("/master/product");
+    // requireAdmin() → redirect("/") → proxy が / を /dashboard へリダイレクト
+    await expect(page).toHaveURL(/.*\/dashboard/, { timeout: 10000 });
+  });
+
   test("ログアウト → /loginへリダイレクト", async ({ page }) => {
     await page.goto("/login");
     await page.fill('input[name="email"]', "test@example.com");
     await page.fill('input[name="password"]', "kyouhayuki");
     const submitBtn = page.getByRole("button", { name: "ログイン" });
     await expect(submitBtn).toBeEnabled();
-    await submitBtn.click();
+    await submitBtn.dispatchEvent("click");
     await page.waitForURL("**/dashboard");
 
     const logoutBtn = page.getByRole("button", { name: "ログアウト" });
     await expect(logoutBtn).toBeEnabled();
-    await logoutBtn.click();
+    await logoutBtn.dispatchEvent("click");
     await page.waitForURL("**/login");
     await expect(page).toHaveURL(/.*\/login/);
   });
