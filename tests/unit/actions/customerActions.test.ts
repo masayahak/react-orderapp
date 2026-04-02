@@ -45,7 +45,7 @@ describe("save得意先 (新規登録)", () => {
     const { 得意先Repository } = await import(
       "@/db/repository/得意先Repository"
     );
-    vi.mocked(得意先Repository.Insert).mockResolvedValueOnce(undefined);
+    vi.mocked(得意先Repository.Insert).mockResolvedValueOnce([]);
 
     const result = await save得意先(validCustomerData, false);
 
@@ -58,7 +58,7 @@ describe("save得意先 (新規登録)", () => {
       "@/db/repository/得意先Repository"
     );
     const { revalidatePath } = await import("next/cache");
-    vi.mocked(得意先Repository.Insert).mockResolvedValueOnce(undefined);
+    vi.mocked(得意先Repository.Insert).mockResolvedValueOnce([]);
 
     await save得意先(validCustomerData, false);
 
@@ -114,7 +114,7 @@ describe("save得意先 (更新)", () => {
     const { 得意先Repository } = await import(
       "@/db/repository/得意先Repository"
     );
-    vi.mocked(得意先Repository.Update).mockResolvedValueOnce(undefined);
+    vi.mocked(得意先Repository.Update).mockResolvedValueOnce(undefined as never);
 
     const result = await save得意先(
       { ...validCustomerData, 得意先ID: "customer-uuid-001" },
@@ -168,7 +168,7 @@ describe("delete得意先", () => {
     const { 得意先Repository } = await import(
       "@/db/repository/得意先Repository"
     );
-    vi.mocked(得意先Repository.Delete).mockResolvedValueOnce(undefined);
+    vi.mocked(得意先Repository.Delete).mockResolvedValueOnce(undefined as never);
 
     const result = await delete得意先("customer-uuid-001", 0);
 
@@ -184,7 +184,7 @@ describe("delete得意先", () => {
       "@/db/repository/得意先Repository"
     );
     const { revalidatePath } = await import("next/cache");
-    vi.mocked(得意先Repository.Delete).mockResolvedValueOnce(undefined);
+    vi.mocked(得意先Repository.Delete).mockResolvedValueOnce(undefined as never);
 
     await delete得意先("customer-uuid-001", 0);
 

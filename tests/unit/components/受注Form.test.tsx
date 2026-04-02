@@ -211,6 +211,20 @@ describe("OrderForm コンポーネント（新規作成モード）", () => {
     });
   });
 
+  describe("戻るボタン", () => {
+    it("左矢印ボタンをクリックすると router.back() が呼ばれること", () => {
+      render(<OrderForm serverDate="2024-01-15" mode="create" />);
+      fireEvent.click(screen.getByTestId("arrow-left-icon").closest("button")!);
+      expect(mockBack).toHaveBeenCalled();
+    });
+
+    it("「戻る」ボタンをクリックすると router.back() が呼ばれること", () => {
+      render(<OrderForm serverDate="2024-01-15" mode="create" />);
+      fireEvent.click(screen.getByRole("button", { name: "戻る" }));
+      expect(mockBack).toHaveBeenCalled();
+    });
+  });
+
   describe("フォームサブミット", () => {
     it("得意先が未選択でサブミットすると「得意先は必須です」が表示されること", async () => {
       render(<OrderForm serverDate="2024-01-15" mode="create" />);

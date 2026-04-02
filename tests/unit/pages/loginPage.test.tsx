@@ -56,4 +56,17 @@ describe("Login Page Rendering", () => {
     expect(screen.getByText("test@example.com / kyouhayuki")).toBeInTheDocument();
     expect(screen.getByText("admin@test.com / admintarou")).toBeInTheDocument();
   });
+
+  it("セッションがある場合は /dashboard にリダイレクトされること", async () => {
+    const { auth } = await import("@/lib/auth");
+    const { redirect } = await import("next/navigation");
+    vi.mocked(auth.api.getSession).mockResolvedValueOnce({
+      user: { id: "user-id", name: "テストユーザー", email: "test@example.com" },
+      session: { id: "session-id" },
+    } as never);
+
+    await LoginPage();
+
+    expect(redirect).toHaveBeenCalledWith("/dashboard");
+  });
 });
