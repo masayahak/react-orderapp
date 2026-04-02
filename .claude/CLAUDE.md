@@ -1,9 +1,9 @@
 # プロジェクト概要
 
 - Node.js + TypeScriptのWebアプリケーション
-- パッケージマネージャ: pnpm
 - Next.js 16 (App Router)
 - TypeScript 5.7 (strict mode)
+- pnpmは利用しない npx/npmを利用する
 
 # コーディング規約
 
