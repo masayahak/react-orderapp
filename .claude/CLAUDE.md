@@ -1,16 +1,9 @@
 # プロジェクト概要
 
-- Node.js + TypeScriptのWebアプリケーション
-- Next.js 16 (App Router)
-- TypeScript 5.7 (strict mode)
-- pnpmは利用しない npx/npmを利用する
+- Next.js 16.2.2 (App Router) / TypeScript 5.7 strict
+- npm/npx を使用（pnpm不可）
 
 # コーディング規約
 
-- 変数名・関数名はcamelCase
-- コンポーネントはPascalCase
+- 変数・関数: camelCase / コンポーネント: PascalCase
 - 1ファイル1コンポーネント
-
-# Git
-
-- コミットメッセージは日本語
