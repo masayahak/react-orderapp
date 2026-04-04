@@ -1,9 +1,15 @@
 import react from "@vitejs/plugin-react";
+import path from "path";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   plugins: [tsconfigPaths(), react()],
+  resolve: {
+    alias: {
+      "server-only": path.resolve("tests/__mocks__/server-only.ts"),
+    },
+  },
   test: {
     environment: "jsdom",
     globals: true,
@@ -14,6 +20,12 @@ export default defineConfig({
       reporter: ["text", "html"],
       reportsDirectory: "tests-results/unit/coverage",
       exclude: ["src/components/ui/**"],
+      thresholds: {
+        statements: 90,
+        branches: 85,
+        functions: 75,
+        lines: 90,
+      },
     },
   },
 });
