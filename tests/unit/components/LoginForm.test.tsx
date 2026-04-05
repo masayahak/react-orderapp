@@ -45,7 +45,7 @@ function fillAndSubmit(email: string, password: string) {
   fireEvent.change(screen.getByPlaceholderText("m@example.com"), {
     target: { value: email },
   });
-  fireEvent.change(screen.getByPlaceholderText("パスワードを入力"), {
+  fireEvent.change(screen.getByPlaceholderText("パスワードを入力…"), {
     target: { value: password },
   });
   fireEvent.submit(screen.getByRole("button", { name: "ログイン" }).closest("form")!);
@@ -67,7 +67,7 @@ describe("LoginForm コンポーネント", () => {
 
     it("パスワードフィールドが表示されること", () => {
       render(<LoginForm />);
-      expect(screen.getByPlaceholderText("パスワードを入力")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("パスワードを入力…")).toBeInTheDocument();
     });
 
     it("「ログイン」ボタンが表示されること", () => {
@@ -82,7 +82,7 @@ describe("LoginForm コンポーネント", () => {
 
     it("初期状態ではパスワードが非表示（type=password）であること", () => {
       render(<LoginForm />);
-      expect(screen.getByPlaceholderText("パスワードを入力")).toHaveAttribute("type", "password");
+      expect(screen.getByPlaceholderText("パスワードを入力…")).toHaveAttribute("type", "password");
     });
   });
 
@@ -90,7 +90,7 @@ describe("LoginForm コンポーネント", () => {
     it("目のアイコンをクリックするとパスワードが表示される（type=text）こと", () => {
       render(<LoginForm />);
       fireEvent.click(screen.getByTestId("eye-icon").parentElement!);
-      expect(screen.getByPlaceholderText("パスワードを入力")).toHaveAttribute("type", "text");
+      expect(screen.getByPlaceholderText("パスワードを入力…")).toHaveAttribute("type", "text");
     });
 
     it("もう一度クリックするとパスワードが非表示（type=password）に戻ること", () => {
@@ -98,7 +98,7 @@ describe("LoginForm コンポーネント", () => {
       const toggleBtn = screen.getByTestId("eye-icon").parentElement!;
       fireEvent.click(toggleBtn);
       fireEvent.click(screen.getByTestId("eye-off-icon").parentElement!);
-      expect(screen.getByPlaceholderText("パスワードを入力")).toHaveAttribute("type", "password");
+      expect(screen.getByPlaceholderText("パスワードを入力…")).toHaveAttribute("type", "password");
     });
   });
 

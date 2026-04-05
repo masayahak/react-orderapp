@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { 受注Model, 受注明細Model } from "@/db/model/受注Model";
+import {
+  受注Model,
+  受注明細Model,
+  type 受注Input,
+  type 受注明細Input,
+} from "@/db/model/受注Model";
 
 // 正常な明細データの基本形
-const validDetail = {
+const validDetail: 受注明細Input = {
   商品CD: "PROD-001",
   商品名: "テスト商品",
   単価: 1000,
@@ -12,7 +17,7 @@ const validDetail = {
 };
 
 // 正常な受注データの基本形
-const validOrder = {
+const validOrder: 受注Input = {
   受注日: "2024-01-15",
   得意先ID: "customer-uuid-001",
   得意先名: "テスト得意先",
@@ -42,29 +47,27 @@ describe("受注明細Model", () => {
   it("商品CDが空の場合はエラーになること", () => {
     const result = 受注明細Model.safeParse({ ...validDetail, 商品CD: "" });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues.some((i) => i.path.includes("商品CD"))).toBe(
-        true,
-      );
-    }
+    if (result.success) return;
+
+    const issue = result.error!.issues.filter((i) => i.path.includes("商品CD"));
+    expect(issue.length).toBeGreaterThanOrEqual(1);
   });
 
   it("商品名が空の場合はエラーになること", () => {
     const result = 受注明細Model.safeParse({ ...validDetail, 商品名: "" });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues.some((i) => i.path.includes("商品名"))).toBe(
-        true,
-      );
-    }
+    if (result.success) return;
+
+    const issue = result.error!.issues.filter((i) => i.path.includes("商品名"));
+    expect(issue.length).toBeGreaterThanOrEqual(1);
   });
 
   it("単価が文字列数字でも数値に変換されること", () => {
     const result = 受注明細Model.safeParse({ ...validDetail, 単価: "500" });
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.単価).toBe(500);
-    }
+    if (!result.success) return;
+
+    expect(result.data.単価).toBe(500);
   });
 
   it("単価が0の場合も有効であること", () => {
@@ -84,9 +87,9 @@ describe("受注明細Model", () => {
   it("数量が文字列数字でも数値に変換されること", () => {
     const result = 受注明細Model.safeParse({ ...validDetail, 数量: "3" });
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.数量).toBe(3);
-    }
+    if (!result.success) return;
+
+    expect(result.data.数量).toBe(3);
   });
 
   it("数量が負の場合はエラーになること", () => {
@@ -136,11 +139,10 @@ describe("受注Model", () => {
   it("受注日が空の場合はエラーになること", () => {
     const result = 受注Model.safeParse({ ...validOrder, 受注日: "" });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues.some((i) => i.path.includes("受注日"))).toBe(
-        true,
-      );
-    }
+    if (result.success) return;
+
+    const issue = result.error!.issues.filter((i) => i.path.includes("受注日"));
+    expect(issue.length).toBeGreaterThanOrEqual(1);
   });
 
   it("受注日が無効な文字列の場合はエラーになること", () => {
@@ -149,31 +151,28 @@ describe("受注Model", () => {
       受注日: "not-a-date",
     });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues.some((i) => i.path.includes("受注日"))).toBe(
-        true,
-      );
-    }
+    if (result.success) return;
+
+    const issue = result.error!.issues.filter((i) => i.path.includes("受注日"));
+    expect(issue.length).toBeGreaterThanOrEqual(1);
   });
 
   it("得意先IDが空の場合はエラーになること", () => {
     const result = 受注Model.safeParse({ ...validOrder, 得意先ID: "" });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues.some((i) => i.path.includes("得意先ID"))).toBe(
-        true,
-      );
-    }
+    if (result.success) return;
+
+    const issue = result.error!.issues.filter((i) => i.path.includes("得意先ID"));
+    expect(issue.length).toBeGreaterThanOrEqual(1);
   });
 
   it("得意先名が空の場合はエラーになること", () => {
     const result = 受注Model.safeParse({ ...validOrder, 得意先名: "" });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(
-        result.error.issues.some((i) => i.path.includes("得意先名")),
-      ).toBe(true);
-    }
+    if (result.success) return;
+
+    const issue = result.error!.issues.filter((i) => i.path.includes("得意先名"));
+    expect(issue.length).toBeGreaterThanOrEqual(1);
   });
 
   it("合計金額が0の場合も有効であること", () => {
@@ -184,19 +183,18 @@ describe("受注Model", () => {
   it("合計金額が文字列数字でも変換されること", () => {
     const result = 受注Model.safeParse({ ...validOrder, 合計金額: "5000" });
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.合計金額).toBe(5000);
-    }
+    if (!result.success) return;
+
+    expect(result.data.合計金額).toBe(5000);
   });
 
   it("明細が空配列の場合はエラーになること", () => {
     const result = 受注Model.safeParse({ ...validOrder, 明細: [] });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues.some((i) => i.path.includes("明細"))).toBe(
-        true,
-      );
-    }
+    if (result.success) return;
+
+    const issue = result.error!.issues.filter((i) => i.path.includes("明細"));
+    expect(issue.length).toBeGreaterThanOrEqual(1);
   });
 
   it("複数の明細行が有効であること", () => {
@@ -225,9 +223,9 @@ describe("受注Model", () => {
     const { version: _, ...rest } = validOrder;
     const result = 受注Model.safeParse(rest);
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.version).toBe(0);
-    }
+    if (!result.success) return;
+
+    expect(result.data.version).toBe(0);
   });
 
   it("明細内の商品CDが空の場合はエラーになること", () => {

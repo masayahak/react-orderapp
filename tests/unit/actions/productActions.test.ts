@@ -4,6 +4,7 @@ import {
   delete商品,
   save商品,
 } from "@/app/(protected)/master/product/actions";
+import { type 商品Input } from "@/db/model/商品Model";
 
 // ─── モック設定 ───────────────────────────────────────
 
@@ -27,7 +28,7 @@ vi.mock("@/db/repository/商品Repository", () => ({
 
 // ─── テストデータ ──────────────────────────────────────
 
-const validProductData = {
+const validProductData: 商品Input = {
   商品CD: "PROD-001",
   商品名: "テスト商品",
   単価: 1000,

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { 得意先Model } from "@/db/model/得意先Model";
+import { 得意先Model, type 得意先Input } from "@/db/model/得意先Model";
 
-const validCustomer = {
+const validCustomer: 得意先Input = {
   得意先名: "テスト株式会社",
   version: 0,
 };
@@ -16,9 +16,9 @@ describe("得意先Model", () => {
   it("得意先IDはオプショナルであること（新規登録時）", () => {
     const result = 得意先Model.safeParse(validCustomer);
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.得意先ID).toBeUndefined();
-    }
+    if (!result.success) return;
+
+    expect(result.data.得意先ID).toBeUndefined();
   });
 
   it("得意先IDを含む場合も有効であること（更新時）", () => {
@@ -27,19 +27,18 @@ describe("得意先Model", () => {
       得意先ID: "customer-uuid-001",
     });
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.得意先ID).toBe("customer-uuid-001");
-    }
+    if (!result.success) return;
+
+    expect(result.data.得意先ID).toBe("customer-uuid-001");
   });
 
   it("得意先名が空の場合はエラーになること", () => {
     const result = 得意先Model.safeParse({ ...validCustomer, 得意先名: "" });
     expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(
-        result.error.issues.some((i) => i.path.includes("得意先名")),
-      ).toBe(true);
-    }
+    if (result.success) return;
+
+    const issue = result.error!.issues.filter((i) => i.path.includes("得意先名"));
+    expect(issue.length).toBeGreaterThanOrEqual(1);
   });
 
   it("電話番号はオプショナルであること", () => {
@@ -58,9 +57,9 @@ describe("得意先Model", () => {
       電話番号: "090-1234-5678",
     });
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.電話番号).toBe("090-1234-5678");
-    }
+    if (!result.success) return;
+
+    expect(result.data.電話番号).toBe("090-1234-5678");
   });
 
   it("備考はオプショナルであること", () => {
@@ -79,18 +78,18 @@ describe("得意先Model", () => {
       備考: "重要顧客",
     });
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.備考).toBe("重要顧客");
-    }
+    if (!result.success) return;
+
+    expect(result.data.備考).toBe("重要顧客");
   });
 
   it("versionのデフォルト値が0であること", () => {
     const { version: _, ...rest } = validCustomer;
     const result = 得意先Model.safeParse(rest);
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.version).toBe(0);
-    }
+    if (!result.success) return;
+
+    expect(result.data.version).toBe(0);
   });
 
   it("全フィールドが揃っている場合も有効であること", () => {

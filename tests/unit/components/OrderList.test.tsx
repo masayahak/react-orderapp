@@ -19,6 +19,14 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
+vi.mock("next/link", () => ({
+  default: ({ href, children, ...props }: { href: string; children: React.ReactNode; [key: string]: unknown }) => (
+    <a href={String(href)} onClick={(e: React.MouseEvent) => { e.preventDefault(); mockPush(String(href)); }} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
 vi.mock("lucide-react", () => ({
   FileText: () => <div data-testid="file-text-icon" />,
   Loader2: () => <div data-testid="loader2-icon" />,
@@ -117,8 +125,8 @@ describe("OrderList コンポーネント", () => {
       <OrderList initialData={sampleOrders} totalCount={100} pageSize={20} />,
     );
 
-    const nextButton = screen.getByRole("button", { name: "次へ" });
-    expect(nextButton).not.toBeDisabled();
+    const nextButton = screen.getByRole("link", { name: "次へ" });
+    expect(nextButton).toBeInTheDocument();
   });
 
   it("テーブルヘッダが正しく表示されること", () => {
@@ -149,7 +157,7 @@ describe("OrderList コンポーネント", () => {
       <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
     );
 
-    expect(screen.getByRole("button", { name: /新規受注/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /新規受注/ })).toBeInTheDocument();
   });
 
   it("ページ番号が正しく表示されること", () => {
@@ -171,7 +179,7 @@ describe("OrderList インタラクション", () => {
     render(
       <OrderList initialData={sampleOrders} totalCount={100} pageSize={20} />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "次へ" }));
+    fireEvent.click(screen.getByRole("link", { name: "次へ" }));
 
     expect(mockPush).toHaveBeenCalledWith("?page=2");
   });
@@ -185,7 +193,7 @@ describe("OrderList インタラクション", () => {
     render(
       <OrderList initialData={sampleOrders} totalCount={100} pageSize={20} />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "前へ" }));
+    fireEvent.click(screen.getByRole("link", { name: "前へ" }));
 
     expect(mockPush).toHaveBeenCalledWith("?page=1");
   });
@@ -198,7 +206,7 @@ describe("OrderList インタラクション", () => {
       <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
     );
 
-    fireEvent.change(screen.getByPlaceholderText("検索ワードを入力..."), {
+    fireEvent.change(screen.getByPlaceholderText("検索ワードを入力…"), {
       target: { value: "テスト" },
     });
     fireEvent.submit(screen.getByRole("button", { name: "検索" }).closest("form")!);
@@ -216,7 +224,7 @@ describe("OrderList インタラクション", () => {
     render(
       <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
     );
-    fireEvent.click(screen.getByRole("button", { name: /新規受注/ }));
+    fireEvent.click(screen.getByRole("link", { name: /新規受注/ }));
 
     expect(mockPush).toHaveBeenCalledWith("/order/new");
   });
@@ -228,7 +236,7 @@ describe("OrderList インタラクション", () => {
     render(
       <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
     );
-    fireEvent.click(screen.getByRole("button", { name: /新規受注/ }));
+    fireEvent.click(screen.getByRole("link", { name: /新規受注/ }));
 
     expect(mockPush).toHaveBeenCalledWith("/order/new?page=2&q=test");
   });
@@ -241,7 +249,7 @@ describe("OrderList インタラクション", () => {
       <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
     );
 
-    const editButtons = screen.getAllByTitle("修正");
+    const editButtons = screen.getAllByRole("link", { name: /を修正/ });
     fireEvent.click(editButtons[0]);
 
     expect(mockPush).toHaveBeenCalledWith(
@@ -257,7 +265,7 @@ describe("OrderList インタラクション", () => {
       <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
     );
 
-    const editButtons = screen.getAllByTitle("修正");
+    const editButtons = screen.getAllByRole("link", { name: /を修正/ });
     fireEvent.click(editButtons[0]);
 
     expect(mockPush).toHaveBeenCalledWith(

@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { type InferSelectModel } from "drizzle-orm";
+import { type 得意先Output } from "@/db/model/得意先Model";
+import { 得意先 } from "@/db/schema";
 
 // ─── モック設定 ───────────────────────────────────────
 
@@ -24,7 +27,7 @@ vi.mock("@/db/drizzle", () => ({ db: mockDb }));
 
 // ─── テストデータ ──────────────────────────────────────
 
-const dbRow = {
+const dbRow: InferSelectModel<typeof 得意先> = {
   得意先ID: "customer-uuid-001",
   得意先名: "テスト株式会社",
   電話番号: "03-1234-5678",
@@ -34,7 +37,7 @@ const dbRow = {
   updatedAt: new Date("2024-01-01"),
 };
 
-const parsedOutput = {
+const parsedOutput: 得意先Output = {
   得意先ID: "customer-uuid-001",
   得意先名: "テスト株式会社",
   電話番号: "03-1234-5678",

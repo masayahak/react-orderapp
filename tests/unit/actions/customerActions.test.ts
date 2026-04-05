@@ -4,6 +4,7 @@ import {
   delete得意先,
   save得意先,
 } from "@/app/(protected)/master/customer/actions";
+import { type 得意先Input } from "@/db/model/得意先Model";
 
 // ─── モック設定 ───────────────────────────────────────
 
@@ -27,7 +28,7 @@ vi.mock("@/db/repository/得意先Repository", () => ({
 
 // ─── テストデータ ──────────────────────────────────────
 
-const validCustomerData = {
+const validCustomerData: 得意先Input = {
   得意先名: "テスト株式会社",
   電話番号: "03-1234-5678",
   備考: "テスト備考",

@@ -6,6 +6,7 @@ import {
   search商品,
   search得意先,
 } from "@/app/(protected)/order/actions";
+import { type 受注Input } from "@/db/model/受注Model";
 
 // ─── モック設定 ───────────────────────────────────────
 
@@ -40,7 +41,7 @@ vi.mock("@/db/repository/得意先Repository", () => ({
 
 // ─── テストデータ ──────────────────────────────────────
 
-const validOrderData = {
+const validOrderData: 受注Input = {
   受注日: "2024-01-15",
   得意先ID: "customer-uuid-001",
   得意先名: "テスト得意先",
