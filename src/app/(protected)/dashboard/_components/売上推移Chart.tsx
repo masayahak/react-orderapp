@@ -63,17 +63,17 @@ const CustomXAxisTick = ({ x, y, payload }: CustomTickProps) => {
   );
 };
 
+const chartConfig = {
+  totalAmount: { label: "売上金額", color: "#4A6984" },
+  count: { label: "受注件数", color: "#64748b" },
+} satisfies ChartConfig;
+
 export function SalesTrendChart({ data, params }: SalesTrendChartProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [activeChart, setActiveChart] = useState<ChartType>("totalAmount");
 
   const { duration, interval, preset } = params;
-
-  const chartConfig = {
-    totalAmount: { label: "売上金額", color: "#4A6984" },
-    count: { label: "受注件数", color: "#64748b" },
-  } satisfies ChartConfig;
 
   const chartData = useMemo(() => {
     const emptyData = generateEmptyTrendData(duration, interval);
@@ -121,10 +121,13 @@ export function SalesTrendChart({ data, params }: SalesTrendChartProps) {
   );
 
   const formatYAxis = (value: number) => {
-    if (activeChart === "count") return value.toLocaleString();
-    if (value >= 100000000) return `${(value / 100000000).toFixed(1)}億円`;
-    if (value >= 10000) return `${(value / 10000).toFixed(0)}万円`;
-    return `${value}円`;
+    if (activeChart === "count")
+      return new Intl.NumberFormat("ja-JP").format(value);
+    if (value >= 100000000)
+      return `${new Intl.NumberFormat("ja-JP", { maximumFractionDigits: 1 }).format(value / 100000000)}億円`;
+    if (value >= 10000)
+      return `${new Intl.NumberFormat("ja-JP", { maximumFractionDigits: 0 }).format(value / 10000)}万円`;
+    return `${new Intl.NumberFormat("ja-JP").format(value)}円`;
   };
 
   return (
@@ -133,11 +136,14 @@ export function SalesTrendChart({ data, params }: SalesTrendChartProps) {
     >
       <CardHeader className="flex flex-row items-stretch space-y-0 border-b p-0 shrink-0 overflow-hidden">
         {/* 売上金額セクション */}
-        <div
+        <button
+          type="button"
           data-active={activeChart === "totalAmount"}
-          className="group flex flex-1 flex-col justify-center gap-1.5 px-6 py-4 transition-all cursor-pointer border-r
+          aria-pressed={activeChart === "totalAmount"}
+          className="group flex flex-1 flex-col justify-center gap-1.5 px-6 py-4 transition-all cursor-pointer border-r text-left
                     data-[active=true]:bg-white data-[active=true]:relative
-                    data-[active=false]:bg-slate-50/50 data-[active=false]:hover:bg-slate-100"
+                    data-[active=false]:bg-slate-50/50 data-[active=false]:hover:bg-slate-100
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-inset"
           onClick={() => setActiveChart("totalAmount")}
         >
           {/* 選択時のみ表示される上部の強調ライン */}
@@ -149,14 +155,17 @@ export function SalesTrendChart({ data, params }: SalesTrendChartProps) {
           <span className="text-2xl font-black leading-none text-slate-400 group-data-[active=true]:text-indigo-700 sm:text-3xl">
             {formatCurrency(totals.totalAmount)}
           </span>
-        </div>
+        </button>
 
         {/* 受注件数セクション */}
-        <div
+        <button
+          type="button"
           data-active={activeChart === "count"}
-          className="group flex flex-1 flex-col justify-center gap-1.5 px-6 py-4 transition-all cursor-pointer
+          aria-pressed={activeChart === "count"}
+          className="group flex flex-1 flex-col justify-center gap-1.5 px-6 py-4 transition-all cursor-pointer text-left
                   data-[active=true]:bg-white data-[active=true]:relative
-                  data-[active=false]:bg-slate-50/50 data-[active=false]:hover:bg-slate-100"
+                  data-[active=false]:bg-slate-50/50 data-[active=false]:hover:bg-slate-100
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-inset"
           onClick={() => setActiveChart("count")}
         >
           {/* 選択時のみ表示される上部の強調ライン */}
@@ -169,7 +178,7 @@ export function SalesTrendChart({ data, params }: SalesTrendChartProps) {
             {formatNumber(totals.count)}
             <span className="text-sm ml-1 font-bold">件</span>
           </span>
-        </div>
+        </button>
       </CardHeader>
 
       <CardContent className="flex-1 min-h-0 px-2 pt-4 pb-0">

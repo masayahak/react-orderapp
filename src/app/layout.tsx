@@ -1,9 +1,9 @@
 import "./globals.css";
 
-import { Analytics } from "@vercel/analytics/next";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { AnalyticsProvider } from "@/app/_components/AnalyticsProvider";
 import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
@@ -21,6 +21,10 @@ export const metadata: Metadata = {
   description: "demo",
 };
 
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,8 +37,7 @@ export default function RootLayout({
       >
         {children}
         <Toaster />
-        {/* Vercel Analytics */}
-        <Analytics />
+        <AnalyticsProvider />
       </body>
     </html>
   );

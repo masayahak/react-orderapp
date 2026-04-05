@@ -3,6 +3,11 @@
 # personal
 /.personal
 
+# agent
+/.agents/
+/.claude/
+
+
 # dependencies
 /node_modules
 /.pnp

@@ -33,8 +33,49 @@ import { 受注Input, 受注Model } from "@/db/model/受注Model";
 
 import { delete受注, save受注, search商品, search得意先 } from "../actions";
 
+const jpyCurrency = new Intl.NumberFormat("ja-JP", {
+  style: "currency",
+  currency: "JPY",
+});
+
 type CustomerSearchRes = { 得意先ID: string; 得意先名: string };
 type ProductSearchRes = { 商品CD: string; 商品名: string; 単価: number };
+
+const customerColumns: ColumnDef<CustomerSearchRes>[] = [
+  { header: "得意先名", accessorKey: "得意先名" },
+  { header: "ID", accessorKey: "得意先ID", visible: false },
+];
+
+const productColumns: ColumnDef<ProductSearchRes>[] = [
+  { header: "CD", accessorKey: "商品CD", width: "100px" },
+  { header: "商品名", accessorKey: "商品名" },
+  {
+    header: "単価",
+    accessorKey: "単価",
+    width: "100px",
+    align: "right",
+    isCurrency: true,
+  },
+];
+
+const DAYS_OF_WEEK = ["日", "月", "火", "水", "木", "金", "土"];
+
+function getDayOfWeekInfo(dateString?: string) {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return null;
+
+  const dayIndex = date.getDay();
+
+  let colorClass = "text-slate-700";
+  if (dayIndex === 0) colorClass = "text-red-600";
+  if (dayIndex === 6) colorClass = "text-blue-600";
+
+  return {
+    label: `(${DAYS_OF_WEEK[dayIndex]})`,
+    colorClass,
+  };
+}
 
 interface OrderFormProps {
   serverDate: string; // サーバーサイドで生成した日付を受け取る
@@ -68,23 +109,6 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
   });
 
   const watchDetails = useWatch({ control: form.control, name: "明細" });
-
-  const customerColumns: ColumnDef<CustomerSearchRes>[] = [
-    { header: "得意先名", accessorKey: "得意先名" },
-    { header: "ID", accessorKey: "得意先ID", visible: false },
-  ];
-
-  const productColumns: ColumnDef<ProductSearchRes>[] = [
-    { header: "CD", accessorKey: "商品CD", width: "100px" },
-    { header: "商品名", accessorKey: "商品名" },
-    {
-      header: "単価",
-      accessorKey: "単価",
-      width: "100px",
-      align: "right",
-      isCurrency: true,
-    },
-  ];
 
   // 推奨
   const onSubmit = async (data: 受注Input) => {
@@ -128,28 +152,11 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
     }
   };
 
-  // 受注日から曜日を算出する関数
+  // 受注日から曜日を算出する
   const orderDate = useWatch({
     control: form.control,
     name: "受注日",
   });
-  const getDayOfWeekInfo = (dateString?: string) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return null;
-
-    const days = ["日", "月", "火", "水", "木", "金", "土"];
-    const dayIndex = date.getDay();
-
-    let colorClass = "text-slate-700"; // デフォルト（平日）
-    if (dayIndex === 0) colorClass = "text-red-600"; // 日曜
-    if (dayIndex === 6) colorClass = "text-blue-600"; // 土曜
-
-    return {
-      label: `(${days[dayIndex]})`,
-      colorClass,
-    };
-  };
   const dayInfo = getDayOfWeekInfo(orderDate);
 
   return (
@@ -162,8 +169,9 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
               size="icon"
               onClick={() => router.back()}
               className="rounded-full"
+              aria-label="前のページに戻る"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-5 w-5" aria-hidden="true" />
             </Button>
             <div>
               <h1 className="text-2xl font-black tracking-tighter">
@@ -194,7 +202,7 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
           <Card className="shadow-sm border-slate-200 overflow-hidden">
             <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                <label className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <label htmlFor="order-date" className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                   受注日
                   <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-600">
                     必須
@@ -208,6 +216,7 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                   )}
                 </label>
                 <Input
+                  id="order-date"
                   type="date"
                   {...form.register("受注日")}
                   className="h-10 bg-slate-50/50"
@@ -220,13 +229,14 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                 )}
               </div>
               <div className="space-y-2">
-                <label className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <label htmlFor="customer-combobox" className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                   得意先
                   <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-600">
                     必須
                   </span>
                 </label>
                 <AdvancedCombobox<CustomerSearchRes>
+                  triggerId="customer-combobox"
                   key={initialData?.得意先ID ?? "new-customer"}
                   placeholder="得意先を検索..."
                   searchFn={search得意先}
@@ -352,7 +362,7 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                         <Input
                           readOnly
                           tabIndex={-1}
-                          value={`¥${(watchDetails?.[index]?.単価 || 0).toLocaleString()}`}
+                          value={jpyCurrency.format(watchDetails?.[index]?.単価 || 0)}
                           className="h-9 bg-slate-50 border-none font-mono text-right text-xs"
                         />
                       </TableCell>
@@ -373,7 +383,7 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                         <Input
                           readOnly
                           tabIndex={-1}
-                          value={`¥${((Number(watchDetails?.[index]?.単価) || 0) * (Number(watchDetails?.[index]?.数量) || 0)).toLocaleString()}`}
+                          value={jpyCurrency.format((Number(watchDetails?.[index]?.単価) || 0) * (Number(watchDetails?.[index]?.数量) || 0))}
                           className="h-9 bg-slate-50 border-none font-mono text-right text-xs"
                         />
                       </TableCell>
@@ -384,8 +394,9 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                           onClick={() => remove(index)}
                           disabled={fields.length <= 1}
                           className="h-8 w-8 text-slate-300 hover:text-rose-500"
+                          aria-label={`${index + 1}行目を削除`}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4" aria-hidden="true" />
                         </Button>
                       </TableCell>
                     </TableRow>

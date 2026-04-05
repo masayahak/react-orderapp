@@ -18,13 +18,18 @@ export function Logout() {
   };
 
   return (
-    <Button variant="outline" onClick={handleLogout} disabled={isLoading}>
+    <Button
+      variant="outline"
+      onClick={handleLogout}
+      disabled={isLoading}
+      aria-label={isLoading ? "ログアウト中…" : "ログアウト"}
+    >
       {isLoading ? (
-        <Loader2 className="size-4 animate-spin" />
+        <Loader2 className="size-4 animate-spin" aria-hidden="true" />
       ) : (
         <>
           ログアウト
-          <LogOut className="ml-2 size-4" />
+          <LogOut className="ml-2 size-4" aria-hidden="true" />
         </>
       )}
     </Button>

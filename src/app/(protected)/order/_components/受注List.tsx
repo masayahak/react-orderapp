@@ -1,6 +1,7 @@
 "use client";
 
 import { FileText, Loader2, Pencil, Plus, Search } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
@@ -17,6 +18,32 @@ import {
 } from "@/components/ui/table";
 import { 受注HeaderOutput } from "@/db/model/受注Model";
 
+const formatDate = (dateStr: string) => {
+  const d = new Date(dateStr);
+  return new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short",
+  }).format(d);
+};
+
+const getDateColorClass = (dateStr: string) => {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "text-slate-600";
+  const day = d.getDay();
+  if (day === 0) return "text-red-600"; // 日曜
+  if (day === 6) return "text-blue-600"; // 土曜
+  return "text-slate-600"; // 平日（デフォルト）
+};
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat("ja-JP", {
+    style: "currency",
+    currency: "JPY",
+  }).format(amount);
+};
+
 export function OrderList({
   initialData,
   totalCount,
@@ -32,33 +59,6 @@ export function OrderList({
 
   const currentPage = Number(searchParams.get("page")) || 1;
   const totalPages = Math.ceil(totalCount / pageSize);
-
-  const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return new Intl.DateTimeFormat("ja-JP", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      weekday: "short",
-    }).format(d);
-  };
-
-  const getDateColorClass = (dateStr: string) => {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return "text-slate-600";
-
-    const day = d.getDay();
-    if (day === 0) return "text-red-600"; // 日曜
-    if (day === 6) return "text-blue-600"; // 土曜
-
-    return "text-slate-600"; // 平日（デフォルト）
-  };
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("ja-JP", {
-      style: "currency",
-      currency: "JPY",
-    }).format(amount);
-  };
 
   const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -84,23 +84,27 @@ export function OrderList({
           >
             <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-500 ml-1">
+                <label htmlFor="startDate-input" className="text-xs font-semibold text-slate-500 ml-1">
                   開始日
                 </label>
                 <Input
+                  id="startDate-input"
                   type="date"
                   name="startDate"
+                  autoComplete="off"
                   defaultValue={searchParams.get("startDate") || ""}
                   className="bg-white"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-500 ml-1">
+                <label htmlFor="endDate-input" className="text-xs font-semibold text-slate-500 ml-1">
                   終了日
                 </label>
                 <Input
+                  id="endDate-input"
                   type="date"
                   name="endDate"
+                  autoComplete="off"
                   defaultValue={searchParams.get("endDate") || ""}
                   className="bg-white"
                 />
@@ -108,14 +112,16 @@ export function OrderList({
             </div>
 
             <div className="space-y-2 flex-1 w-full">
-              <label className="text-xs font-semibold text-slate-500 ml-1">
+              <label htmlFor="q-input" className="text-xs font-semibold text-slate-500 ml-1">
                 キーワード (得意先・商品)
               </label>
               <div className="relative">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" aria-hidden="true" />
                 <Input
+                  id="q-input"
                   name="q"
-                  placeholder="検索ワードを入力..."
+                  placeholder="検索ワードを入力…"
+                  autoComplete="off"
                   defaultValue={searchParams.get("q") || ""}
                   className="pl-10 bg-white"
                 />
@@ -134,15 +140,16 @@ export function OrderList({
                   "検索"
                 )}
               </Button>
-              <Button
-                type="button"
-                className="w-full md:w-auto bg-blue-600 hover:bg-blue-800"
-                onClick={() => {
-                  const query = searchParams.toString();
-                  router.push(query ? `/order/new?${query}` : "/order/new");
-                }}
-              >
-                <Plus className="h-4 w-4 mr-2" /> 新規受注
+              <Button asChild className="w-full md:w-auto bg-blue-600 hover:bg-blue-800">
+                <Link
+                  href={
+                    searchParams.toString()
+                      ? `/order/new?${searchParams.toString()}`
+                      : "/order/new"
+                  }
+                >
+                  <Plus className="h-4 w-4 mr-2" aria-hidden="true" /> 新規受注
+                </Link>
               </Button>
             </div>
           </form>
@@ -206,20 +213,21 @@ export function OrderList({
                     {/* 確認・修正ボタンに遷移処理を追加 */}
                     <div className="flex justify-center">
                       <Button
+                        asChild
                         variant="ghost"
                         size="icon"
                         className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-                        onClick={() => {
-                          const query = searchParams.toString();
-                          router.push(
-                            query
-                              ? `/order/${order.受注ID}?${query}`
-                              : `/order/${order.受注ID}`,
-                          );
-                        }}
-                        title="修正"
+                        aria-label={`受注 ${order.受注ID?.substring(0, 8)} を修正`}
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Link
+                          href={
+                            searchParams.toString()
+                              ? `/order/${order.受注ID}?${searchParams.toString()}`
+                              : `/order/${order.受注ID}`
+                          }
+                        >
+                          <Pencil className="h-4 w-4" aria-hidden="true" />
+                        </Link>
                       </Button>
                     </div>
                   </TableCell>
@@ -237,37 +245,37 @@ export function OrderList({
               : `全 ${totalCount.toLocaleString()} 件中 ${((currentPage - 1) * pageSize + 1).toLocaleString()} - ${Math.min(currentPage * pageSize, totalCount).toLocaleString()} 件を表示`}
           </p>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage <= 1}
-              className="bg-white"
-              onClick={() => {
-                const params = new URLSearchParams(searchParams.toString());
-                params.set("page", (currentPage - 1).toString());
-                startTransition(() => router.push(`?${params.toString()}`));
-              }}
-            >
-              前へ
-            </Button>
+            {currentPage <= 1 ? (
+              <Button variant="outline" size="sm" disabled className="bg-white">
+                前へ
+              </Button>
+            ) : (
+              <Button asChild variant="outline" size="sm" className="bg-white">
+                <Link
+                  href={`?${(() => { const p = new URLSearchParams(searchParams.toString()); p.set("page", String(currentPage - 1)); return p.toString(); })()}`}
+                >
+                  前へ
+                </Link>
+              </Button>
+            )}
             <div className="flex items-center gap-1 px-4 text-sm font-medium">
               <span className="text-slate-900">{currentPage}</span>
               <span className="text-slate-400">/</span>
               <span className="text-slate-400">{totalPages}</span>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage >= totalPages}
-              className="bg-white"
-              onClick={() => {
-                const params = new URLSearchParams(searchParams.toString());
-                params.set("page", (currentPage + 1).toString());
-                startTransition(() => router.push(`?${params.toString()}`));
-              }}
-            >
-              次へ
-            </Button>
+            {currentPage >= totalPages ? (
+              <Button variant="outline" size="sm" disabled className="bg-white">
+                次へ
+              </Button>
+            ) : (
+              <Button asChild variant="outline" size="sm" className="bg-white">
+                <Link
+                  href={`?${(() => { const p = new URLSearchParams(searchParams.toString()); p.set("page", String(currentPage + 1)); return p.toString(); })()}`}
+                >
+                  次へ
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>

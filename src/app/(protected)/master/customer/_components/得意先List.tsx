@@ -74,14 +74,15 @@ export function CustomerList({
             className="flex flex-col md:flex-row items-end gap-6"
           >
             <div className="space-y-2 flex-1 w-full">
-              <label className="text-xs font-semibold text-slate-500 ml-1">
+              <label htmlFor="customer-search-input" className="text-xs font-semibold text-slate-500 ml-1">
                 キーワード
               </label>
               <div className="relative">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" aria-hidden="true" />
                 <Input
+                  id="customer-search-input"
                   name="q"
-                  placeholder="検索ワードを入力..."
+                  placeholder="検索ワードを入力…"
                   defaultValue={searchParams.get("q") || ""}
                   className="pl-10 bg-white"
                 />
@@ -159,8 +160,9 @@ export function CustomerList({
                           setEditingItem(p);
                           setIsDialogOpen(true);
                         }}
+                        aria-label={`${p.得意先名} を編集`}
                       >
-                        <Pencil className="h-4 w-4 text-blue-600" />
+                        <Pencil className="h-4 w-4 text-blue-600" aria-hidden="true" />
                       </Button>
                     </div>
                   </TableCell>

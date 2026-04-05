@@ -19,8 +19,9 @@ export default async function NavigationServer() {
           <Link
             href="/"
             className="flex items-center justify-center text-lg font-semibold text-zinc-100 dark:text-zinc-100"
+            aria-label="受注管理システム ホームへ"
           >
-            <div className="p-2.5 bg-indigo-600 mr-2">
+            <div className="p-2.5 bg-indigo-600 mr-2" aria-hidden="true">
               <BarChart3 className="h-4 w-4" />
             </div>
             受注管理システム

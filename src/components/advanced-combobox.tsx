@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +44,7 @@ interface AdvancedComboboxProps<T> {
   onSelect: (item: T) => void;
   initialValue?: T; // 修正モード用の初期値
   className?: string;
+  triggerId?: string;
 }
 
 export function AdvancedCombobox<T>({
@@ -55,6 +56,7 @@ export function AdvancedCombobox<T>({
   onSelect,
   initialValue,
   className,
+  triggerId,
 }: AdvancedComboboxProps<T>) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -84,12 +86,16 @@ export function AdvancedCombobox<T>({
     fetchResults(debouncedQuery);
   }, [debouncedQuery, fetchResults]);
 
-  const visibleColumns = columns.filter((col) => col.visible !== false);
+  const visibleColumns = useMemo(
+    () => columns.filter((col) => col.visible !== false),
+    [columns],
+  );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          id={triggerId}
           variant="outline"
           role="combobox"
           aria-expanded={open}
@@ -101,7 +107,7 @@ export function AdvancedCombobox<T>({
           <span className="truncate">
             {selected ? String(selected[displayKey]) : placeholder}
           </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -109,12 +115,13 @@ export function AdvancedCombobox<T>({
         align="start"
       >
         <Command shouldFilter={false}>
-          <div className="flex items-center border-b px-3">
+          <div className="flex items-center border-b px-3 focus-within:ring-1 focus-within:ring-indigo-500">
             <CommandInput
-              placeholder="検索キーワードを入力..."
+              aria-label="検索キーワードを入力"
+              placeholder="検索キーワードを入力…"
               value={query}
               onValueChange={setQuery}
-              className="h-10 w-full bg-transparent outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-10 w-full bg-transparent focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             />
             {isLoading && (
               <Loader2 className="ml-2 h-4 w-4 animate-spin text-slate-400" />
@@ -167,6 +174,7 @@ export function AdvancedCombobox<T>({
                   >
                     <div className="w-8 flex justify-center shrink-0">
                       <Check
+                        aria-hidden="true"
                         className={cn(
                           "h-4 w-4 text-indigo-600",
                           isSelected ? "opacity-100" : "opacity-0",

@@ -118,7 +118,7 @@ export function LoginForm({
                       <FormControl>
                         <div className="relative">
                           <Input
-                            placeholder="パスワードを入力"
+                            placeholder="パスワードを入力…"
                             {...field}
                             type={showPassword ? "text" : "password"}
                           />
@@ -126,11 +126,12 @@ export function LoginForm({
                             type="button"
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                             onClick={() => setShowPassword(!showPassword)}
+                            aria-label={showPassword ? "パスワードを非表示" : "パスワードを表示"}
                           >
                             {showPassword ? (
-                              <EyeOff className="size-4" />
+                              <EyeOff className="size-4" aria-hidden="true" />
                             ) : (
-                              <Eye className="size-4" />
+                              <Eye className="size-4" aria-hidden="true" />
                             )}
                           </button>
                         </div>
