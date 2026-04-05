@@ -362,7 +362,7 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                         <Input
                           readOnly
                           tabIndex={-1}
-                          value={jpyCurrency.format(watchDetails?.[index]?.単価 || 0)}
+                          value={jpyCurrency.format(Number(watchDetails?.[index]?.単価) || 0)}
                           className="h-9 bg-slate-50 border-none font-mono text-right text-xs"
                         />
                       </TableCell>
