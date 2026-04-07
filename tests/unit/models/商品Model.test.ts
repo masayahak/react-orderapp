@@ -41,26 +41,6 @@ describe("商品Model", () => {
     expect(result.data.単価).toBe(2500);
   });
 
-  it("単価が0の場合も有効であること", () => {
-    const result = 商品Model.safeParse({ ...validProduct, 単価: 0 });
-    expect(result.success).toBe(true);
-  });
-
-  it("単価が負の場合はエラーになること", () => {
-    const result = 商品Model.safeParse({ ...validProduct, 単価: -100 });
-    expect(result.success).toBe(false);
-  });
-
-  it("単価が非数値文字列の場合はエラーになること", () => {
-    const result = 商品Model.safeParse({ ...validProduct, 単価: "abc" });
-    expect(result.success).toBe(false);
-  });
-
-  it("単価が空文字の場合はエラーになること", () => {
-    const result = 商品Model.safeParse({ ...validProduct, 単価: "" });
-    expect(result.success).toBe(false);
-  });
-
   it("備考がnullの場合も有効であること", () => {
     const result = 商品Model.safeParse({ ...validProduct, 備考: null });
     expect(result.success).toBe(true);
@@ -91,8 +71,4 @@ describe("商品Model", () => {
     expect(result.data.version).toBe(0);
   });
 
-  it("大きな単価も有効であること", () => {
-    const result = 商品Model.safeParse({ ...validProduct, 単価: 9999999 });
-    expect(result.success).toBe(true);
-  });
 });

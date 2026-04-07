@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { 得意先Model, type 得意先Input } from "@/db/model/得意先Model";
+import { 得意先Model, type 得意先Output } from "@/db/model/得意先Model";
 
-const validCustomer: 得意先Input = {
+const validCustomer: 得意先Output = {
   得意先名: "テスト株式会社",
   version: 0,
 };
@@ -37,7 +37,9 @@ describe("得意先Model", () => {
     expect(result.success).toBe(false);
     if (result.success) return;
 
-    const issue = result.error!.issues.filter((i) => i.path.includes("得意先名"));
+    const issue = result.error!.issues.filter((i) =>
+      i.path.includes("得意先名"),
+    );
     expect(issue.length).toBeGreaterThanOrEqual(1);
   });
 

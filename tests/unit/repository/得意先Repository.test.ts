@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { type InferSelectModel } from "drizzle-orm";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { type 得意先Output } from "@/db/model/得意先Model";
 import { 得意先 } from "@/db/schema";
 
@@ -56,9 +57,8 @@ describe("得意先Repository", () => {
 
   describe("Search", () => {
     it("キーワードにマッチする得意先一覧と総件数が返ること", async () => {
-      const { 得意先Repository } = await import(
-        "@/db/repository/得意先Repository"
-      );
+      const { 得意先Repository } =
+        await import("@/db/repository/得意先Repository");
 
       // 1回目: count クエリ
       mockDb.select.mockReturnValueOnce({
@@ -87,9 +87,8 @@ describe("得意先Repository", () => {
     });
 
     it("マッチしない場合は空配列と0が返ること", async () => {
-      const { 得意先Repository } = await import(
-        "@/db/repository/得意先Repository"
-      );
+      const { 得意先Repository } =
+        await import("@/db/repository/得意先Repository");
 
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValue({
@@ -115,9 +114,8 @@ describe("得意先Repository", () => {
     });
 
     it("ページングのoffsetが正しく計算されること（page=2, pageSize=10 → offset=10）", async () => {
-      const { 得意先Repository } = await import(
-        "@/db/repository/得意先Repository"
-      );
+      const { 得意先Repository } =
+        await import("@/db/repository/得意先Repository");
 
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValue({
@@ -137,20 +135,20 @@ describe("得意先Repository", () => {
         }),
       });
 
-      await 得意先Repository.Search("テスト", 2, 10);
-
+      await 得意先Repository.Search("テスト", 3, 10);
+      // .limit(10)で実行されたか？
       expect(mockLimit).toHaveBeenCalledWith(10);
-      expect(mockOffset).toHaveBeenCalledWith(10);
+      // .offset(20)で実行されたか？
+      expect(mockOffset).toHaveBeenCalledWith(20);
     });
   });
 
   // ─── SearchBy ────────────────────────────────────────
 
-  describe("SearchBy", () => {
+  describe("SearchById", () => {
     it("IDに一致する得意先が返ること", async () => {
-      const { 得意先Repository } = await import(
-        "@/db/repository/得意先Repository"
-      );
+      const { 得意先Repository } =
+        await import("@/db/repository/得意先Repository");
 
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValue({
@@ -160,15 +158,14 @@ describe("得意先Repository", () => {
         }),
       });
 
-      const result = await 得意先Repository.SearchBy("customer-uuid-001");
+      const result = await 得意先Repository.SearchById("customer-uuid-001");
 
       expect(result).toEqual(parsedOutput);
     });
 
     it("存在しないIDの場合はnullが返ること", async () => {
-      const { 得意先Repository } = await import(
-        "@/db/repository/得意先Repository"
-      );
+      const { 得意先Repository } =
+        await import("@/db/repository/得意先Repository");
 
       mockDb.select.mockReturnValueOnce({
         from: vi.fn().mockReturnValue({
@@ -178,7 +175,7 @@ describe("得意先Repository", () => {
         }),
       });
 
-      const result = await 得意先Repository.SearchBy("nonexistent-id");
+      const result = await 得意先Repository.SearchById("nonexistent-id");
 
       expect(result).toBeNull();
     });
@@ -188,9 +185,8 @@ describe("得意先Repository", () => {
 
   describe("Insert", () => {
     it("生成したUUIDとversion=0を付与してinsertされること", async () => {
-      const { 得意先Repository } = await import(
-        "@/db/repository/得意先Repository"
-      );
+      const { 得意先Repository } =
+        await import("@/db/repository/得意先Repository");
 
       const mockReturning = vi.fn().mockResolvedValue([dbRow]);
       const mockValues = vi.fn().mockReturnValue({ returning: mockReturning });
@@ -209,6 +205,7 @@ describe("得意先Repository", () => {
         得意先ID: "generated-uuid",
         version: 0,
       });
+      // insert 結果取得の .returning() が一度だけ実行されたか？
       expect(mockReturning).toHaveBeenCalledOnce();
     });
   });
@@ -217,13 +214,10 @@ describe("得意先Repository", () => {
 
   describe("Update", () => {
     it("versionをインクリメントしてupdateされること", async () => {
-      const { 得意先Repository } = await import(
-        "@/db/repository/得意先Repository"
-      );
+      const { 得意先Repository } =
+        await import("@/db/repository/得意先Repository");
 
-      const mockWhere = vi
-        .fn()
-        .mockResolvedValue({ rowCount: 1 });
+      const mockWhere = vi.fn().mockResolvedValue({ rowCount: 1 });
       const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
       mockDb.update.mockReturnValueOnce({ set: mockSet });
 
@@ -244,9 +238,8 @@ describe("得意先Repository", () => {
     });
 
     it("対象が存在しない場合（rowCount=0）はエラーがスローされること", async () => {
-      const { 得意先Repository } = await import(
-        "@/db/repository/得意先Repository"
-      );
+      const { 得意先Repository } =
+        await import("@/db/repository/得意先Repository");
 
       mockDb.update.mockReturnValueOnce({
         set: vi.fn().mockReturnValue({
@@ -270,9 +263,8 @@ describe("得意先Repository", () => {
 
   describe("Delete", () => {
     it("IDとversionの条件でdeleteされること", async () => {
-      const { 得意先Repository } = await import(
-        "@/db/repository/得意先Repository"
-      );
+      const { 得意先Repository } =
+        await import("@/db/repository/得意先Repository");
 
       const mockWhere = vi.fn().mockResolvedValue({ rowCount: 1 });
       mockDb.delete.mockReturnValueOnce({ where: mockWhere });
@@ -284,9 +276,8 @@ describe("得意先Repository", () => {
     });
 
     it("対象が存在しない場合（rowCount=0）はエラーがスローされること", async () => {
-      const { 得意先Repository } = await import(
-        "@/db/repository/得意先Repository"
-      );
+      const { 得意先Repository } =
+        await import("@/db/repository/得意先Repository");
 
       mockDb.delete.mockReturnValueOnce({
         where: vi.fn().mockResolvedValue({ rowCount: 0 }),

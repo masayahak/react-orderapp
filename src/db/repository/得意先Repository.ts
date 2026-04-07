@@ -44,7 +44,7 @@ const _impl = {
     };
   },
 
-  async findById(得意先ID: string): Promise<得意先Output | null> {
+  async searchById(得意先ID: string): Promise<得意先Output | null> {
     const results = await db
       .select()
       .from(得意先)
@@ -110,7 +110,7 @@ const _impl = {
 export const 得意先Repository = {
   // 参照系は cache でラップして Request Memoization を有効化
   Search: cache(_impl.search),
-  SearchBy: cache(_impl.findById),
+  SearchById: cache(_impl.searchById),
 
   // 更新系は副作用を伴うため cache しない
   Insert: _impl.insert,

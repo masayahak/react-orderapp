@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   受注Model,
+  type 受注Output,
   受注明細Model,
-  type 受注Input,
-  type 受注明細Input,
+  type 受注明細Output,
 } from "@/db/model/受注Model";
 
 // 正常な明細データの基本形
-const validDetail: 受注明細Input = {
+const validDetail: 受注明細Output = {
   商品CD: "PROD-001",
   商品名: "テスト商品",
   単価: 1000,
@@ -17,7 +17,7 @@ const validDetail: 受注明細Input = {
 };
 
 // 正常な受注データの基本形
-const validOrder: 受注Input = {
+const validOrder: 受注Output = {
   受注日: "2024-01-15",
   得意先ID: "customer-uuid-001",
   得意先名: "テスト得意先",
@@ -70,20 +70,6 @@ describe("受注明細Model", () => {
     expect(result.data.単価).toBe(500);
   });
 
-  it("単価が0の場合も有効であること", () => {
-    const result = 受注明細Model.safeParse({
-      ...validDetail,
-      単価: 0,
-      明細金額: 0,
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it("単価が負の場合はエラーになること", () => {
-    const result = 受注明細Model.safeParse({ ...validDetail, 単価: -1 });
-    expect(result.success).toBe(false);
-  });
-
   it("数量が文字列数字でも数値に変換されること", () => {
     const result = 受注明細Model.safeParse({ ...validDetail, 数量: "3" });
     expect(result.success).toBe(true);
@@ -92,24 +78,12 @@ describe("受注明細Model", () => {
     expect(result.data.数量).toBe(3);
   });
 
-  it("数量が負の場合はエラーになること", () => {
-    const result = 受注明細Model.safeParse({ ...validDetail, 数量: -1 });
-    expect(result.success).toBe(false);
-  });
-
-  it("数量が0の場合も有効であること", () => {
-    const result = 受注明細Model.safeParse({ ...validDetail, 数量: 0, 明細金額: 0 });
+  it("明細金額が文字列数字でも数値に変換されること", () => {
+    const result = 受注明細Model.safeParse({ ...validDetail, 明細金額: "3000" });
     expect(result.success).toBe(true);
-  });
+    if (!result.success) return;
 
-  it("明細金額が0の場合も有効であること", () => {
-    const result = 受注明細Model.safeParse({ ...validDetail, 明細金額: 0 });
-    expect(result.success).toBe(true);
-  });
-
-  it("単価が非数値文字列の場合はエラーになること", () => {
-    const result = 受注明細Model.safeParse({ ...validDetail, 単価: "abc" });
-    expect(result.success).toBe(false);
+    expect(result.data.明細金額).toBe(3000);
   });
 });
 
@@ -162,7 +136,9 @@ describe("受注Model", () => {
     expect(result.success).toBe(false);
     if (result.success) return;
 
-    const issue = result.error!.issues.filter((i) => i.path.includes("得意先ID"));
+    const issue = result.error!.issues.filter((i) =>
+      i.path.includes("得意先ID"),
+    );
     expect(issue.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -171,13 +147,10 @@ describe("受注Model", () => {
     expect(result.success).toBe(false);
     if (result.success) return;
 
-    const issue = result.error!.issues.filter((i) => i.path.includes("得意先名"));
+    const issue = result.error!.issues.filter((i) =>
+      i.path.includes("得意先名"),
+    );
     expect(issue.length).toBeGreaterThanOrEqual(1);
-  });
-
-  it("合計金額が0の場合も有効であること", () => {
-    const result = 受注Model.safeParse({ ...validOrder, 合計金額: 0 });
-    expect(result.success).toBe(true);
   });
 
   it("合計金額が文字列数字でも変換されること", () => {

@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-import { numericSchema } from "./共通チェック";
+import { nonNegativeNumericSchema } from "./nonNegativeNumericSchema";
 
 export const 商品Model = z.object({
   商品CD: z.string().min(1, "必須"),
   商品名: z.string().min(1, "必須"),
-  単価: numericSchema("単価は必須です"),
+  単価: nonNegativeNumericSchema("単価は必須です"),
   備考: z.string().optional().nullable(),
   version: z.number().default(0),
 });
