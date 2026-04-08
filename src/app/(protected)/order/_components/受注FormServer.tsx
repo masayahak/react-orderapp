@@ -23,7 +23,7 @@ export async function OrderFormServer({ id, mode }: OrderEditServerProps) {
   // 編集モード
   if (!id) notFound(); // IDがない編集呼び出しは404
 
-  const order = await 受注Repository.GetById(id);
+  const order = await 受注Repository.SearchById(id);
   if (!order) {
     notFound();
   }

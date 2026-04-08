@@ -75,7 +75,7 @@ const _impl = {
     };
   },
 
-  async findById(受注ID: string): Promise<受注Output | null> {
+  async searchById(受注ID: string): Promise<受注Output | null> {
     const headerResults = await db
       .select()
       .from(受注)
@@ -159,7 +159,7 @@ const _impl = {
 export const 受注Repository = {
   // 参照系: React.cache でメモ化
   Search: cache(_impl.search),
-  GetById: cache(_impl.findById),
+  SearchById: cache(_impl.searchById),
 
   // 更新・削除系: 副作用を伴うため cache しない
   Save: _impl.save,

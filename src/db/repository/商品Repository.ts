@@ -44,7 +44,7 @@ const _impl = {
     };
   },
 
-  async findByCd(商品CD: string): Promise<商品Output | null> {
+  async searchById(商品CD: string): Promise<商品Output | null> {
     const results = await db
       .select()
       .from(商品)
@@ -108,7 +108,7 @@ const _impl = {
 export const 商品Repository = {
   // 参照系: React.cache でメモ化
   Search: cache(_impl.search),
-  SearchBy: cache(_impl.findByCd),
+  SearchById: cache(_impl.searchById),
 
   // 更新系: キャッシュせずそのまま実行
   Insert: _impl.insert,
