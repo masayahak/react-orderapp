@@ -60,7 +60,7 @@ const _impl = {
       .insert(商品)
       .values({
         ...データ,
-        単価: データ.単価.toString(), // 輸送ポッド(string)へ変換
+        単価: データ.単価.toString(), // 浮動小数点の桁落ち防止
         version: 0, // 初期バージョン
       })
       .onConflictDoNothing({ target: 商品.商品CD })
@@ -76,7 +76,7 @@ const _impl = {
       .update(商品)
       .set({
         ...データ,
-        単価: データ.単価.toString(), // 輸送ポッド(string)へ変換
+        単価: データ.単価.toString(), // 浮動小数点の桁落ち防止
         version: 現在のversion + 1,
         updatedAt: new Date(),
       })

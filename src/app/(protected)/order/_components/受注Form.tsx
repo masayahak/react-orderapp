@@ -146,7 +146,6 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
       setShowDeleteAlert(false);
       const query = searchParams.toString();
       router.push(query ? `/order?${query}` : "/order");
-      router.refresh();
     } else {
       toast.error(res.error);
     }

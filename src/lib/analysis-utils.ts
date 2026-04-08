@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { dateStringSchema } from "@/db/model/dateStringSchema";
+
 // 基本的な型定義
 export type AnalysisPreset = "week" | "month" | "year";
 export type AnalysisInterval = "day" | "month";
@@ -9,22 +11,6 @@ export type AnalysisDuration = {
   from: string; // yyyy-MM-dd
   to: string; // yyyy-MM-dd
 };
-
-// 日付形式 (yyyy-MM-dd) かつ 実在する日付であることをバリデーション
-const dateStringSchema = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "日付形式(yyyy-MM-dd)で入力してください")
-  .refine((val) => {
-    const [y, m, d] = val.split("-").map(Number);
-    const date = new Date(y, m - 1, d);
-    // JSのDateは「2月31日」を「3月3日」などに自動変換するため、
-    // 入力値と変換後の値が一致するかで実在性を判定する
-    return (
-      date.getFullYear() === y &&
-      date.getMonth() === m - 1 &&
-      date.getDate() === d
-    );
-  }, "実在しない日付です");
 
 // プリセットから集計単位を一義的に決定する（関数従属の定義）
 const getIntervalByPreset = (preset: AnalysisPreset): AnalysisInterval => {
@@ -42,13 +28,10 @@ export const analysisParamsSchema = z
     direction: z.enum(["current", "prev", "next"]).default("current"),
   })
   .transform((data) => {
-    // presetからintervalを導出（関数従属をtransform内に封じ込める）
-    const interval: AnalysisInterval = data.preset === "year" ? "month" : "day";
-
     return {
       preset: data.preset,
       direction: data.direction,
-      interval,
+      interval: getIntervalByPreset(data.preset),
       duration: {
         from: data.from,
         to: data.to,
@@ -132,6 +115,8 @@ export const generateEmptyTrendData = (
   duration: AnalysisDuration,
   interval: AnalysisInterval,
 ) => {
+  // new Date("2024-01-15") はISO 8601形式のためUTC 00:00として解釈される。
+  // "-" を "/" に置換することでローカルタイム基準のパースになり、日付のズレを防ぐ。
   const start = new Date(duration.from.replace(/-/g, "/"));
   const end = new Date(duration.to.replace(/-/g, "/"));
   const result: { period: string; totalAmount: number; count: number }[] = [];

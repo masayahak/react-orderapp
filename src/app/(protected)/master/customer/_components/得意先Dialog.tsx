@@ -62,10 +62,9 @@ export function CustomerDialog({
   });
 
   const onSubmit = async (data: 得意先Input) => {
-    const validated = 得意先Model.parse(data);
     const payload = isEdit
-      ? { ...validated, 得意先ID: target?.得意先ID }
-      : validated;
+      ? { ...data, 得意先ID: target?.得意先ID }
+      : data;
     const res = await save得意先(payload, isEdit);
     if (res.success) {
       toast.success(isEdit ? "更新しました" : "登録しました");

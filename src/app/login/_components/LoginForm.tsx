@@ -70,8 +70,6 @@ export function LoginForm({
       },
       {
         onSuccess: () => {
-          // プリフェッチ済みのルートへ即座に遷移
-          router.refresh();
           router.push("/");
 
           // 画面遷移が完了するまで「くるくる」を維持するため、

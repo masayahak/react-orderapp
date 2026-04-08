@@ -149,14 +149,13 @@ describe("LoginForm コンポーネント", () => {
       });
     });
 
-    it("ログイン成功後に router.refresh() と router.push('/') が呼ばれること", async () => {
+    it("ログイン成功後に router.push('/') が呼ばれること", async () => {
       mockSignInEmail.mockImplementation(async (_creds: unknown, { onSuccess }: { onSuccess: () => void }) => {
         onSuccess();
       });
       render(<LoginForm />);
       fillAndSubmit("test@example.com", "password123");
       await waitFor(() => {
-        expect(mockRefresh).toHaveBeenCalled();
         expect(mockPush).toHaveBeenCalledWith("/");
       });
     });

@@ -60,12 +60,9 @@ export function ProductDialog({
         },
   });
 
-  // useFormで指定した「商品Input」でまずは受け取る
   const onSubmit = async (data: 商品Input) => {
-    // Zod による型変換と検証を保証する
-    const validated = 商品Model.parse(data);
     // 編集時は商品CDは入力値ではなく、編集前の商品CDを利用
-    const payload = isEdit ? { ...validated, 商品CD: target?.商品CD } : data;
+    const payload = isEdit ? { ...data, 商品CD: target?.商品CD } : data;
     const res = await save商品(payload, isEdit);
     if (res.success) {
       toast.success(isEdit ? "更新しました" : "登録しました");

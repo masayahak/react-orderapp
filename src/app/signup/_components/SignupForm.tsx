@@ -67,7 +67,6 @@ export function SignupForm({
       {
         onSuccess: () => {
           router.push("/");
-          router.refresh();
 
           // 画面遷移が完了するまで「くるくる」を維持するため、
           // ここでは setIsLoading(false) を意図的に呼ばない

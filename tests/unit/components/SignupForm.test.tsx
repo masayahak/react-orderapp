@@ -135,7 +135,7 @@ describe("SignupForm コンポーネント", () => {
       });
     });
 
-    it("登録成功後に router.push('/') と router.refresh() が呼ばれること", async () => {
+    it("登録成功後に router.push('/') が呼ばれること", async () => {
       mockSignUpEmail.mockImplementation(async (_creds: unknown, { onSuccess }: { onSuccess: () => void }) => {
         onSuccess();
       });
@@ -143,7 +143,6 @@ describe("SignupForm コンポーネント", () => {
       fillAndSubmit("testuser", "test@example.com", "password123");
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith("/");
-        expect(mockRefresh).toHaveBeenCalled();
       });
     });
   });
