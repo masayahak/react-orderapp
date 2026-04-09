@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { ZodError } from "zod";
 
-import { 受注Model, 受注Output } from "@/db/model/受注Model";
+import { 受注Input, 受注Model } from "@/db/model/受注Model";
 import { 受注Repository } from "@/db/repository/受注Repository";
 import { 商品Repository } from "@/db/repository/商品Repository";
 import { 得意先Repository } from "@/db/repository/得意先Repository";
@@ -40,7 +40,7 @@ export async function search商品(query: string) {
 }
 
 export async function save受注(
-  data: 受注Output,
+  data: 受注Input,
   mode: "create" | "edit",
   orderId?: string,
 ) {
@@ -48,8 +48,16 @@ export async function save受注(
   await requireSession();
 
   try {
-    // サーバーサイドで型を確認
-    const validated = 受注Model.parse(data);
+    // 明細金額・合計金額はサーバー側で計算する（クライアント値は信頼しない）
+    const 明細 = data.明細.map((item) => ({
+      ...item,
+      明細金額: (Number(item.単価) || 0) * (Number(item.数量) || 0),
+    }));
+    const validated = 受注Model.parse({
+      ...data,
+      合計金額: 明細.reduce((sum, item) => sum + item.明細金額, 0),
+      明細,
+    });
     await 受注Repository.Save(validated, mode, orderId);
 
     // 関連するページのキャッシュをクリア

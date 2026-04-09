@@ -110,18 +110,8 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
 
   const watchDetails = useWatch({ control: form.control, name: "明細" });
 
-  // 推奨
   const onSubmit = async (data: 受注Input) => {
-    const 明細 = data.明細.map((item) => ({
-      ...item,
-      明細金額: (Number(item.単価) || 0) * (Number(item.数量) || 0),
-    }));
-    const validated = 受注Model.parse({
-      ...data,
-      合計金額: 明細.reduce((sum, item) => sum + item.明細金額, 0),
-      明細,
-    });
-    const res = await save受注(validated, mode, initialData?.受注ID);
+    const res = await save受注(data, mode, initialData?.受注ID);
     if (res.success) {
       toast.success(
         mode === "create" ? "受注を登録しました" : "変更を保存しました",
@@ -201,7 +191,10 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
           <Card className="shadow-sm border-slate-200 overflow-hidden">
             <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                <label htmlFor="order-date" className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <label
+                  htmlFor="order-date"
+                  className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider"
+                >
                   受注日
                   <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-600">
                     必須
@@ -228,7 +221,10 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                 )}
               </div>
               <div className="space-y-2">
-                <label htmlFor="customer-combobox" className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <label
+                  htmlFor="customer-combobox"
+                  className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider"
+                >
                   得意先
                   <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-600">
                     必須
@@ -361,7 +357,9 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                         <Input
                           readOnly
                           tabIndex={-1}
-                          value={jpyCurrency.format(Number(watchDetails?.[index]?.単価) || 0)}
+                          value={jpyCurrency.format(
+                            Number(watchDetails?.[index]?.単価) || 0,
+                          )}
                           className="h-9 bg-slate-50 border-none font-mono text-right text-xs"
                         />
                       </TableCell>
@@ -382,7 +380,10 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                         <Input
                           readOnly
                           tabIndex={-1}
-                          value={jpyCurrency.format((Number(watchDetails?.[index]?.単価) || 0) * (Number(watchDetails?.[index]?.数量) || 0))}
+                          value={jpyCurrency.format(
+                            (Number(watchDetails?.[index]?.単価) || 0) *
+                              (Number(watchDetails?.[index]?.数量) || 0),
+                          )}
                           className="h-9 bg-slate-50 border-none font-mono text-right text-xs"
                         />
                       </TableCell>

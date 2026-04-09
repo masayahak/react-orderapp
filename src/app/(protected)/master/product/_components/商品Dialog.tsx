@@ -61,9 +61,7 @@ export function ProductDialog({
   });
 
   const onSubmit = async (data: 商品Input) => {
-    // 編集時は商品CDは入力値ではなく、編集前の商品CDを利用
-    const payload = isEdit ? { ...data, 商品CD: target?.商品CD } : data;
-    const res = await save商品(payload, isEdit);
+    const res = await save商品(data, isEdit);
     if (res.success) {
       toast.success(isEdit ? "更新しました" : "登録しました");
       onClose();
