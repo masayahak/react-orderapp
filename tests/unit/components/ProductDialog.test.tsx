@@ -1,11 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import {
-  delete商品,
-  save商品,
-} from "@/app/(protected)/master/product/actions";
 import { ProductDialog } from "@/app/(protected)/master/product/_components/商品Dialog";
+import { delete商品, save商品 } from "@/app/(protected)/master/product/actions";
 
 // ─── モック設定 ───────────────────────────────────────
 
@@ -56,7 +53,9 @@ describe("ProductDialog コンポーネント（新規登録）", () => {
   it("「保存する」ボタンと「キャンセル」ボタンが表示されること", () => {
     render(<ProductDialog target={null} onClose={vi.fn()} />);
 
-    expect(screen.getByRole("button", { name: "保存する" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "保存する" }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "キャンセル" }),
     ).toBeInTheDocument();
@@ -139,9 +138,7 @@ describe("ProductDialog コンポーネント（編集）", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "キャンセル" }));
 
-    expect(
-      screen.queryByText("本当に削除しますか？"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("本当に削除しますか？")).not.toBeInTheDocument();
   });
 
   it("削除実行ボタンが表示されること", () => {
@@ -175,7 +172,9 @@ describe("ProductDialog コンポーネント（保存フロー）", () => {
     fireEvent.change(screen.getByPlaceholderText("例: ガンダム"), {
       target: { value: "新商品" },
     });
-    fireEvent.submit(screen.getByRole("button", { name: "保存する" }).closest("form")!);
+    fireEvent.submit(
+      screen.getByRole("button", { name: "保存する" }).closest("form")!,
+    );
 
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith("登録しました");
@@ -193,7 +192,9 @@ describe("ProductDialog コンポーネント（保存フロー）", () => {
     fireEvent.change(screen.getByPlaceholderText("例: ガンダム"), {
       target: { value: "新商品" },
     });
-    fireEvent.submit(screen.getByRole("button", { name: "保存する" }).closest("form")!);
+    fireEvent.submit(
+      screen.getByRole("button", { name: "保存する" }).closest("form")!,
+    );
 
     await waitFor(() => {
       expect(onClose).toHaveBeenCalled();
@@ -201,7 +202,10 @@ describe("ProductDialog コンポーネント（保存フロー）", () => {
   });
 
   it("商品CD重複エラー時にフィールドエラーが表示されること", async () => {
-    vi.mocked(save商品).mockResolvedValueOnce({ success: false, error: "商品が既に存在します" });
+    vi.mocked(save商品).mockResolvedValueOnce({
+      success: false,
+      error: "商品が既に存在します",
+    });
 
     render(<ProductDialog target={null} onClose={vi.fn()} />);
     fireEvent.change(screen.getByPlaceholderText("例: RX-78-2"), {
@@ -210,7 +214,9 @@ describe("ProductDialog コンポーネント（保存フロー）", () => {
     fireEvent.change(screen.getByPlaceholderText("例: ガンダム"), {
       target: { value: "新商品" },
     });
-    fireEvent.submit(screen.getByRole("button", { name: "保存する" }).closest("form")!);
+    fireEvent.submit(
+      screen.getByRole("button", { name: "保存する" }).closest("form")!,
+    );
 
     await waitFor(() => {
       expect(screen.getByText("商品が既に存在します")).toBeInTheDocument();
@@ -219,7 +225,10 @@ describe("ProductDialog コンポーネント（保存フロー）", () => {
 
   it("その他の保存失敗時に toast.error が呼ばれること", async () => {
     const { toast } = await import("sonner");
-    vi.mocked(save商品).mockResolvedValueOnce({ success: false, error: "排他エラーが発生しました" });
+    vi.mocked(save商品).mockResolvedValueOnce({
+      success: false,
+      error: "排他エラーが発生しました",
+    });
 
     render(<ProductDialog target={null} onClose={vi.fn()} />);
     fireEvent.change(screen.getByPlaceholderText("例: RX-78-2"), {
@@ -228,7 +237,9 @@ describe("ProductDialog コンポーネント（保存フロー）", () => {
     fireEvent.change(screen.getByPlaceholderText("例: ガンダム"), {
       target: { value: "新商品" },
     });
-    fireEvent.submit(screen.getByRole("button", { name: "保存する" }).closest("form")!);
+    fireEvent.submit(
+      screen.getByRole("button", { name: "保存する" }).closest("form")!,
+    );
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith("排他エラーが発生しました");
@@ -240,7 +251,9 @@ describe("ProductDialog コンポーネント（保存フロー）", () => {
     vi.mocked(save商品).mockResolvedValueOnce({ success: true });
 
     render(<ProductDialog target={existingProduct} onClose={vi.fn()} />);
-    fireEvent.submit(screen.getByRole("button", { name: "保存する" }).closest("form")!);
+    fireEvent.submit(
+      screen.getByRole("button", { name: "保存する" }).closest("form")!,
+    );
 
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith("更新しました");
@@ -285,7 +298,10 @@ describe("ProductDialog コンポーネント（削除フロー）", () => {
 
   it("削除失敗時に toast.error が呼ばれること", async () => {
     const { toast } = await import("sonner");
-    vi.mocked(delete商品).mockResolvedValueOnce({ success: false, error: "削除に失敗しました" });
+    vi.mocked(delete商品).mockResolvedValueOnce({
+      success: false,
+      error: "削除に失敗しました",
+    });
 
     render(<ProductDialog target={existingProduct} onClose={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: "削除" }));

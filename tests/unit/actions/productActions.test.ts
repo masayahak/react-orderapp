@@ -48,7 +48,7 @@ describe("認可チェック", () => {
   it("save商品 実行時に requireAdmin が呼ばれること", async () => {
     const { requireAdmin } = await import("@/lib/auth-guard");
     const { 商品Repository } = await import("@/db/repository/商品Repository");
-    vi.mocked(商品Repository.Insert).mockResolvedValueOnce([{ 商品CD: "PROD-001" }]);
+    vi.mocked(商品Repository.Insert).mockResolvedValueOnce([{ 商品CD: "PROD-001" }] as never);
 
     await save商品(validProductData, false);
 
@@ -58,7 +58,7 @@ describe("認可チェック", () => {
   it("delete商品 実行時に requireAdmin が呼ばれること", async () => {
     const { requireAdmin } = await import("@/lib/auth-guard");
     const { 商品Repository } = await import("@/db/repository/商品Repository");
-    vi.mocked(商品Repository.Delete).mockResolvedValueOnce(undefined);
+    vi.mocked(商品Repository.Delete).mockResolvedValueOnce(undefined as never);
 
     await delete商品("PROD-001", 0);
 
@@ -77,7 +77,7 @@ describe("save商品 (新規登録)", () => {
     const { 商品Repository } = await import(
       "@/db/repository/商品Repository"
     );
-    vi.mocked(商品Repository.Insert).mockResolvedValueOnce([{ 商品CD: "PROD-001" }]);
+    vi.mocked(商品Repository.Insert).mockResolvedValueOnce([{ 商品CD: "PROD-001" }] as never);
 
     const result = await save商品(validProductData, false);
 
@@ -102,7 +102,7 @@ describe("save商品 (新規登録)", () => {
       "@/db/repository/商品Repository"
     );
     const { revalidatePath } = await import("next/cache");
-    vi.mocked(商品Repository.Insert).mockResolvedValueOnce([{ 商品CD: "PROD-001" }]);
+    vi.mocked(商品Repository.Insert).mockResolvedValueOnce([{ 商品CD: "PROD-001" }] as never);
 
     await save商品(validProductData, false);
 
@@ -176,7 +176,7 @@ describe("save商品 (更新)", () => {
     const { 商品Repository } = await import(
       "@/db/repository/商品Repository"
     );
-    vi.mocked(商品Repository.Update).mockResolvedValueOnce(undefined);
+    vi.mocked(商品Repository.Update).mockResolvedValueOnce(undefined as never);
 
     const result = await save商品(validProductData, true);
 
@@ -193,7 +193,7 @@ describe("save商品 (更新)", () => {
       "@/db/repository/商品Repository"
     );
     const { revalidatePath } = await import("next/cache");
-    vi.mocked(商品Repository.Update).mockResolvedValueOnce(undefined);
+    vi.mocked(商品Repository.Update).mockResolvedValueOnce(undefined as never);
 
     await save商品(validProductData, true);
 
@@ -226,7 +226,7 @@ describe("delete商品", () => {
     const { 商品Repository } = await import(
       "@/db/repository/商品Repository"
     );
-    vi.mocked(商品Repository.Delete).mockResolvedValueOnce(undefined);
+    vi.mocked(商品Repository.Delete).mockResolvedValueOnce(undefined as never);
 
     const result = await delete商品("PROD-001", 0);
 
@@ -239,7 +239,7 @@ describe("delete商品", () => {
       "@/db/repository/商品Repository"
     );
     const { revalidatePath } = await import("next/cache");
-    vi.mocked(商品Repository.Delete).mockResolvedValueOnce(undefined);
+    vi.mocked(商品Repository.Delete).mockResolvedValueOnce(undefined as never);
 
     await delete商品("PROD-001", 0);
 

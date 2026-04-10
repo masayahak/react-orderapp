@@ -1,11 +1,11 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { CustomerDialog } from "@/app/(protected)/master/customer/_components/得意先Dialog";
 import {
   delete得意先,
   save得意先,
 } from "@/app/(protected)/master/customer/actions";
-import { CustomerDialog } from "@/app/(protected)/master/customer/_components/得意先Dialog";
 
 // ─── モック設定 ───────────────────────────────────────
 
@@ -55,7 +55,9 @@ describe("CustomerDialog コンポーネント（新規登録）", () => {
   it("「保存する」ボタンと「キャンセル」ボタンが表示されること", () => {
     render(<CustomerDialog target={null} onClose={vi.fn()} />);
 
-    expect(screen.getByRole("button", { name: "保存する" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "保存する" }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "キャンセル" }),
     ).toBeInTheDocument();
@@ -132,9 +134,7 @@ describe("CustomerDialog コンポーネント（編集）", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "キャンセル" }));
 
-    expect(
-      screen.queryByText("本当に削除しますか？"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("本当に削除しますか？")).not.toBeInTheDocument();
   });
 
   it("削除実行ボタンが表示されること", () => {
@@ -165,7 +165,9 @@ describe("CustomerDialog コンポーネント（保存フロー）", () => {
     fireEvent.change(screen.getByPlaceholderText("例: ハカマタソフト"), {
       target: { value: "新規得意先" },
     });
-    fireEvent.submit(screen.getByRole("button", { name: "保存する" }).closest("form")!);
+    fireEvent.submit(
+      screen.getByRole("button", { name: "保存する" }).closest("form")!,
+    );
 
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith("登録しました");
@@ -180,7 +182,9 @@ describe("CustomerDialog コンポーネント（保存フロー）", () => {
     fireEvent.change(screen.getByPlaceholderText("例: ハカマタソフト"), {
       target: { value: "新規得意先" },
     });
-    fireEvent.submit(screen.getByRole("button", { name: "保存する" }).closest("form")!);
+    fireEvent.submit(
+      screen.getByRole("button", { name: "保存する" }).closest("form")!,
+    );
 
     await waitFor(() => {
       expect(onClose).toHaveBeenCalled();
@@ -189,13 +193,18 @@ describe("CustomerDialog コンポーネント（保存フロー）", () => {
 
   it("保存失敗時に toast.error が呼ばれること", async () => {
     const { toast } = await import("sonner");
-    vi.mocked(save得意先).mockResolvedValueOnce({ success: false, error: "保存に失敗しました" });
+    vi.mocked(save得意先).mockResolvedValueOnce({
+      success: false,
+      error: "保存に失敗しました",
+    });
 
     render(<CustomerDialog target={null} onClose={vi.fn()} />);
     fireEvent.change(screen.getByPlaceholderText("例: ハカマタソフト"), {
       target: { value: "新規得意先" },
     });
-    fireEvent.submit(screen.getByRole("button", { name: "保存する" }).closest("form")!);
+    fireEvent.submit(
+      screen.getByRole("button", { name: "保存する" }).closest("form")!,
+    );
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith("保存に失敗しました");
@@ -207,7 +216,9 @@ describe("CustomerDialog コンポーネント（保存フロー）", () => {
     vi.mocked(save得意先).mockResolvedValueOnce({ success: true });
 
     render(<CustomerDialog target={existingCustomer} onClose={vi.fn()} />);
-    fireEvent.submit(screen.getByRole("button", { name: "保存する" }).closest("form")!);
+    fireEvent.submit(
+      screen.getByRole("button", { name: "保存する" }).closest("form")!,
+    );
 
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith("更新しました");
@@ -252,7 +263,10 @@ describe("CustomerDialog コンポーネント（削除フロー）", () => {
 
   it("削除失敗時に toast.error が呼ばれること", async () => {
     const { toast } = await import("sonner");
-    vi.mocked(delete得意先).mockResolvedValueOnce({ success: false, error: "削除に失敗しました" });
+    vi.mocked(delete得意先).mockResolvedValueOnce({
+      success: false,
+      error: "削除に失敗しました",
+    });
 
     render(<CustomerDialog target={existingCustomer} onClose={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: "削除" }));

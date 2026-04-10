@@ -45,11 +45,11 @@ const formatCurrency = (amount: number) => {
 };
 
 export function OrderList({
-  initialData,
+  pageData,
   totalCount,
   pageSize,
 }: {
-  initialData: 受注HeaderOutput[];
+  pageData: 受注HeaderOutput[];
   totalCount: number;
   pageSize: number;
 }) {
@@ -201,7 +201,7 @@ export function OrderList({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {initialData.length === 0 ? (
+            {pageData.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={5}
@@ -214,7 +214,7 @@ export function OrderList({
                 </TableCell>
               </TableRow>
             ) : (
-              initialData.map((order) => (
+              pageData.map((order) => (
                 <TableRow
                   key={order.受注ID}
                   className="group hover:bg-slate-50/50 transition-colors"

@@ -69,9 +69,9 @@ describe("save受注", () => {
     const { 受注Repository } = await import(
       "@/db/repository/受注Repository"
     );
-    vi.mocked(受注Repository.Save).mockResolvedValueOnce(undefined);
+    vi.mocked(受注Repository.Save).mockResolvedValueOnce(undefined as never);
 
-    const result = await save受注(validOrderData as any, "create");
+    const result = await save受注(validOrderData, "create");
 
     expect(result).toEqual({ success: true });
     expect(受注Repository.Save).toHaveBeenCalledOnce();
@@ -81,10 +81,10 @@ describe("save受注", () => {
     const { 受注Repository } = await import(
       "@/db/repository/受注Repository"
     );
-    vi.mocked(受注Repository.Save).mockResolvedValueOnce(undefined);
+    vi.mocked(受注Repository.Save).mockResolvedValueOnce(undefined as never);
 
     await save受注(
-      { ...validOrderData, 受注ID: "order-uuid-001" } as any,
+      { ...validOrderData, 受注ID: "order-uuid-001" },
       "edit",
       "order-uuid-001",
     );
@@ -104,7 +104,7 @@ describe("save受注", () => {
       new Error("楽観的排他制御エラー"),
     );
 
-    const result = await save受注(validOrderData as any, "create");
+    const result = await save受注(validOrderData, "create");
 
     expect(result).toEqual({
       success: false,
@@ -119,7 +119,7 @@ describe("save受注", () => {
     // Error インスタンスではない値をスロー
     vi.mocked(受注Repository.Save).mockRejectedValueOnce("unknown error");
 
-    const result = await save受注(validOrderData as any, "create");
+    const result = await save受注(validOrderData, "create");
 
     expect(result).toEqual({
       success: false,
@@ -132,9 +132,9 @@ describe("save受注", () => {
       "@/db/repository/受注Repository"
     );
     const { revalidatePath } = await import("next/cache");
-    vi.mocked(受注Repository.Save).mockResolvedValueOnce(undefined);
+    vi.mocked(受注Repository.Save).mockResolvedValueOnce(undefined as never);
 
-    await save受注(validOrderData as any, "create");
+    await save受注(validOrderData, "create");
 
     expect(revalidatePath).toHaveBeenCalledWith("/dashboard");
     expect(revalidatePath).toHaveBeenCalledWith("/order");
@@ -150,7 +150,7 @@ describe("delete受注", () => {
     const { 受注Repository } = await import(
       "@/db/repository/受注Repository"
     );
-    vi.mocked(受注Repository.Delete).mockResolvedValueOnce(undefined);
+    vi.mocked(受注Repository.Delete).mockResolvedValueOnce(undefined as never);
 
     const result = await delete受注("order-uuid-001", 0);
 
@@ -193,7 +193,7 @@ describe("delete受注", () => {
       "@/db/repository/受注Repository"
     );
     const { revalidatePath } = await import("next/cache");
-    vi.mocked(受注Repository.Delete).mockResolvedValueOnce(undefined);
+    vi.mocked(受注Repository.Delete).mockResolvedValueOnce(undefined as never);
 
     await delete受注("order-uuid-001", 0);
 
@@ -219,8 +219,6 @@ describe("search得意先", () => {
           電話番号: "03-1234-5678",
           備考: null,
           version: 0,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
         {
           得意先ID: "uuid-002",
@@ -228,8 +226,6 @@ describe("search得意先", () => {
           電話番号: null,
           備考: null,
           version: 1,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
       ],
       totalCount: 2,
@@ -274,8 +270,6 @@ describe("search商品", () => {
           単価: 1000,
           備考: null,
           version: 0,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
         {
           商品CD: "PROD-002",
@@ -283,8 +277,6 @@ describe("search商品", () => {
           単価: 2500,
           備考: "在庫注意",
           version: 0,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
       ],
       totalCount: 2,

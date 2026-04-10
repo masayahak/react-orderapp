@@ -21,7 +21,7 @@ export async function ProductListServer({
 
   return (
     <ProductList
-      initialData={items}
+      pageData={items}
       totalCount={totalCount}
       pageSize={pageSize}
     />

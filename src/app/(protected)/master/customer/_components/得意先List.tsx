@@ -20,11 +20,11 @@ import { 得意先Output } from "@/db/model/得意先Model";
 import { CustomerDialog } from "./得意先Dialog";
 
 export function CustomerList({
-  initialData,
+  pageData,
   totalCount,
   pageSize,
 }: {
-  initialData: 得意先Output[];
+  pageData: 得意先Output[];
   totalCount: number;
   pageSize: number;
 }) {
@@ -121,7 +121,7 @@ export function CustomerList({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {initialData.length === 0 ? (
+            {pageData.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={4}
@@ -131,7 +131,7 @@ export function CustomerList({
                 </TableCell>
               </TableRow>
             ) : (
-              initialData.map((p) => (
+              pageData.map((p) => (
                 <TableRow
                   key={p.得意先ID}
                   className="hover:bg-muted/30 transition-colors"

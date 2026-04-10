@@ -20,11 +20,11 @@ import { 商品Output } from "@/db/model/商品Model";
 import { ProductDialog } from "./商品Dialog";
 
 export function ProductList({
-  initialData,
+  pageData,
   totalCount,
   pageSize,
 }: {
-  initialData: 商品Output[];
+  pageData: 商品Output[];
   totalCount: number;
   pageSize: number;
 }) {
@@ -128,7 +128,7 @@ export function ProductList({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {initialData.length === 0 ? (
+            {pageData.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={5}
@@ -138,7 +138,7 @@ export function ProductList({
                 </TableCell>
               </TableRow>
             ) : (
-              initialData.map((p) => (
+              pageData.map((p) => (
                 <TableRow
                   key={p.商品CD}
                   className="hover:bg-muted/30 transition-colors"

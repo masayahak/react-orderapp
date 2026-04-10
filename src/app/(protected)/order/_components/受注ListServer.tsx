@@ -26,7 +26,7 @@ export async function OrderListServer({
 
   return (
     <OrderList
-      initialData={items}
+      pageData={items}
       totalCount={totalCount}
       pageSize={pageSize}
     />

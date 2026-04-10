@@ -61,7 +61,7 @@ const sampleOrders = [
 describe("OrderList コンポーネント", () => {
   it("受注データが表示されること", () => {
     render(
-      <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={2} pageSize={20} />,
     );
 
     expect(screen.getByText("テスト株式会社")).toBeInTheDocument();
@@ -69,7 +69,7 @@ describe("OrderList コンポーネント", () => {
   });
 
   it("データが空の場合に「該当する受注データは見つかりませんでした」が表示されること", () => {
-    render(<OrderList initialData={[]} totalCount={0} pageSize={20} />);
+    render(<OrderList pageData={[]} totalCount={0} pageSize={20} />);
 
     expect(
       screen.getByText("該当する受注データは見つかりませんでした"),
@@ -78,7 +78,7 @@ describe("OrderList コンポーネント", () => {
 
   it("受注IDが短縮表示されること（先頭8文字）", () => {
     render(
-      <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={2} pageSize={20} />,
     );
 
     // 受注ID の先頭8文字が表示される
@@ -88,7 +88,7 @@ describe("OrderList コンポーネント", () => {
 
   it("ページングの総件数・表示範囲が正しく表示されること", () => {
     render(
-      <OrderList initialData={sampleOrders} totalCount={45} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={45} pageSize={20} />,
     );
 
     // 1ページ目なので 1-20 件を表示
@@ -97,14 +97,14 @@ describe("OrderList コンポーネント", () => {
   });
 
   it("データが0件の場合に「該当データなし」が表示されること", () => {
-    render(<OrderList initialData={[]} totalCount={0} pageSize={20} />);
+    render(<OrderList pageData={[]} totalCount={0} pageSize={20} />);
 
     expect(screen.getByText("該当データなし")).toBeInTheDocument();
   });
 
   it("1ページ目では「前へ」ボタンが無効化されること", () => {
     render(
-      <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={2} pageSize={20} />,
     );
 
     const prevButton = screen.getByRole("button", { name: "前へ" });
@@ -113,7 +113,7 @@ describe("OrderList コンポーネント", () => {
 
   it("最終ページでは「次へ」ボタンが無効化されること", () => {
     render(
-      <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={2} pageSize={20} />,
     );
 
     const nextButton = screen.getByRole("button", { name: "次へ" });
@@ -122,7 +122,7 @@ describe("OrderList コンポーネント", () => {
 
   it("複数ページある場合は「次へ」ボタンが有効になること", () => {
     render(
-      <OrderList initialData={sampleOrders} totalCount={100} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={100} pageSize={20} />,
     );
 
     const nextButton = screen.getByRole("link", { name: "次へ" });
@@ -131,7 +131,7 @@ describe("OrderList コンポーネント", () => {
 
   it("テーブルヘッダが正しく表示されること", () => {
     render(
-      <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={2} pageSize={20} />,
     );
 
     expect(screen.getByText("受注ID")).toBeInTheDocument();
@@ -143,7 +143,7 @@ describe("OrderList コンポーネント", () => {
 
   it("検索フォームが表示されること", () => {
     render(
-      <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={2} pageSize={20} />,
     );
 
     expect(screen.getByText("開始日")).toBeInTheDocument();
@@ -154,7 +154,7 @@ describe("OrderList コンポーネント", () => {
 
   it("「新規受注」ボタンが表示されること", () => {
     render(
-      <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={2} pageSize={20} />,
     );
 
     expect(screen.getByRole("link", { name: /新規受注/ })).toBeInTheDocument();
@@ -162,7 +162,7 @@ describe("OrderList コンポーネント", () => {
 
   it("ページ番号が正しく表示されること", () => {
     render(
-      <OrderList initialData={sampleOrders} totalCount={100} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={100} pageSize={20} />,
     );
 
     // 現在のページ数 / 総ページ数
@@ -177,7 +177,7 @@ describe("OrderList インタラクション", () => {
     mockSearchParamsToString.mockReturnValue("");
 
     render(
-      <OrderList initialData={sampleOrders} totalCount={100} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={100} pageSize={20} />,
     );
     fireEvent.click(screen.getByRole("link", { name: "次へ" }));
 
@@ -191,7 +191,7 @@ describe("OrderList インタラクション", () => {
     mockSearchParamsToString.mockReturnValue("page=2");
 
     render(
-      <OrderList initialData={sampleOrders} totalCount={100} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={100} pageSize={20} />,
     );
     fireEvent.click(screen.getByRole("link", { name: "前へ" }));
 
@@ -203,7 +203,7 @@ describe("OrderList インタラクション", () => {
     mockSearchParamsToString.mockReturnValue("");
 
     render(
-      <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={2} pageSize={20} />,
     );
 
     fireEvent.change(screen.getByPlaceholderText("検索ワードを入力…"), {
@@ -222,7 +222,7 @@ describe("OrderList インタラクション", () => {
     mockSearchParamsToString.mockReturnValue("");
 
     render(
-      <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={2} pageSize={20} />,
     );
     fireEvent.click(screen.getByRole("link", { name: /新規受注/ }));
 
@@ -234,7 +234,7 @@ describe("OrderList インタラクション", () => {
     mockSearchParamsToString.mockReturnValue("page=2&q=test");
 
     render(
-      <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={2} pageSize={20} />,
     );
     fireEvent.click(screen.getByRole("link", { name: /新規受注/ }));
 
@@ -246,7 +246,7 @@ describe("OrderList インタラクション", () => {
     mockSearchParamsToString.mockReturnValue("");
 
     render(
-      <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={2} pageSize={20} />,
     );
 
     const editButtons = screen.getAllByRole("link", { name: /を修正/ });
@@ -262,7 +262,7 @@ describe("OrderList インタラクション", () => {
     mockSearchParamsToString.mockReturnValue("page=2");
 
     render(
-      <OrderList initialData={sampleOrders} totalCount={2} pageSize={20} />,
+      <OrderList pageData={sampleOrders} totalCount={2} pageSize={20} />,
     );
 
     const editButtons = screen.getAllByRole("link", { name: /を修正/ });

@@ -20,6 +20,7 @@ vi.mock("@/lib/auth", () => ({
 }));
 
 import { redirect } from "next/navigation";
+
 import { auth } from "@/lib/auth";
 import { requireAdmin, requireSession } from "@/lib/auth-guard";
 
@@ -38,7 +39,9 @@ describe("requireSession", () => {
   });
 
   it("認証済みの場合 session が返ること", async () => {
-    const mockSession = { user: { id: "user-id", name: "テスト", role: "user" } };
+    const mockSession = {
+      user: { id: "user-id", name: "テスト", role: "user" },
+    };
     vi.mocked(auth.api.getSession).mockResolvedValueOnce(mockSession as never);
 
     const session = await requireSession();
@@ -63,7 +66,9 @@ describe("requireAdmin", () => {
   });
 
   it("一般ユーザー(role: user)の場合 redirect('/') が呼ばれること", async () => {
-    const mockSession = { user: { id: "user-id", name: "一般ユーザー", role: "user" } };
+    const mockSession = {
+      user: { id: "user-id", name: "一般ユーザー", role: "user" },
+    };
     vi.mocked(auth.api.getSession).mockResolvedValueOnce(mockSession as never);
 
     await expect(requireAdmin()).rejects.toThrow("NEXT_REDIRECT:/");
@@ -71,7 +76,9 @@ describe("requireAdmin", () => {
   });
 
   it("admin ユーザーの場合 session が返ること", async () => {
-    const mockSession = { user: { id: "admin-id", name: "管理者", role: "admin" } };
+    const mockSession = {
+      user: { id: "admin-id", name: "管理者", role: "admin" },
+    };
     vi.mocked(auth.api.getSession).mockResolvedValueOnce(mockSession as never);
 
     const session = await requireAdmin();

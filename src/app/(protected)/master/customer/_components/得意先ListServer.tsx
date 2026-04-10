@@ -21,7 +21,7 @@ export async function CustomerListServer({
 
   return (
     <CustomerList
-      initialData={items}
+      pageData={items}
       totalCount={totalCount}
       pageSize={pageSize}
     />
