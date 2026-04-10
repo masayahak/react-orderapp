@@ -3,8 +3,7 @@
 # personal
 /.personal
 
-# agent
-/.agents/
+# claude
 /.claude/
 
 # migrations
