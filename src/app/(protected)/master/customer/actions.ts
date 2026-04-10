@@ -15,7 +15,7 @@ export async function save得意先(data: 得意先Input, isEdit: boolean) {
     const validated = 得意先Model.parse(data);
     if (isEdit) {
       if (!validated.得意先ID) {
-        throw new Error("更新対象のIDが指定されていません。");
+        return { success: false, error: "更新対象のIDが指定されていません。" };
       }
       await 得意先Repository.Update(
         validated.得意先ID,

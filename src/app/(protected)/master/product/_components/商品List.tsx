@@ -35,17 +35,11 @@ export function ProductList({
   const currentPage = Number(searchParams.get("page")) || 1;
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const updateNavigation = (newParams: URLSearchParams) => {
-    startTransition(() => {
-      // shallow: true を使わず、サーバーコンポーネントの再実行を促す
-      router.push(`?${newParams.toString()}`);
-    });
-  };
-
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", newPage.toString());
-    updateNavigation(params);
+    // shallow: true を使わず、サーバーコンポーネントの再実行を促す
+    startTransition(() => router.push(`?${params.toString()}`));
   };
 
   const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
@@ -58,11 +52,12 @@ export function ProductList({
     else params.delete("q");
 
     params.set("page", "1");
-    updateNavigation(params);
+    // shallow: true を使わず、サーバーコンポーネントの再実行を促す
+    startTransition(() => router.push(`?${params.toString()}`));
   };
 
-  const [editingItem, setEditingItem] = useState<商品Output | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  type DialogState = { open: false } | { open: true; item: 商品Output | null };
+  const [dialog, setDialog] = useState<DialogState>({ open: false });
 
   return (
     <div className="space-y-4">
@@ -73,11 +68,17 @@ export function ProductList({
             className="flex flex-col md:flex-row items-end gap-6"
           >
             <div className="space-y-2 flex-1 w-full">
-              <label htmlFor="product-search-input" className="text-xs font-semibold text-slate-500 ml-1">
+              <label
+                htmlFor="product-search-input"
+                className="text-xs font-semibold text-slate-500 ml-1"
+              >
                 キーワード (商品CD・商品名)
               </label>
               <div className="relative">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" aria-hidden="true" />
+                <Search
+                  className="absolute left-3 top-2.5 h-4 w-4 text-slate-400"
+                  aria-hidden="true"
+                />
                 <Input
                   id="product-search-input"
                   name="q"
@@ -105,8 +106,7 @@ export function ProductList({
                 type="button"
                 className=" ml-12 w-full md:w-auto bg-blue-600 hover:bg-blue-800"
                 onClick={() => {
-                  setEditingItem(null);
-                  setIsDialogOpen(true);
+                  setDialog({ open: true, item: null });
                 }}
               >
                 <Plus className="mr-2 h-4 w-4" /> 新規追加
@@ -161,12 +161,14 @@ export function ProductList({
                         variant="ghost"
                         size="icon"
                         onClick={() => {
-                          setEditingItem(p);
-                          setIsDialogOpen(true);
+                          setDialog({ open: true, item: p });
                         }}
                         aria-label={`${p.商品名} を編集`}
                       >
-                        <Pencil className="h-4 w-4 text-blue-600" aria-hidden="true" />
+                        <Pencil
+                          className="h-4 w-4 text-blue-600"
+                          aria-hidden="true"
+                        />
                       </Button>
                     </div>
                   </TableCell>
@@ -208,10 +210,10 @@ export function ProductList({
         </div>
       </div>
 
-      {isDialogOpen && (
+      {dialog.open && (
         <ProductDialog
-          target={editingItem}
-          onClose={() => setIsDialogOpen(false)}
+          target={dialog.item}
+          onClose={() => setDialog({ open: false })}
         />
       )}
     </div>

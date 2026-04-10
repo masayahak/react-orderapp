@@ -35,17 +35,11 @@ export function CustomerList({
   const currentPage = Number(searchParams.get("page")) || 1;
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const updateNavigation = (newParams: URLSearchParams) => {
-    startTransition(() => {
-      // shallow: true を使わず、サーバーコンポーネントの再実行を促す
-      router.push(`?${newParams.toString()}`);
-    });
-  };
-
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", newPage.toString());
-    updateNavigation(params);
+    // shallow: true を使わず、サーバーコンポーネントの再実行を促す
+    startTransition(() => router.push(`?${params.toString()}`));
   };
 
   const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
@@ -58,11 +52,12 @@ export function CustomerList({
     else params.delete("q");
 
     params.set("page", "1");
-    updateNavigation(params);
+    // shallow: true を使わず、サーバーコンポーネントの再実行を促す
+    startTransition(() => router.push(`?${params.toString()}`));
   };
 
-  const [editingItem, setEditingItem] = useState<得意先Output | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  type DialogState = { open: false } | { open: true; item: 得意先Output | null };
+  const [dialog, setDialog] = useState<DialogState>({ open: false });
 
   return (
     <div className="space-y-4">
@@ -103,10 +98,7 @@ export function CustomerList({
               <Button
                 type="button"
                 className="ml-12 w-full md:w-auto bg-blue-600 hover:bg-blue-800"
-                onClick={() => {
-                  setEditingItem(null);
-                  setIsDialogOpen(true);
-                }}
+                onClick={() => setDialog({ open: true, item: null })}
               >
                 <Plus className="mr-2 h-4 w-4" /> 新規追加
               </Button>
@@ -156,10 +148,7 @@ export function CustomerList({
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => {
-                          setEditingItem(p);
-                          setIsDialogOpen(true);
-                        }}
+                        onClick={() => setDialog({ open: true, item: p })}
                         aria-label={`${p.得意先名} を編集`}
                       >
                         <Pencil className="h-4 w-4 text-blue-600" aria-hidden="true" />
@@ -203,10 +192,10 @@ export function CustomerList({
         </div>
       </div>
 
-      {isDialogOpen && (
+      {dialog.open && (
         <CustomerDialog
-          target={editingItem}
-          onClose={() => setIsDialogOpen(false)}
+          target={dialog.item}
+          onClose={() => setDialog({ open: false })}
         />
       )}
     </div>

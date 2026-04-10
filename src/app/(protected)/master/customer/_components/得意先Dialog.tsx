@@ -91,7 +91,7 @@ export function CustomerDialog({
   return (
     <>
       <Dialog open onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[450px]">
+        <DialogContent className="sm:max-w-[450px]" aria-describedby={undefined}>
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">
               {isEdit ? "得意先情報の修正" : "得意先の新規登録"}

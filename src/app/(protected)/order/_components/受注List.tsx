@@ -65,9 +65,18 @@ export function OrderList({
     const formData = new FormData(e.currentTarget);
     const params = new URLSearchParams(searchParams.toString());
 
-    params.set("q", formData.get("q") as string);
-    params.set("startDate", formData.get("startDate") as string);
-    params.set("endDate", formData.get("endDate") as string);
+    const q = formData.get("q") as string;
+    const startDate = formData.get("startDate") as string;
+    const endDate = formData.get("endDate") as string;
+
+    if (q) params.set("q", q);
+    else params.delete("q");
+    if (startDate) params.set("startDate", startDate);
+    else params.delete("startDate");
+    if (endDate) params.set("endDate", endDate);
+    else params.delete("endDate");
+
+    // 新しい条件で検索する際は、必ず1ページ目に戻すのが鉄則
     params.set("page", "1");
 
     startTransition(() => router.push(`?${params.toString()}`));
@@ -84,7 +93,10 @@ export function OrderList({
           >
             <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
               <div className="space-y-2">
-                <label htmlFor="startDate-input" className="text-xs font-semibold text-slate-500 ml-1">
+                <label
+                  htmlFor="startDate-input"
+                  className="text-xs font-semibold text-slate-500 ml-1"
+                >
                   開始日
                 </label>
                 <Input
@@ -97,7 +109,10 @@ export function OrderList({
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="endDate-input" className="text-xs font-semibold text-slate-500 ml-1">
+                <label
+                  htmlFor="endDate-input"
+                  className="text-xs font-semibold text-slate-500 ml-1"
+                >
                   終了日
                 </label>
                 <Input
@@ -112,11 +127,17 @@ export function OrderList({
             </div>
 
             <div className="space-y-2 flex-1 w-full">
-              <label htmlFor="q-input" className="text-xs font-semibold text-slate-500 ml-1">
+              <label
+                htmlFor="q-input"
+                className="text-xs font-semibold text-slate-500 ml-1"
+              >
                 キーワード (得意先・商品)
               </label>
               <div className="relative">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" aria-hidden="true" />
+                <Search
+                  className="absolute left-3 top-2.5 h-4 w-4 text-slate-400"
+                  aria-hidden="true"
+                />
                 <Input
                   id="q-input"
                   name="q"
@@ -140,7 +161,10 @@ export function OrderList({
                   "検索"
                 )}
               </Button>
-              <Button asChild className="w-full md:w-auto bg-blue-600 hover:bg-blue-800">
+              <Button
+                asChild
+                className="w-full md:w-auto bg-blue-600 hover:bg-blue-800"
+              >
                 <Link
                   href={
                     searchParams.toString()
@@ -252,7 +276,11 @@ export function OrderList({
             ) : (
               <Button asChild variant="outline" size="sm" className="bg-white">
                 <Link
-                  href={`?${(() => { const p = new URLSearchParams(searchParams.toString()); p.set("page", String(currentPage - 1)); return p.toString(); })()}`}
+                  href={`?${(() => {
+                    const p = new URLSearchParams(searchParams.toString());
+                    p.set("page", String(currentPage - 1));
+                    return p.toString();
+                  })()}`}
                 >
                   前へ
                 </Link>
@@ -270,7 +298,11 @@ export function OrderList({
             ) : (
               <Button asChild variant="outline" size="sm" className="bg-white">
                 <Link
-                  href={`?${(() => { const p = new URLSearchParams(searchParams.toString()); p.set("page", String(currentPage + 1)); return p.toString(); })()}`}
+                  href={`?${(() => {
+                    const p = new URLSearchParams(searchParams.toString());
+                    p.set("page", String(currentPage + 1));
+                    return p.toString();
+                  })()}`}
                 >
                   次へ
                 </Link>
