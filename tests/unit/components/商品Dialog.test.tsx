@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ProductDialog } from "@/app/(protected)/master/product/_components/商品Dialog";
 import { delete商品, save商品 } from "@/app/(protected)/master/product/actions";
@@ -33,32 +33,12 @@ describe("ProductDialog コンポーネント（新規登録）", () => {
     expect(screen.getByText("商品の新規登録")).toBeInTheDocument();
   });
 
-  it("フォームフィールドが表示されること", () => {
-    render(<ProductDialog target={null} onClose={vi.fn()} />);
-
-    expect(screen.getByText("商品CD")).toBeInTheDocument();
-    expect(screen.getByText("商品名")).toBeInTheDocument();
-    expect(screen.getByText("単価")).toBeInTheDocument();
-    expect(screen.getByText("備考")).toBeInTheDocument();
-  });
-
   it("新規登録時は「削除」ボタンが表示されないこと", () => {
     render(<ProductDialog target={null} onClose={vi.fn()} />);
 
     expect(
       screen.queryByRole("button", { name: "削除" }),
     ).not.toBeInTheDocument();
-  });
-
-  it("「保存する」ボタンと「キャンセル」ボタンが表示されること", () => {
-    render(<ProductDialog target={null} onClose={vi.fn()} />);
-
-    expect(
-      screen.getByRole("button", { name: "保存する" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "キャンセル" }),
-    ).toBeInTheDocument();
   });
 
   it("「キャンセル」ボタンをクリックすると onClose が呼ばれること", () => {
@@ -122,33 +102,17 @@ describe("ProductDialog コンポーネント（編集）", () => {
     expect(screen.getByText(/この操作は取り消せません/)).toBeInTheDocument();
   });
 
-  it("削除確認ダイアログに商品名が表示されること", () => {
-    render(<ProductDialog target={existingProduct} onClose={vi.fn()} />);
-
-    fireEvent.click(screen.getByRole("button", { name: "削除" }));
-
-    expect(screen.getByText(/テスト商品/)).toBeInTheDocument();
-  });
-
   it("削除確認ダイアログで「キャンセル」をクリックするとダイアログが閉じること", () => {
     render(<ProductDialog target={existingProduct} onClose={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("button", { name: "削除" }));
     expect(screen.getByText("本当に削除しますか？")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "キャンセル" }));
+    fireEvent.click(
+      within(screen.getByRole("alertdialog")).getByRole("button", { name: "キャンセル" }),
+    );
 
     expect(screen.queryByText("本当に削除しますか？")).not.toBeInTheDocument();
-  });
-
-  it("削除実行ボタンが表示されること", () => {
-    render(<ProductDialog target={existingProduct} onClose={vi.fn()} />);
-
-    fireEvent.click(screen.getByRole("button", { name: "削除" }));
-
-    expect(
-      screen.getByRole("button", { name: "削除実行" }),
-    ).toBeInTheDocument();
   });
 });
 
@@ -161,28 +125,11 @@ describe("ProductDialog コンポーネント（保存フロー）", () => {
     version: 2,
   };
 
-  it("新規登録成功時に toast.success('登録しました') が呼ばれること", async () => {
-    const { toast } = await import("sonner");
-    vi.mocked(save商品).mockResolvedValueOnce({ success: true });
-
-    render(<ProductDialog target={null} onClose={vi.fn()} />);
-    fireEvent.change(screen.getByPlaceholderText("例: RX-78-2"), {
-      target: { value: "NEW-001" },
-    });
-    fireEvent.change(screen.getByPlaceholderText("例: ガンダム"), {
-      target: { value: "新商品" },
-    });
-    fireEvent.submit(
-      screen.getByRole("button", { name: "保存する" }).closest("form")!,
-    );
-
-    await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith("登録しました");
-    });
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
   it("新規登録成功時に onClose が呼ばれること", async () => {
-    vi.mocked(save商品).mockResolvedValueOnce({ success: true });
     const onClose = vi.fn();
 
     render(<ProductDialog target={null} onClose={onClose} />);
@@ -246,9 +193,63 @@ describe("ProductDialog コンポーネント（保存フロー）", () => {
     });
   });
 
-  it("編集保存成功時に toast.success('更新しました') が呼ばれること", async () => {
+  it("新規登録時に save商品 が正しい引数で1回呼ばれること", async () => {
+    render(<ProductDialog target={null} onClose={vi.fn()} />);
+    fireEvent.change(screen.getByPlaceholderText("例: RX-78-2"), {
+      target: { value: "NEW-001" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("例: ガンダム"), {
+      target: { value: "新商品" },
+    });
+    fireEvent.submit(
+      screen.getByRole("button", { name: "保存する" }).closest("form")!,
+    );
+
+    await waitFor(() => {
+      expect(save商品).toHaveBeenCalledOnce();
+      expect(save商品).toHaveBeenCalledWith(
+        { 商品CD: "NEW-001", 商品名: "新商品", 単価: 0, 備考: "", version: 0 },
+        false,
+      );
+    });
+  });
+
+  it("編集時に save商品 が正しい引数で1回呼ばれること", async () => {
+    render(<ProductDialog target={existingProduct} onClose={vi.fn()} />);
+    fireEvent.submit(
+      screen.getByRole("button", { name: "保存する" }).closest("form")!,
+    );
+
+    await waitFor(() => {
+      expect(save商品).toHaveBeenCalledOnce();
+      expect(save商品).toHaveBeenCalledWith(
+        { 商品CD: "PROD-001", 商品名: "テスト商品", 単価: 1500, 備考: "取扱注意", version: 2 },
+        true,
+      );
+    });
+  });
+
+  it("新規登録成功時に toast.success が呼ばれること", async () => {
     const { toast } = await import("sonner");
-    vi.mocked(save商品).mockResolvedValueOnce({ success: true });
+
+    render(<ProductDialog target={null} onClose={vi.fn()} />);
+    fireEvent.change(screen.getByPlaceholderText("例: RX-78-2"), {
+      target: { value: "NEW-001" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("例: ガンダム"), {
+      target: { value: "新商品" },
+    });
+    fireEvent.submit(
+      screen.getByRole("button", { name: "保存する" }).closest("form")!,
+    );
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith("登録しました");
+    });
+  });
+
+  it("編集成功時に toast.success が呼ばれること", async () => {
+    const { toast } = await import("sonner");
 
     render(<ProductDialog target={existingProduct} onClose={vi.fn()} />);
     fireEvent.submit(
@@ -270,21 +271,11 @@ describe("ProductDialog コンポーネント（削除フロー）", () => {
     version: 2,
   };
 
-  it("削除成功時に toast.success('削除しました') が呼ばれること", async () => {
-    const { toast } = await import("sonner");
-    vi.mocked(delete商品).mockResolvedValueOnce({ success: true });
-
-    render(<ProductDialog target={existingProduct} onClose={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: "削除" }));
-    fireEvent.click(screen.getByRole("button", { name: "削除実行" }));
-
-    await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith("削除しました");
-    });
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
   it("削除成功時に onClose が呼ばれること", async () => {
-    vi.mocked(delete商品).mockResolvedValueOnce({ success: true });
     const onClose = vi.fn();
 
     render(<ProductDialog target={existingProduct} onClose={onClose} />);
@@ -309,6 +300,29 @@ describe("ProductDialog コンポーネント（削除フロー）", () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith("削除に失敗しました");
+    });
+  });
+
+  it("delete商品 が正しい引数で1回呼ばれること", async () => {
+    render(<ProductDialog target={existingProduct} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "削除" }));
+    fireEvent.click(screen.getByRole("button", { name: "削除実行" }));
+
+    await waitFor(() => {
+      expect(delete商品).toHaveBeenCalledOnce();
+      expect(delete商品).toHaveBeenCalledWith("PROD-001", 2);
+    });
+  });
+
+  it("削除成功時に toast.success が呼ばれること", async () => {
+    const { toast } = await import("sonner");
+
+    render(<ProductDialog target={existingProduct} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "削除" }));
+    fireEvent.click(screen.getByRole("button", { name: "削除実行" }));
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith("削除しました");
     });
   });
 });

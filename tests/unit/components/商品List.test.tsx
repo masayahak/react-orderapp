@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ProductList } from "@/app/(protected)/master/product/_components/商品List";
 
@@ -45,6 +45,10 @@ const sampleProducts = [
 // ─── テスト ───────────────────────────────────────────
 
 describe("ProductList コンポーネント", () => {
+  beforeEach(() => {
+    mockPush.mockClear();
+  });
+
   describe("データあり", () => {
     it("商品名が表示されること", () => {
       render(
@@ -94,6 +98,45 @@ describe("ProductList コンポーネント", () => {
       expect(
         screen.getByText("該当する商品が見つかりません"),
       ).toBeInTheDocument();
+    });
+  });
+
+  describe("ページ変更", () => {
+    it("次へボタンをクリックすると page=2 で router.push が呼ばれること", () => {
+      render(
+        <ProductList pageData={sampleProducts} totalCount={25} pageSize={20} />,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "次へ" }));
+      expect(mockPush).toHaveBeenCalledWith("?page=2");
+    });
+
+    it("前へボタンをクリックすると page=1 で router.push が呼ばれること", () => {
+      mockSearchParamsGet.mockReturnValue("2");
+      render(
+        <ProductList pageData={sampleProducts} totalCount={25} pageSize={20} />,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "前へ" }));
+      expect(mockPush).toHaveBeenCalledWith("?page=1");
+    });
+  });
+
+  describe("検索", () => {
+    it("キーワードを入力して検索すると q と page=1 で router.push が呼ばれること", () => {
+      render(
+        <ProductList pageData={sampleProducts} totalCount={2} pageSize={20} />,
+      );
+
+      fireEvent.change(screen.getByPlaceholderText("検索ワードを入力…"), {
+        target: { value: "ガンダム" },
+      });
+      fireEvent.submit(
+        screen.getByRole("button", { name: "検索" }).closest("form")!,
+      );
+      expect(mockPush).toHaveBeenCalledWith(
+        "?q=%E3%82%AC%E3%83%B3%E3%83%80%E3%83%A0&page=1",
+      );
     });
   });
 

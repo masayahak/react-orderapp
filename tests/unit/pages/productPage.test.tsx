@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ProductPage from "@/app/(protected)/master/product/page";
 
@@ -13,22 +13,30 @@ vi.mock("@/lib/auth-guard", () => ({
 
 vi.mock("lucide-react", () => ({
   Loader2: () => <div data-testid="loader2-icon" />,
-  Plus: () => <div data-testid="plus-icon" />,
-  Search: () => <div data-testid="search-icon" />,
-  Pencil: () => <div data-testid="pencil-icon" />,
-  Trash2: () => <div data-testid="trash2-icon" />,
 }));
 
-vi.mock(
-  "@/app/(protected)/master/product/_components/商品ListServer",
-  () => ({
-    ProductListServer: () => (
-      <div data-testid="mock-product-list">Product List</div>
-    ),
-  }),
-);
+vi.mock("@/app/(protected)/master/product/_components/商品ListServer", () => ({
+  ProductListServer: () => (
+    <div data-testid="mock-product-list">Product List</div>
+  ),
+}));
 
 // ─── テスト ───────────────────────────────────────────
+
+describe("認可チェック", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("ページレンダリング時に requireAdmin が呼ばれること", async () => {
+    const { requireAdmin } = await import("@/lib/auth-guard");
+    const searchParams = Promise.resolve({});
+    const pageElement = await ProductPage({ searchParams });
+    render(pageElement);
+
+    expect(requireAdmin).toHaveBeenCalledOnce();
+  });
+});
 
 describe("商品マスタページ", () => {
   it("「商品マスタメンテナンス」タイトルが表示されること", async () => {

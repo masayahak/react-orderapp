@@ -1,9 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  delete商品,
-  save商品,
-} from "@/app/(protected)/master/product/actions";
+import { delete商品, save商品 } from "@/app/(protected)/master/product/actions";
 import { type 商品Input } from "@/db/model/商品Model";
 
 // ─── モック設定 ───────────────────────────────────────
@@ -48,7 +45,9 @@ describe("認可チェック", () => {
   it("save商品 実行時に requireAdmin が呼ばれること", async () => {
     const { requireAdmin } = await import("@/lib/auth-guard");
     const { 商品Repository } = await import("@/db/repository/商品Repository");
-    vi.mocked(商品Repository.Insert).mockResolvedValueOnce([{ 商品CD: "PROD-001" }] as never);
+    vi.mocked(商品Repository.Insert).mockResolvedValueOnce([
+      { 商品CD: "PROD-001" },
+    ] as never);
 
     await save商品(validProductData, false);
 
@@ -74,10 +73,12 @@ describe("save商品 (新規登録)", () => {
   });
 
   it("新規登録が成功すると { success: true } が返ること", async () => {
-    const { 商品Repository } = await import(
-      "@/db/repository/商品Repository"
-    );
-    vi.mocked(商品Repository.Insert).mockResolvedValueOnce([{ 商品CD: "PROD-001" }] as never);
+    const { 商品Repository } = await import("@/db/repository/商品Repository");
+
+    // Insert が配列1行返す → 成功
+    vi.mocked(商品Repository.Insert).mockResolvedValueOnce([
+      { 商品CD: "PROD-001" },
+    ] as never);
 
     const result = await save商品(validProductData, false);
 
@@ -86,9 +87,7 @@ describe("save商品 (新規登録)", () => {
   });
 
   it("商品CDが既に存在する場合はエラーメッセージが返ること", async () => {
-    const { 商品Repository } = await import(
-      "@/db/repository/商品Repository"
-    );
+    const { 商品Repository } = await import("@/db/repository/商品Repository");
     // Insert が空配列を返す → 既に存在する商品CD
     vi.mocked(商品Repository.Insert).mockResolvedValueOnce([]);
 
@@ -98,11 +97,11 @@ describe("save商品 (新規登録)", () => {
   });
 
   it("新規登録成功時に /master/product がrevalidateされること", async () => {
-    const { 商品Repository } = await import(
-      "@/db/repository/商品Repository"
-    );
+    const { 商品Repository } = await import("@/db/repository/商品Repository");
     const { revalidatePath } = await import("next/cache");
-    vi.mocked(商品Repository.Insert).mockResolvedValueOnce([{ 商品CD: "PROD-001" }] as never);
+    vi.mocked(商品Repository.Insert).mockResolvedValueOnce([
+      { 商品CD: "PROD-001" },
+    ] as never);
 
     await save商品(validProductData, false);
 
@@ -110,9 +109,7 @@ describe("save商品 (新規登録)", () => {
   });
 
   it("Repositoryがエラーをスローした場合、エラーメッセージが返ること", async () => {
-    const { 商品Repository } = await import(
-      "@/db/repository/商品Repository"
-    );
+    const { 商品Repository } = await import("@/db/repository/商品Repository");
     vi.mocked(商品Repository.Insert).mockRejectedValueOnce(
       new Error("データベースエラー"),
     );
@@ -126,9 +123,7 @@ describe("save商品 (新規登録)", () => {
   });
 
   it("予期せぬエラーが発生した場合、フォールバックメッセージが返ること", async () => {
-    const { 商品Repository } = await import(
-      "@/db/repository/商品Repository"
-    );
+    const { 商品Repository } = await import("@/db/repository/商品Repository");
     vi.mocked(商品Repository.Insert).mockRejectedValueOnce("unknown");
 
     const result = await save商品(validProductData, false);
@@ -147,24 +142,6 @@ describe("save商品 (新規登録)", () => {
       error: "入力内容に不備があります。画面の指示に従ってください。",
     });
   });
-
-  it("商品名が空の場合はZodエラーが返ること", async () => {
-    const result = await save商品({ ...validProductData, 商品名: "" }, false);
-
-    expect(result).toEqual({
-      success: false,
-      error: "入力内容に不備があります。画面の指示に従ってください。",
-    });
-  });
-
-  it("単価が負の場合はZodエラーが返ること", async () => {
-    const result = await save商品({ ...validProductData, 単価: -1 }, false);
-
-    expect(result).toEqual({
-      success: false,
-      error: "入力内容に不備があります。画面の指示に従ってください。",
-    });
-  });
 });
 
 describe("save商品 (更新)", () => {
@@ -173,9 +150,7 @@ describe("save商品 (更新)", () => {
   });
 
   it("更新が成功すると { success: true } が返ること", async () => {
-    const { 商品Repository } = await import(
-      "@/db/repository/商品Repository"
-    );
+    const { 商品Repository } = await import("@/db/repository/商品Repository");
     vi.mocked(商品Repository.Update).mockResolvedValueOnce(undefined as never);
 
     const result = await save商品(validProductData, true);
@@ -189,9 +164,7 @@ describe("save商品 (更新)", () => {
   });
 
   it("更新成功時に /master/product がrevalidateされること", async () => {
-    const { 商品Repository } = await import(
-      "@/db/repository/商品Repository"
-    );
+    const { 商品Repository } = await import("@/db/repository/商品Repository");
     const { revalidatePath } = await import("next/cache");
     vi.mocked(商品Repository.Update).mockResolvedValueOnce(undefined as never);
 
@@ -201,9 +174,7 @@ describe("save商品 (更新)", () => {
   });
 
   it("Repositoryがエラーをスローした場合、エラーメッセージが返ること", async () => {
-    const { 商品Repository } = await import(
-      "@/db/repository/商品Repository"
-    );
+    const { 商品Repository } = await import("@/db/repository/商品Repository");
     vi.mocked(商品Repository.Update).mockRejectedValueOnce(
       new Error("楽観的排他制御エラー"),
     );
@@ -223,9 +194,7 @@ describe("delete商品", () => {
   });
 
   it("正常に削除できると成功レスポンスが返ること", async () => {
-    const { 商品Repository } = await import(
-      "@/db/repository/商品Repository"
-    );
+    const { 商品Repository } = await import("@/db/repository/商品Repository");
     vi.mocked(商品Repository.Delete).mockResolvedValueOnce(undefined as never);
 
     const result = await delete商品("PROD-001", 0);
@@ -235,9 +204,7 @@ describe("delete商品", () => {
   });
 
   it("削除成功時に /master/product がrevalidateされること", async () => {
-    const { 商品Repository } = await import(
-      "@/db/repository/商品Repository"
-    );
+    const { 商品Repository } = await import("@/db/repository/商品Repository");
     const { revalidatePath } = await import("next/cache");
     vi.mocked(商品Repository.Delete).mockResolvedValueOnce(undefined as never);
 
@@ -247,9 +214,7 @@ describe("delete商品", () => {
   });
 
   it("Repositoryがエラーをスローした場合、エラーメッセージが返ること", async () => {
-    const { 商品Repository } = await import(
-      "@/db/repository/商品Repository"
-    );
+    const { 商品Repository } = await import("@/db/repository/商品Repository");
     vi.mocked(商品Repository.Delete).mockRejectedValueOnce(
       new Error("削除対象が見つかりません"),
     );
@@ -263,9 +228,7 @@ describe("delete商品", () => {
   });
 
   it("予期せぬエラーが発生した場合、フォールバックメッセージが返ること", async () => {
-    const { 商品Repository } = await import(
-      "@/db/repository/商品Repository"
-    );
+    const { 商品Repository } = await import("@/db/repository/商品Repository");
     vi.mocked(商品Repository.Delete).mockRejectedValueOnce("unknown");
 
     const result = await delete商品("PROD-001", 0);

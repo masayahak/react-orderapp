@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ProductListServer } from "@/app/(protected)/master/product/_components/商品ListServer";
 
@@ -30,6 +30,10 @@ vi.mock(
 // ─── テスト ───────────────────────────────────────────
 
 describe("ProductListServer コンポーネント", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("ProductList が表示されること", async () => {
     const element = await ProductListServer({ query: "", page: 1 });
     render(element);
@@ -42,6 +46,6 @@ describe("ProductListServer コンポーネント", () => {
 
     await ProductListServer({ query: "ガンダム", page: 2 });
 
-    expect(商品Repository.Search).toHaveBeenCalledWith("ガンダム", 2, 20);
+    expect(商品Repository.Search).toHaveBeenLastCalledWith("ガンダム", 2, 20);
   });
 });
