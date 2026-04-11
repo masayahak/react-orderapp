@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import CustomerPage from "@/app/(protected)/master/customer/page";
 
@@ -13,10 +13,6 @@ vi.mock("@/lib/auth-guard", () => ({
 
 vi.mock("lucide-react", () => ({
   Loader2: () => <div data-testid="loader2-icon" />,
-  Plus: () => <div data-testid="plus-icon" />,
-  Search: () => <div data-testid="search-icon" />,
-  Pencil: () => <div data-testid="pencil-icon" />,
-  Trash2: () => <div data-testid="trash2-icon" />,
 }));
 
 vi.mock(
@@ -29,6 +25,21 @@ vi.mock(
 );
 
 // ─── テスト ───────────────────────────────────────────
+
+describe("認可チェック", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("ページレンダリング時に requireAdmin が呼ばれること", async () => {
+    const { requireAdmin } = await import("@/lib/auth-guard");
+    const searchParams = Promise.resolve({});
+    const pageElement = await CustomerPage({ searchParams });
+    render(pageElement);
+
+    expect(requireAdmin).toHaveBeenCalledOnce();
+  });
+});
 
 describe("得意先マスタページ", () => {
   it("「得意先マスタメンテナンス」タイトルが表示されること", async () => {

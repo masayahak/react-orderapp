@@ -56,6 +56,33 @@ describe("ProductDialog コンポーネント（新規登録）", () => {
     const cdInput = screen.getByPlaceholderText("例: RX-78-2");
     expect(cdInput).not.toBeDisabled();
   });
+
+  it("フォームフィールドが表示されること", () => {
+    render(<ProductDialog target={null} onClose={vi.fn()} />);
+
+    expect(screen.getByText(/商品CD/)).toBeInTheDocument();
+    expect(screen.getByText(/商品名/)).toBeInTheDocument();
+    expect(screen.getByText(/単価/)).toBeInTheDocument();
+    expect(screen.getByText(/備考/)).toBeInTheDocument();
+  });
+
+  it("「保存する」ボタンと「キャンセル」ボタンが表示されること", () => {
+    render(<ProductDialog target={null} onClose={vi.fn()} />);
+
+    expect(
+      screen.getByRole("button", { name: "保存する" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "キャンセル" }),
+    ).toBeInTheDocument();
+  });
+
+  it("商品名フィールドが初期値として空であること", () => {
+    render(<ProductDialog target={null} onClose={vi.fn()} />);
+
+    const input = screen.getByPlaceholderText("例: ガンダム");
+    expect(input).toHaveValue("");
+  });
 });
 
 describe("ProductDialog コンポーネント（編集）", () => {
@@ -113,6 +140,24 @@ describe("ProductDialog コンポーネント（編集）", () => {
     );
 
     expect(screen.queryByText("本当に削除しますか？")).not.toBeInTheDocument();
+  });
+
+  it("削除確認ダイアログに商品名が表示されること", () => {
+    render(<ProductDialog target={existingProduct} onClose={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "削除" }));
+
+    expect(screen.getByText(/テスト商品/)).toBeInTheDocument();
+  });
+
+  it("削除実行ボタンが表示されること", () => {
+    render(<ProductDialog target={existingProduct} onClose={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "削除" }));
+
+    expect(
+      screen.getByRole("button", { name: "削除実行" }),
+    ).toBeInTheDocument();
   });
 });
 

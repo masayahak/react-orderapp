@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CustomerDialog } from "@/app/(protected)/master/customer/_components/得意先Dialog";
 import {
@@ -39,9 +39,9 @@ describe("CustomerDialog コンポーネント（新規登録）", () => {
   it("フォームフィールドが表示されること", () => {
     render(<CustomerDialog target={null} onClose={vi.fn()} />);
 
-    expect(screen.getByText("得意先名")).toBeInTheDocument();
-    expect(screen.getByText("電話番号")).toBeInTheDocument();
-    expect(screen.getByText("備考")).toBeInTheDocument();
+    expect(screen.getByText(/得意先名/)).toBeInTheDocument();
+    expect(screen.getByText(/電話番号/)).toBeInTheDocument();
+    expect(screen.getByText(/備考/)).toBeInTheDocument();
   });
 
   it("新規登録時は「削除」ボタンが表示されないこと", () => {
@@ -132,7 +132,9 @@ describe("CustomerDialog コンポーネント（編集）", () => {
     fireEvent.click(screen.getByRole("button", { name: "削除" }));
     expect(screen.getByText("本当に削除しますか？")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "キャンセル" }));
+    fireEvent.click(
+      within(screen.getByRole("alertdialog")).getByRole("button", { name: "キャンセル" }),
+    );
 
     expect(screen.queryByText("本当に削除しますか？")).not.toBeInTheDocument();
   });
@@ -156,6 +158,10 @@ describe("CustomerDialog コンポーネント（保存フロー）", () => {
     備考: "重要顧客",
     version: 3,
   };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it("新規登録成功時に toast.success('登録しました') が呼ばれること", async () => {
     const { toast } = await import("sonner");
@@ -224,6 +230,45 @@ describe("CustomerDialog コンポーネント（保存フロー）", () => {
       expect(toast.success).toHaveBeenCalledWith("更新しました");
     });
   });
+
+  it("新規登録時に save得意先 が正しい引数で1回呼ばれること", async () => {
+    render(<CustomerDialog target={null} onClose={vi.fn()} />);
+    fireEvent.change(screen.getByPlaceholderText("例: ハカマタソフト"), {
+      target: { value: "新規得意先" },
+    });
+    fireEvent.submit(
+      screen.getByRole("button", { name: "保存する" }).closest("form")!,
+    );
+
+    await waitFor(() => {
+      expect(save得意先).toHaveBeenCalledOnce();
+      expect(save得意先).toHaveBeenCalledWith(
+        { 得意先名: "新規得意先", 電話番号: "", 備考: "", version: 0 },
+        false,
+      );
+    });
+  });
+
+  it("編集時に save得意先 が正しい引数で1回呼ばれること", async () => {
+    render(<CustomerDialog target={existingCustomer} onClose={vi.fn()} />);
+    fireEvent.submit(
+      screen.getByRole("button", { name: "保存する" }).closest("form")!,
+    );
+
+    await waitFor(() => {
+      expect(save得意先).toHaveBeenCalledOnce();
+      expect(save得意先).toHaveBeenCalledWith(
+        {
+          得意先ID: "customer-uuid-001",
+          得意先名: "テスト株式会社",
+          電話番号: "03-1234-5678",
+          備考: "重要顧客",
+          version: 3,
+        },
+        true,
+      );
+    });
+  });
 });
 
 describe("CustomerDialog コンポーネント（削除フロー）", () => {
@@ -234,6 +279,10 @@ describe("CustomerDialog コンポーネント（削除フロー）", () => {
     備考: "重要顧客",
     version: 3,
   };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it("削除成功時に toast.success('削除しました') が呼ばれること", async () => {
     const { toast } = await import("sonner");
@@ -274,6 +323,17 @@ describe("CustomerDialog コンポーネント（削除フロー）", () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith("削除に失敗しました");
+    });
+  });
+
+  it("delete得意先 が正しい引数で1回呼ばれること", async () => {
+    render(<CustomerDialog target={existingCustomer} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "削除" }));
+    fireEvent.click(screen.getByRole("button", { name: "削除実行" }));
+
+    await waitFor(() => {
+      expect(delete得意先).toHaveBeenCalledOnce();
+      expect(delete得意先).toHaveBeenCalledWith("customer-uuid-001", 3);
     });
   });
 });

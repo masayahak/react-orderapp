@@ -170,6 +170,21 @@ describe("save得意先 (更新)", () => {
     });
   });
 
+  it("更新成功時に /master/customer がrevalidateされること", async () => {
+    const { 得意先Repository } = await import(
+      "@/db/repository/得意先Repository"
+    );
+    const { revalidatePath } = await import("next/cache");
+    vi.mocked(得意先Repository.Update).mockResolvedValueOnce(undefined as never);
+
+    await save得意先(
+      { ...validCustomerData, 得意先ID: "customer-uuid-001" },
+      true,
+    );
+
+    expect(revalidatePath).toHaveBeenCalledWith("/master/customer");
+  });
+
   it("Repositoryがエラーをスローした場合、エラーメッセージが返ること", async () => {
     const { 得意先Repository } = await import(
       "@/db/repository/得意先Repository"

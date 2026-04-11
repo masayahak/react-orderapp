@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ProductList } from "@/app/(protected)/master/product/_components/商品List";
+import { CustomerList } from "@/app/(protected)/master/customer/_components/得意先List";
 
 // ─── モック設定 ───────────────────────────────────────
 
@@ -29,74 +29,57 @@ vi.mock("lucide-react", () => ({
 }));
 
 vi.mock(
-  "@/app/(protected)/master/product/_components/商品Dialog",
+  "@/app/(protected)/master/customer/_components/得意先Dialog",
   () => ({
-    ProductDialog: () => <div data-testid="mock-product-dialog" />,
+    CustomerDialog: () => <div data-testid="mock-customer-dialog" />,
   }),
 );
 
 // ─── テストデータ ──────────────────────────────────────
 
-const sampleProducts = [
-  { 商品CD: "PROD-001", 商品名: "ガンダム", 単価: 1000, version: 0 },
-  { 商品CD: "PROD-002", 商品名: "ザク", 単価: 500, version: 1 },
+const sampleCustomers = [
+  { 得意先ID: "uuid-001", 得意先名: "ハカマタソフト", 電話番号: "03-1234-5678", version: 0 },
+  { 得意先ID: "uuid-002", 得意先名: "テスト株式会社", 電話番号: "06-9876-5432", version: 1 },
 ];
 
 // ─── テスト ───────────────────────────────────────────
 
-describe("ProductList コンポーネント", () => {
+describe("CustomerList コンポーネント", () => {
   beforeEach(() => {
     mockPush.mockClear();
   });
 
   describe("データあり", () => {
-    it("商品名が表示されること", () => {
+    it("得意先名が表示されること", () => {
       render(
-        <ProductList
-          pageData={sampleProducts}
+        <CustomerList
+          pageData={sampleCustomers}
           totalCount={2}
           pageSize={20}
         />,
       );
 
-      expect(screen.getByText("ガンダム")).toBeInTheDocument();
-      expect(screen.getByText("ザク")).toBeInTheDocument();
+      expect(screen.getByText("ハカマタソフト")).toBeInTheDocument();
+      expect(screen.getByText("テスト株式会社")).toBeInTheDocument();
     });
 
-    it("商品CDが表示されること", () => {
+    it("電話番号が表示されること", () => {
       render(
-        <ProductList
-          pageData={sampleProducts}
+        <CustomerList
+          pageData={sampleCustomers}
           totalCount={2}
           pageSize={20}
         />,
       );
 
-      expect(screen.getByText("PROD-001")).toBeInTheDocument();
-      expect(screen.getByText("PROD-002")).toBeInTheDocument();
-    });
-
-    it("単価が表示されること", () => {
-      render(
-        <ProductList
-          pageData={sampleProducts}
-          totalCount={2}
-          pageSize={20}
-        />,
-      );
-
-      expect(
-        screen.getByText(`¥${(1000).toLocaleString()}`),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(`¥${(500).toLocaleString()}`),
-      ).toBeInTheDocument();
+      expect(screen.getByText("03-1234-5678")).toBeInTheDocument();
+      expect(screen.getByText("06-9876-5432")).toBeInTheDocument();
     });
 
     it("件数表示が正しいこと", () => {
       render(
-        <ProductList
-          pageData={sampleProducts}
+        <CustomerList
+          pageData={sampleCustomers}
           totalCount={2}
           pageSize={20}
         />,
@@ -107,13 +90,13 @@ describe("ProductList コンポーネント", () => {
   });
 
   describe("データなし", () => {
-    it("「該当する商品が見つかりません」が表示されること", () => {
+    it("「該当する得意先が見つかりません」が表示されること", () => {
       render(
-        <ProductList pageData={[]} totalCount={0} pageSize={20} />,
+        <CustomerList pageData={[]} totalCount={0} pageSize={20} />,
       );
 
       expect(
-        screen.getByText("該当する商品が見つかりません"),
+        screen.getByText("該当する得意先が見つかりません"),
       ).toBeInTheDocument();
     });
   });
@@ -121,7 +104,7 @@ describe("ProductList コンポーネント", () => {
   describe("ページ変更", () => {
     it("次へボタンをクリックすると page=2 で router.push が呼ばれること", () => {
       render(
-        <ProductList pageData={sampleProducts} totalCount={25} pageSize={20} />,
+        <CustomerList pageData={sampleCustomers} totalCount={25} pageSize={20} />,
       );
 
       fireEvent.click(screen.getByRole("button", { name: "次へ" }));
@@ -131,7 +114,7 @@ describe("ProductList コンポーネント", () => {
     it("前へボタンをクリックすると page=1 で router.push が呼ばれること", () => {
       mockSearchParamsGet.mockReturnValue("2");
       render(
-        <ProductList pageData={sampleProducts} totalCount={25} pageSize={20} />,
+        <CustomerList pageData={sampleCustomers} totalCount={25} pageSize={20} />,
       );
 
       fireEvent.click(screen.getByRole("button", { name: "前へ" }));
@@ -142,17 +125,17 @@ describe("ProductList コンポーネント", () => {
   describe("検索", () => {
     it("キーワードを入力して検索すると q と page=1 で router.push が呼ばれること", () => {
       render(
-        <ProductList pageData={sampleProducts} totalCount={2} pageSize={20} />,
+        <CustomerList pageData={sampleCustomers} totalCount={2} pageSize={20} />,
       );
 
       fireEvent.change(screen.getByPlaceholderText("検索ワードを入力…"), {
-        target: { value: "ガンダム" },
+        target: { value: "ハカマタ" },
       });
       fireEvent.submit(
         screen.getByRole("button", { name: "検索" }).closest("form")!,
       );
       expect(mockPush).toHaveBeenCalledWith(
-        "?q=%E3%82%AC%E3%83%B3%E3%83%80%E3%83%A0&page=1",
+        "?q=%E3%83%8F%E3%82%AB%E3%83%9E%E3%82%BF&page=1",
       );
     });
   });
@@ -160,8 +143,8 @@ describe("ProductList コンポーネント", () => {
   describe("UI要素", () => {
     it("検索ボタンが表示されること", () => {
       render(
-        <ProductList
-          pageData={sampleProducts}
+        <CustomerList
+          pageData={sampleCustomers}
           totalCount={2}
           pageSize={20}
         />,
@@ -172,8 +155,8 @@ describe("ProductList コンポーネント", () => {
 
     it("新規追加ボタンが表示されること", () => {
       render(
-        <ProductList
-          pageData={sampleProducts}
+        <CustomerList
+          pageData={sampleCustomers}
           totalCount={2}
           pageSize={20}
         />,
@@ -186,8 +169,8 @@ describe("ProductList コンポーネント", () => {
 
     it("各行に編集ボタンが表示されること", () => {
       render(
-        <ProductList
-          pageData={sampleProducts}
+        <CustomerList
+          pageData={sampleCustomers}
           totalCount={2}
           pageSize={20}
         />,
