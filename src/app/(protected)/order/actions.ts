@@ -14,9 +14,9 @@ export async function search得意先(query: string) {
   // 認証ガード
   await requireSession();
 
-  // 最小文字数チェックなどはフロント側で行っている前提
-  const pageSize = 1000;
-  const { items } = await 得意先Repository.Search(query, 1, pageSize);
+  // コンボボックス表示用 最大100件まで
+  const limit = 100;
+  const { items } = await 得意先Repository.Search(query, 1, limit);
 
   // Comboboxに必要な型 (CustomerSearchRes) に絞って返す
   return items.map((i) => ({
@@ -29,8 +29,9 @@ export async function search商品(query: string) {
   // 認証ガード
   await requireSession();
 
-  const pageSize = 1000;
-  const { items } = await 商品Repository.Search(query, 1, pageSize);
+  // コンボボックス表示用 最大100件まで
+  const limit = 100;
+  const { items } = await 商品Repository.Search(query, 1, limit);
 
   // Comboboxに必要な型 (ProductSearchRes) に絞って返す
   return items.map((i) => ({

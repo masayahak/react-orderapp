@@ -32,6 +32,20 @@ export interface ColumnDef<T> {
   isCurrency?: boolean;
 }
 
+/* -------------------------------------------------
+なぜ、一覧表示する書式付きリストを直接受け取らず、
+一覧を取得するロジック searchFn を受け取るのか？
+----------------------------------------------------
+対象のマスタなどのデータの分母がせいぜい数百件なら
+全データを取得・加工し受け取れば良い。
+ただし、データの分母が数十万件など大きい場合、
+巨大なデータを無駄に受け取ってメモリを圧迫したくない。
+絞り込み条件へ検索キーワードを入力してはじめて、
+絞り込んだデータのみをコンボボックスへ表示したい。
+そのため、事前に表示対象のリストを受け取るのではなく、
+表示対象のリストを取得する関数で受け取らざるを得ない。
+------------------------------------------------- */
+
 interface AdvancedComboboxProps<T> {
   placeholder: string;
   idForLabel?: string;
@@ -61,8 +75,16 @@ export function AdvancedCombobox<T>({
   const [isLoading, setIsLoading] = useState(false);
   const [selected, setSelected] = useState<T | null>(initialValue || null);
 
-  const debouncedQuery = useDebounce(query, 300);
+  // 受け取った columns の定義から、表示対象の取得を定義する
+  // なお 再レンダリングされても、columns が変わらない限り再定義する必要はないのでメモ化
+  const visibleColumns = useMemo(
+    () => columns.filter((col) => col.visible !== false),
+    [columns],
+  );
 
+  // fetchResults は useEffect の監視対象なので、
+  // 再レンダリング時に再作成しないように useCallback でメモ化する
+  // 監視対象の searchFn が変わった時だけ再作成する
   const fetchResults = useCallback(
     async (q: string) => {
       setIsLoading(true);
@@ -79,17 +101,19 @@ export function AdvancedCombobox<T>({
     [searchFn],
   );
 
+  // queryはキー入力でリアルタイムに変化する
+  // しかし一文字ずつSQLを発行すると負荷が高すぎる
+  // debouncedQueryは queryが変化しても 300ms 入力が止まるまで、値の更新を遅らせる
+  const debouncedQuery = useDebounce(query, 300);
+
+  // debouncedQuery が変化したら fetchResults 実行
   useEffect(() => {
     fetchResults(debouncedQuery);
   }, [debouncedQuery, fetchResults]);
 
-  const visibleColumns = useMemo(
-    () => columns.filter((col) => col.visible !== false),
-    [columns],
-  );
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
+      {/* PopoverTriggerをクリックするとonOpenChange(true) */}
       <PopoverTrigger asChild>
         <Button
           id={idForLabel}
@@ -110,6 +134,7 @@ export function AdvancedCombobox<T>({
           />
         </Button>
       </PopoverTrigger>
+
       <PopoverContent
         className="p-0 w-(--radix-popover-trigger-width) min-w-[400px]"
         align="start"
@@ -167,7 +192,7 @@ export function AdvancedCombobox<T>({
                     onSelect={() => {
                       setSelected(item);
                       onSelect(item);
-                      setOpen(false);
+                      setOpen(false); // 選択したらコンボボックスを閉じる
                       setQuery("");
                     }}
                     className="flex items-center px-2 py-2 cursor-pointer"
