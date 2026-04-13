@@ -83,6 +83,15 @@ describe("ProductDialog コンポーネント（新規登録）", () => {
     const input = screen.getByPlaceholderText("例: ガンダム");
     expect(input).toHaveValue("");
   });
+
+  it("単価フィールドの値を変更できること", () => {
+    render(<ProductDialog target={null} onClose={vi.fn()} />);
+
+    const 単価Input = screen.getByRole("spinbutton");
+    fireEvent.change(単価Input, { target: { value: "2000" } });
+
+    expect(単価Input).toHaveValue(2000);
+  });
 });
 
 describe("ProductDialog コンポーネント（編集）", () => {

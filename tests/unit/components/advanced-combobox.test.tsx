@@ -276,6 +276,26 @@ describe("AdvancedCombobox", () => {
     });
   });
 
+  describe("エラーハンドリング", () => {
+    it("searchFn がエラーをスローした場合、「見つかりませんでした。」が表示されること", async () => {
+      render(
+        <AdvancedCombobox
+          placeholder="検索..."
+          searchFn={vi.fn().mockRejectedValue(new Error("Network Error"))}
+          columns={columns}
+          displayKey="name"
+          valueKey="id"
+          onSelect={vi.fn()}
+        />,
+      );
+      fireEvent.click(screen.getByRole("combobox"));
+
+      await waitFor(() => {
+        expect(screen.getByText("見つかりませんでした。")).toBeInTheDocument();
+      });
+    });
+  });
+
   describe("ローディング", () => {
     it("searchFn が pending 中は Loader2 が表示されること", async () => {
       render(

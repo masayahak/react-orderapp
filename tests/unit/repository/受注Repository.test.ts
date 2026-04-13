@@ -195,6 +195,36 @@ describe("受注Repository", () => {
       expect(result.items[0]).toEqual(parsedHeaderOutput);
     });
 
+    it("startDate・endDate を指定した場合、日付フィルタが適用され結果が返ること", async () => {
+      const { 受注Repository } = await import("@/db/repository/受注Repository");
+
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([{ value: 1 }]),
+        }),
+      });
+      mockDb.select.mockReturnValueOnce({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockReturnValue({
+                offset: vi.fn().mockResolvedValue([headerRow]),
+              }),
+            }),
+          }),
+        }),
+      });
+
+      const result = await 受注Repository.Search({
+        pageSize: 10,
+        startDate: "2024-01-01",
+        endDate: "2024-01-31",
+      });
+
+      expect(result.totalCount).toBe(1);
+      expect(result.items).toHaveLength(1);
+    });
+
     it("ページングのoffsetが正しく計算されること（page=2, pageSize=10 → offset=10）", async () => {
       const { 受注Repository } = await import("@/db/repository/受注Repository");
 

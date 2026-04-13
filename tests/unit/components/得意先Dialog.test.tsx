@@ -89,6 +89,18 @@ describe("CustomerDialog コンポーネント（編集）", () => {
     version: 3,
   };
 
+  it("電話番号・備考が null の場合、フォームに空文字が設定されること", () => {
+    render(
+      <CustomerDialog
+        target={{ 得意先ID: "customer-uuid-002", 得意先名: "ナルテスト", 電話番号: null, 備考: null, version: 0 }}
+        onClose={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByPlaceholderText("090-0000-0000")).toHaveValue("");
+    expect(screen.getByPlaceholderText("取引条件など")).toHaveValue("");
+  });
+
   it("編集フォームのタイトルが表示されること", () => {
     render(<CustomerDialog target={existingCustomer} onClose={vi.fn()} />);
 

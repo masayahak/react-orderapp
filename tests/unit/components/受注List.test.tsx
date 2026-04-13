@@ -205,6 +205,18 @@ describe("OrderList コンポーネント", () => {
       );
       expect(mockPush).toHaveBeenCalledWith(expect.stringContaining("page=1"));
     });
+
+    it("キーワードが空の場合、q を含まず page=1 で router.push が呼ばれること", () => {
+      render(
+        <OrderList pageData={sampleOrders} totalCount={2} pageSize={20} />,
+      );
+
+      fireEvent.submit(
+        screen.getByRole("button", { name: "検索" }).closest("form")!,
+      );
+
+      expect(mockPush).toHaveBeenCalledWith("?page=1");
+    });
   });
 
   describe("UI要素", () => {

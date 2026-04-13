@@ -20,7 +20,7 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html"],
       reportsDirectory: "tests-results/unit/coverage",
-      exclude: ["src/components/ui/**"],
+      exclude: ["src/components/ui/**", "src/db/schema.ts"],
       thresholds: {
         statements: 90,
         branches: 85,

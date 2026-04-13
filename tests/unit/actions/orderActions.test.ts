@@ -290,6 +290,22 @@ describe("save受注 (新規登録)", () => {
       error: "入力内容に不備があります。画面の指示に従ってください。",
     });
   });
+
+  it("単価が 0 の明細を含む受注を正常に保存できること", async () => {
+    const { 受注Repository } = await import("@/db/repository/受注Repository");
+    vi.mocked(受注Repository.Save).mockResolvedValueOnce(undefined as never);
+
+    const result = await save受注(
+      {
+        ...validOrderData,
+        合計金額: 0,
+        明細: [{ 商品CD: "PROD-001", 商品名: "テスト商品", 単価: 0, 数量: 0, 明細金額: 0 }],
+      },
+      "create",
+    );
+
+    expect(result).toEqual({ success: true });
+  });
 });
 
 describe("save受注 (更新)", () => {

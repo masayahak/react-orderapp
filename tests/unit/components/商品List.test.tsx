@@ -54,7 +54,11 @@ vi.mock("lucide-react", () => ({
 vi.mock(
   "@/app/(protected)/master/product/_components/商品Dialog",
   () => ({
-    ProductDialog: () => <div data-testid="mock-product-dialog" />,
+    ProductDialog: ({ onClose }: { onClose: () => void }) => (
+      <div data-testid="mock-product-dialog">
+        <button onClick={onClose}>閉じる</button>
+      </div>
+    ),
   }),
 );
 
@@ -203,6 +207,49 @@ describe("ProductList コンポーネント", () => {
       expect(mockPush).toHaveBeenCalledWith(
         "?q=%E3%82%AC%E3%83%B3%E3%83%80%E3%83%A0&page=1",
       );
+    });
+
+    it("キーワードが空の場合、q を含まず page=1 で router.push が呼ばれること", () => {
+      render(
+        <ProductList pageData={sampleProducts} totalCount={2} pageSize={20} />,
+      );
+
+      fireEvent.submit(
+        screen.getByRole("button", { name: "検索" }).closest("form")!,
+      );
+      expect(mockPush).toHaveBeenCalledWith("?page=1");
+    });
+  });
+
+  describe("ダイアログ", () => {
+    it("新規追加ボタンをクリックするとダイアログが表示されること", () => {
+      render(
+        <ProductList pageData={sampleProducts} totalCount={2} pageSize={20} />,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /新規追加/ }));
+      expect(screen.getByTestId("mock-product-dialog")).toBeInTheDocument();
+    });
+
+    it("編集ボタンをクリックするとダイアログが表示されること", () => {
+      render(
+        <ProductList pageData={sampleProducts} totalCount={2} pageSize={20} />,
+      );
+
+      fireEvent.click(screen.getAllByRole("button", { name: /を編集/ })[0]);
+      expect(screen.getByTestId("mock-product-dialog")).toBeInTheDocument();
+    });
+
+    it("ダイアログを閉じるとダイアログが非表示になること", () => {
+      render(
+        <ProductList pageData={sampleProducts} totalCount={2} pageSize={20} />,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /新規追加/ }));
+      expect(screen.getByTestId("mock-product-dialog")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "閉じる" }));
+      expect(screen.queryByTestId("mock-product-dialog")).not.toBeInTheDocument();
     });
   });
 

@@ -54,7 +54,11 @@ vi.mock("lucide-react", () => ({
 vi.mock(
   "@/app/(protected)/master/customer/_components/得意先Dialog",
   () => ({
-    CustomerDialog: () => <div data-testid="mock-customer-dialog" />,
+    CustomerDialog: ({ onClose }: { onClose: () => void }) => (
+      <div data-testid="mock-customer-dialog">
+        <button onClick={onClose}>閉じる</button>
+      </div>
+    ),
   }),
 );
 
@@ -186,6 +190,49 @@ describe("CustomerList コンポーネント", () => {
       expect(mockPush).toHaveBeenCalledWith(
         "?q=%E3%83%8F%E3%82%AB%E3%83%9E%E3%82%BF&page=1",
       );
+    });
+
+    it("キーワードが空の場合、q を含まず page=1 で router.push が呼ばれること", () => {
+      render(
+        <CustomerList pageData={sampleCustomers} totalCount={2} pageSize={20} />,
+      );
+
+      fireEvent.submit(
+        screen.getByRole("button", { name: "検索" }).closest("form")!,
+      );
+      expect(mockPush).toHaveBeenCalledWith("?page=1");
+    });
+  });
+
+  describe("ダイアログ", () => {
+    it("新規追加ボタンをクリックするとダイアログが表示されること", () => {
+      render(
+        <CustomerList pageData={sampleCustomers} totalCount={2} pageSize={20} />,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /新規追加/ }));
+      expect(screen.getByTestId("mock-customer-dialog")).toBeInTheDocument();
+    });
+
+    it("編集ボタンをクリックするとダイアログが表示されること", () => {
+      render(
+        <CustomerList pageData={sampleCustomers} totalCount={2} pageSize={20} />,
+      );
+
+      fireEvent.click(screen.getAllByRole("button", { name: /を編集/ })[0]);
+      expect(screen.getByTestId("mock-customer-dialog")).toBeInTheDocument();
+    });
+
+    it("ダイアログを閉じるとダイアログが非表示になること", () => {
+      render(
+        <CustomerList pageData={sampleCustomers} totalCount={2} pageSize={20} />,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /新規追加/ }));
+      expect(screen.getByTestId("mock-customer-dialog")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: "閉じる" }));
+      expect(screen.queryByTestId("mock-customer-dialog")).not.toBeInTheDocument();
     });
   });
 
