@@ -231,9 +231,9 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                   </span>
                 </label>
                 <AdvancedCombobox<CustomerSearchRes>
-                  triggerId="customer-combobox"
                   key={initialData?.得意先ID ?? "new-customer"}
                   placeholder="得意先を検索..."
+                  idForLabel="customer-combobox"
                   searchFn={search得意先}
                   columns={customerColumns}
                   displayKey="得意先名"

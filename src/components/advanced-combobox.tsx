@@ -32,31 +32,28 @@ export interface ColumnDef<T> {
   isCurrency?: boolean;
 }
 
-/**
- * プロパティの型定義
- */
 interface AdvancedComboboxProps<T> {
   placeholder: string;
+  idForLabel?: string;
   searchFn: (query: string) => Promise<T[]>;
   columns: ColumnDef<T>[];
   displayKey: keyof T;
   valueKey: keyof T;
+  initialValue?: T;
   onSelect: (item: T) => void;
-  initialValue?: T; // 修正モード用の初期値
   className?: string;
-  triggerId?: string;
 }
 
 export function AdvancedCombobox<T>({
   placeholder,
+  idForLabel,
   searchFn,
   columns,
   displayKey,
   valueKey,
-  onSelect,
   initialValue,
+  onSelect,
   className,
-  triggerId,
 }: AdvancedComboboxProps<T>) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -95,7 +92,7 @@ export function AdvancedCombobox<T>({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          id={triggerId}
+          id={idForLabel}
           variant="outline"
           role="combobox"
           aria-expanded={open}
@@ -107,7 +104,10 @@ export function AdvancedCombobox<T>({
           <span className="truncate">
             {selected ? String(selected[displayKey]) : placeholder}
           </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
+          <ChevronsUpDown
+            className="ml-2 h-4 w-4 shrink-0 opacity-50"
+            aria-hidden="true"
+          />
         </Button>
       </PopoverTrigger>
       <PopoverContent

@@ -21,6 +21,29 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
+vi.mock("next/link", () => ({
+  default: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string;
+    children: React.ReactNode;
+    [key: string]: unknown;
+  }) => (
+    <a
+      href={String(href)}
+      onClick={(e: React.MouseEvent) => {
+        e.preventDefault();
+        mockPush(String(href));
+      }}
+      {...props}
+    >
+      {children}
+    </a>
+  ),
+}));
+
 vi.mock("lucide-react", () => ({
   Loader2: () => <div data-testid="loader2-icon" />,
   Pencil: () => <div data-testid="pencil-icon" />,
@@ -47,6 +70,8 @@ const sampleCustomers = [
 describe("CustomerList コンポーネント", () => {
   beforeEach(() => {
     mockPush.mockClear();
+    mockSearchParamsGet.mockReturnValue(null);
+    mockSearchParamsToString.mockReturnValue("");
   });
 
   describe("データあり", () => {
@@ -102,22 +127,46 @@ describe("CustomerList コンポーネント", () => {
   });
 
   describe("ページ変更", () => {
-    it("次へボタンをクリックすると page=2 で router.push が呼ばれること", () => {
+    it("1ページ目では「前へ」ボタンが無効化されること", () => {
+      render(
+        <CustomerList pageData={sampleCustomers} totalCount={2} pageSize={20} />,
+      );
+
+      expect(screen.getByRole("button", { name: "前へ" })).toBeDisabled();
+    });
+
+    it("最終ページでは「次へ」ボタンが無効化されること", () => {
+      render(
+        <CustomerList pageData={sampleCustomers} totalCount={2} pageSize={20} />,
+      );
+
+      expect(screen.getByRole("button", { name: "次へ" })).toBeDisabled();
+    });
+
+    it("複数ページある場合は「次へ」ボタンが有効になること", () => {
       render(
         <CustomerList pageData={sampleCustomers} totalCount={25} pageSize={20} />,
       );
 
-      fireEvent.click(screen.getByRole("button", { name: "次へ" }));
+      expect(screen.getByRole("link", { name: "次へ" })).toBeInTheDocument();
+    });
+
+    it("「次へ」ボタンをクリックすると page=2 で router.push が呼ばれること", () => {
+      render(
+        <CustomerList pageData={sampleCustomers} totalCount={25} pageSize={20} />,
+      );
+
+      fireEvent.click(screen.getByRole("link", { name: "次へ" }));
       expect(mockPush).toHaveBeenCalledWith("?page=2");
     });
 
-    it("前へボタンをクリックすると page=1 で router.push が呼ばれること", () => {
+    it("2ページ目で「前へ」ボタンをクリックすると page=1 で router.push が呼ばれること", () => {
       mockSearchParamsGet.mockReturnValue("2");
       render(
         <CustomerList pageData={sampleCustomers} totalCount={25} pageSize={20} />,
       );
 
-      fireEvent.click(screen.getByRole("button", { name: "前へ" }));
+      fireEvent.click(screen.getByRole("link", { name: "前へ" }));
       expect(mockPush).toHaveBeenCalledWith("?page=1");
     });
   });

@@ -14,6 +14,7 @@ const {
   mockDelete受注,
   mockSearch得意先,
   mockSearch商品,
+  mockAdvancedCombobox,
 } = vi.hoisted(() => ({
   mockPush: vi.fn(),
   mockBack: vi.fn(),
@@ -23,6 +24,7 @@ const {
   mockDelete受注: vi.fn(),
   mockSearch得意先: vi.fn().mockResolvedValue([]),
   mockSearch商品: vi.fn().mockResolvedValue([]),
+  mockAdvancedCombobox: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -58,23 +60,43 @@ vi.mock("lucide-react", () => ({
   Trash2: () => <div data-testid="trash2-icon" />,
 }));
 
-// AdvancedCombobox: placeholder を data-testid として使い、onSelect をボタンクリックで呼び出せる形にする
+// AdvancedCombobox: を置き換え、onSelectの結果だけをエミュレートする
 vi.mock("@/components/advanced-combobox", () => ({
-  AdvancedCombobox: ({ onSelect, placeholder }: { onSelect: (item: Record<string, unknown>) => void; placeholder: string }) => (
-    <button
-      data-testid={`combobox-${placeholder}`}
-      type="button"
-      onClick={() => {
-        if (placeholder === "得意先を検索...") {
-          onSelect({ 得意先ID: "cust-001", 得意先名: "テスト株式会社" });
-        } else {
-          onSelect({ 商品CD: "PROD-001", 商品名: "テスト商品", 単価: 1000 });
-        }
-      }}
-    >
-      {placeholder}
-    </button>
-  ),
+  AdvancedCombobox: (props: {
+    placeholder: string;
+    idForLabel?: string;
+    searchFn: unknown;
+    columns: unknown;
+    displayKey: string;
+    valueKey: string;
+    initialValue?: Record<string, unknown>;
+    onSelect: (item: Record<string, unknown>) => void;
+    className?: string;
+  }) => {
+    mockAdvancedCombobox(props);
+    return (
+      <button
+        data-testid={`combobox-${props.placeholder}`}
+        type="button"
+        onClick={() => {
+          if (props.displayKey === "得意先名") {
+            props.onSelect({
+              得意先ID: "cust-001",
+              得意先名: "テスト株式会社",
+            });
+          } else {
+            props.onSelect({
+              商品CD: "PROD-001",
+              商品名: "テスト商品",
+              単価: 1000,
+            });
+          }
+        }}
+      >
+        {props.placeholder}
+      </button>
+    );
+  },
 }));
 
 // ─── テストデータ ─────────────────────────────────────
@@ -101,7 +123,92 @@ const editModeProps = {
   },
 };
 
-// ─── テスト ───────────────────────────────────────────
+// ─── AdvancedCombobox テスト ───────────────────────────────────────────
+
+describe("AdvancedCombobox", () => {
+  describe("プロパティ", () => {
+    it("得意先コンボボックスに search得意先 が渡されること", () => {
+      render(<OrderForm serverDate="2024-01-15" mode="create" />);
+      const customerProps = mockAdvancedCombobox.mock.calls
+        .map(([p]) => p)
+        .find((p) => p.displayKey === "得意先名");
+      expect(customerProps?.searchFn).toBe(mockSearch得意先);
+    });
+
+    it("得意先コンボボックスに displayKey='得意先名' valueKey='得意先ID' が渡されること", () => {
+      render(<OrderForm serverDate="2024-01-15" mode="create" />);
+      const customerProps = mockAdvancedCombobox.mock.calls
+        .map(([p]) => p)
+        .find((p) => p.displayKey === "得意先名");
+      expect(customerProps).toMatchObject({
+        displayKey: "得意先名",
+        valueKey: "得意先ID",
+      });
+    });
+
+    it("商品コンボボックスに search商品 が渡されること", () => {
+      render(<OrderForm serverDate="2024-01-15" mode="create" />);
+      const productProps = mockAdvancedCombobox.mock.calls
+        .map(([p]) => p)
+        .find((p) => p.displayKey === "商品CD");
+      expect(productProps?.searchFn).toBe(mockSearch商品);
+    });
+
+    it("商品コンボボックスに displayKey='商品CD' valueKey='商品CD' が渡されること", () => {
+      render(<OrderForm serverDate="2024-01-15" mode="create" />);
+      const productProps = mockAdvancedCombobox.mock.calls
+        .map(([p]) => p)
+        .find((p) => p.displayKey === "商品CD");
+      expect(productProps).toMatchObject({
+        displayKey: "商品CD",
+        valueKey: "商品CD",
+      });
+    });
+  });
+
+  describe("initialValue", () => {
+    it("新規作成モードでは得意先コンボボックスに initialValue が渡されないこと", () => {
+      render(<OrderForm serverDate="2024-01-15" mode="create" />);
+      const customerProps = mockAdvancedCombobox.mock.calls
+        .map(([p]) => p)
+        .find((p) => p.displayKey === "得意先名");
+      expect(customerProps?.initialValue).toBeUndefined();
+    });
+
+    it("新規作成モードでは商品コンボボックスに initialValue が渡されないこと", () => {
+      render(<OrderForm serverDate="2024-01-15" mode="create" />);
+      const productProps = mockAdvancedCombobox.mock.calls
+        .map(([p]) => p)
+        .find((p) => p.displayKey === "商品CD");
+      expect(productProps?.initialValue).toBeUndefined();
+    });
+
+    it("編集モードでは得意先コンボボックスに initialValue が渡されること", () => {
+      render(<OrderForm {...editModeProps} />);
+      const customerProps = mockAdvancedCombobox.mock.calls
+        .map(([p]) => p)
+        .find((p) => p.displayKey === "得意先名");
+      expect(customerProps?.initialValue).toEqual({
+        得意先ID: "cust-001",
+        得意先名: "テスト株式会社",
+      });
+    });
+
+    it("編集モードでは商品コンボボックスに initialValue が渡されること", () => {
+      render(<OrderForm {...editModeProps} />);
+      const productProps = mockAdvancedCombobox.mock.calls
+        .map(([p]) => p)
+        .find((p) => p.displayKey === "商品CD");
+      expect(productProps?.initialValue).toEqual({
+        商品CD: "PROD-001",
+        商品名: "テスト商品",
+        単価: 1000,
+      });
+    });
+  });
+});
+
+// ─── 新規作成モード テスト ───────────────────────────────────────────
 
 describe("OrderForm コンポーネント（新規作成モード）", () => {
   describe("初期表示", () => {
@@ -117,7 +224,9 @@ describe("OrderForm コンポーネント（新規作成モード）", () => {
 
     it("得意先コンボボックスが表示されること", () => {
       render(<OrderForm serverDate="2024-01-15" mode="create" />);
-      expect(screen.getByTestId("combobox-得意先を検索...")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("combobox-得意先を検索..."),
+      ).toBeInTheDocument();
     });
 
     it("「受注明細」セクションが表示されること", () => {
@@ -132,17 +241,23 @@ describe("OrderForm コンポーネント（新規作成モード）", () => {
 
     it("「明細行を追加」ボタンが表示されること", () => {
       render(<OrderForm serverDate="2024-01-15" mode="create" />);
-      expect(screen.getByRole("button", { name: /明細行を追加/ })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /明細行を追加/ }),
+      ).toBeInTheDocument();
     });
 
     it("「受注を確定する」ボタンが表示されること", () => {
       render(<OrderForm serverDate="2024-01-15" mode="create" />);
-      expect(screen.getByRole("button", { name: "受注を確定する" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "受注を確定する" }),
+      ).toBeInTheDocument();
     });
 
     it("新規作成時は「伝票削除」ボタンが表示されないこと", () => {
       render(<OrderForm serverDate="2024-01-15" mode="create" />);
-      expect(screen.queryByRole("button", { name: /伝票削除/ })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /伝票削除/ }),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -173,18 +288,22 @@ describe("OrderForm コンポーネント（新規作成モード）", () => {
     it("明細が1行のときは行削除ボタンが無効化されること", () => {
       render(<OrderForm serverDate="2024-01-15" mode="create" />);
       // 削除ボタンは ghost/icon ボタンで Trash2 アイコンを含む
-      const deleteButtons = screen.getAllByRole("button").filter(
-        (btn) => btn.querySelector("[data-testid='trash2-icon']") !== null,
-      );
+      const deleteButtons = screen
+        .getAllByRole("button")
+        .filter(
+          (btn) => btn.querySelector("[data-testid='trash2-icon']") !== null,
+        );
       expect(deleteButtons[0]).toBeDisabled();
     });
 
     it("明細が2行以上のときは行削除ボタンが有効であること", () => {
       render(<OrderForm serverDate="2024-01-15" mode="create" />);
       fireEvent.click(screen.getByRole("button", { name: /明細行を追加/ }));
-      const deleteButtons = screen.getAllByRole("button").filter(
-        (btn) => btn.querySelector("[data-testid='trash2-icon']") !== null,
-      );
+      const deleteButtons = screen
+        .getAllByRole("button")
+        .filter(
+          (btn) => btn.querySelector("[data-testid='trash2-icon']") !== null,
+        );
       deleteButtons.forEach((btn) => expect(btn).not.toBeDisabled());
     });
 
@@ -193,9 +312,11 @@ describe("OrderForm コンポーネント（新規作成モード）", () => {
       fireEvent.click(screen.getByRole("button", { name: /明細行を追加/ }));
       expect(screen.getAllByTestId("combobox-CD検索...")).toHaveLength(2);
 
-      const deleteButtons = screen.getAllByRole("button").filter(
-        (btn) => btn.querySelector("[data-testid='trash2-icon']") !== null,
-      );
+      const deleteButtons = screen
+        .getAllByRole("button")
+        .filter(
+          (btn) => btn.querySelector("[data-testid='trash2-icon']") !== null,
+        );
       fireEvent.click(deleteButtons[0]);
       expect(screen.getAllByTestId("combobox-CD検索...")).toHaveLength(1);
     });
@@ -292,7 +413,10 @@ describe("OrderForm コンポーネント（新規作成モード）", () => {
 
     it("save受注 失敗時に toast.error が呼ばれること", async () => {
       const { toast } = await import("sonner");
-      mockSave受注.mockResolvedValue({ success: false, error: "保存に失敗しました" });
+      mockSave受注.mockResolvedValue({
+        success: false,
+        error: "保存に失敗しました",
+      });
       render(<OrderForm serverDate="2024-01-15" mode="create" />);
 
       fireEvent.click(screen.getByTestId("combobox-得意先を検索..."));
@@ -324,6 +448,8 @@ describe("OrderForm コンポーネント（新規作成モード）", () => {
   });
 });
 
+// ─── 編集モード テスト ───────────────────────────────────────────
+
 describe("OrderForm コンポーネント（編集モード）", () => {
   describe("初期表示", () => {
     it("タイトル「受注確認・修正」が表示されること", () => {
@@ -338,7 +464,9 @@ describe("OrderForm コンポーネント（編集モード）", () => {
 
     it("「伝票削除」ボタンが表示されること", () => {
       render(<OrderForm {...editModeProps} />);
-      expect(screen.getByRole("button", { name: /伝票削除/ })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /伝票削除/ }),
+      ).toBeInTheDocument();
     });
 
     it("初期データの受注日がフィールドに反映されること", () => {
@@ -348,7 +476,9 @@ describe("OrderForm コンポーネント（編集モード）", () => {
 
     it("「変更を確定する」ボタンが表示されること", () => {
       render(<OrderForm {...editModeProps} />);
-      expect(screen.getByRole("button", { name: "変更を確定する" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "変更を確定する" }),
+      ).toBeInTheDocument();
     });
   });
 
@@ -372,7 +502,9 @@ describe("OrderForm コンポーネント（編集モード）", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "キャンセル" }));
 
-      expect(screen.queryByText("本当に削除しますか？")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("本当に削除しますか？"),
+      ).not.toBeInTheDocument();
     });
 
     it("「削除実行」をクリックすると delete受注 が呼ばれること", async () => {
@@ -415,7 +547,10 @@ describe("OrderForm コンポーネント（編集モード）", () => {
 
     it("delete受注 失敗時に toast.error が呼ばれること", async () => {
       const { toast } = await import("sonner");
-      mockDelete受注.mockResolvedValue({ success: false, error: "削除に失敗しました" });
+      mockDelete受注.mockResolvedValue({
+        success: false,
+        error: "削除に失敗しました",
+      });
       render(<OrderForm {...editModeProps} />);
 
       fireEvent.click(screen.getByRole("button", { name: /伝票削除/ }));

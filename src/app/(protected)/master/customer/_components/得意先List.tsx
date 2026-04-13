@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2, Pencil, Plus, Search } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -34,13 +35,6 @@ export function CustomerList({
 
   const currentPage = Number(searchParams.get("page")) || 1;
   const totalPages = Math.ceil(totalCount / pageSize);
-
-  const handlePageChange = (newPage: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", newPage.toString());
-    // shallow: true を使わず、サーバーコンポーネントの再実行を促す
-    startTransition(() => router.push(`?${params.toString()}`));
-  };
 
   const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -170,25 +164,43 @@ export function CustomerList({
           件を表示
         </p>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={currentPage <= 1 || isPending}
-            onClick={() => handlePageChange(currentPage - 1)}
-          >
-            前へ
-          </Button>
+          {currentPage <= 1 ? (
+            <Button variant="outline" size="sm" disabled>
+              前へ
+            </Button>
+          ) : (
+            <Button asChild variant="outline" size="sm">
+              <Link
+                href={`?${(() => {
+                  const p = new URLSearchParams(searchParams.toString());
+                  p.set("page", String(currentPage - 1));
+                  return p.toString();
+                })()}`}
+              >
+                前へ
+              </Link>
+            </Button>
+          )}
           <div className="flex items-center px-4 text-sm font-medium">
             {currentPage} / {totalPages}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={currentPage >= totalPages || isPending}
-            onClick={() => handlePageChange(currentPage + 1)}
-          >
-            次へ
-          </Button>
+          {currentPage >= totalPages ? (
+            <Button variant="outline" size="sm" disabled>
+              次へ
+            </Button>
+          ) : (
+            <Button asChild variant="outline" size="sm">
+              <Link
+                href={`?${(() => {
+                  const p = new URLSearchParams(searchParams.toString());
+                  p.set("page", String(currentPage + 1));
+                  return p.toString();
+                })()}`}
+              >
+                次へ
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
 

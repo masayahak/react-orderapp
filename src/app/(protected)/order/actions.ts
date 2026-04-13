@@ -9,6 +9,7 @@ import { 商品Repository } from "@/db/repository/商品Repository";
 import { 得意先Repository } from "@/db/repository/得意先Repository";
 import { requireSession } from "@/lib/auth-guard";
 
+// ------ 入力支援用 ------------------------------------------------
 export async function search得意先(query: string) {
   // 認証ガード
   await requireSession();
@@ -39,6 +40,7 @@ export async function search商品(query: string) {
   }));
 }
 
+// ------ 受注用 ------------------------------------------------
 export async function save受注(
   data: 受注Input,
   mode: "create" | "edit",
