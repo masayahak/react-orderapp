@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { 受注HeaderOutput } from "@/db/model/受注Model";
+import { formatJpy } from "@/lib/formatters";
 
 const formatDate = (dateStr: string) => {
   const d = new Date(dateStr);
@@ -37,12 +38,6 @@ const getDateColorClass = (dateStr: string) => {
   return "text-slate-600"; // 平日（デフォルト）
 };
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("ja-JP", {
-    style: "currency",
-    currency: "JPY",
-  }).format(amount);
-};
 
 export function OrderList({
   pageData,
@@ -231,7 +226,7 @@ export function OrderList({
                     {order.得意先名}
                   </TableCell>
                   <TableCell className="text-right font-bold text-slate-900">
-                    {formatCurrency(order.合計金額)}
+                    {formatJpy.format(order.合計金額)}
                   </TableCell>
                   <TableCell className="text-center">
                     {/* 確認・修正ボタンに遷移処理を追加 */}

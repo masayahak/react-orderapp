@@ -19,7 +19,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { AnalysisParams, formatCurrency } from "@/lib/analysis-utils";
+import { AnalysisParams } from "@/lib/analysis-utils";
+import { format円 } from "@/lib/formatters";
 
 export interface RankingData {
   name: string;
@@ -99,7 +100,7 @@ export function CustomerRanking({ data, params }: CustomerRankingProps) {
                     indicator="line"
                     formatter={(value) => (
                       <span className="font-mono font-bold text-slate-700">
-                        {formatCurrency(Number(value))}
+                        {format円(Number(value))}
                       </span>
                     )}
                   />
@@ -126,7 +127,7 @@ export function CustomerRanking({ data, params }: CustomerRankingProps) {
                   offset={8}
                   className="fill-slate-500"
                   fontSize={11}
-                  formatter={(val: number) => formatCurrency(val)}
+                  formatter={(val: number) => format円(val)}
                 />
               </Bar>
             </BarChart>

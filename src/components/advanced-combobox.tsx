@@ -29,7 +29,8 @@ export interface ColumnDef<T> {
   width?: string;
   visible?: boolean;
   align?: "left" | "center" | "right";
-  isCurrency?: boolean;
+  formatter?: (value: T[keyof T]) => string;
+  cellClassName?: string;
 }
 
 /* -------------------------------------------------
@@ -209,11 +210,9 @@ export function AdvancedCombobox<T>({
                     {visibleColumns.map((col) => {
                       // 値の取得とフォーマット処理
                       const rawValue = item[col.accessorKey];
-                      let displayValue = String(rawValue);
-
-                      if (col.isCurrency && !isNaN(Number(rawValue))) {
-                        displayValue = `¥${Number(rawValue).toLocaleString()}`;
-                      }
+                      const displayValue = col.formatter
+                        ? col.formatter(rawValue)
+                        : String(rawValue ?? "");
 
                       return (
                         <div
@@ -226,8 +225,7 @@ export function AdvancedCombobox<T>({
                             col.align === "center" && "text-center",
                             col.align === "right" && "text-right",
                             (!col.align || col.align === "left") && "text-left",
-                            // 通貨の場合は等幅フォントを適用して見栄えを良くする
-                            col.isCurrency && "font-mono",
+                            col.cellClassName,
                           )}
                           style={{
                             width: col.width || "auto",

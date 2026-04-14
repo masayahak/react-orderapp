@@ -11,13 +11,13 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { AnalysisParams, generateEmptyTrendData } from "@/lib/analysis-utils";
 import {
-  AnalysisParams,
-  dateFormatJPLocal,
-  formatCurrency,
+  formatDateJpLocal,
   formatNumber,
-  generateEmptyTrendData,
-} from "@/lib/analysis-utils";
+  format円,
+  format円Large,
+} from "@/lib/formatters";
 
 interface SalesTrendChartProps {
   data: { period: string; totalAmount: number; count: number }[];
@@ -78,7 +78,7 @@ export function SalesTrendChart({ data, params }: SalesTrendChartProps) {
   const chartData = useMemo(() => {
     const emptyData = generateEmptyTrendData(duration, interval);
     const dataMap = new Map(
-      data.map((item) => [dateFormatJPLocal(new Date(item.period)), item]),
+      data.map((item) => [formatDateJpLocal(new Date(item.period)), item]),
     );
     const dayLabels = ["日", "月", "火", "水", "木", "金", "土"];
 
@@ -121,13 +121,8 @@ export function SalesTrendChart({ data, params }: SalesTrendChartProps) {
   );
 
   const formatYAxis = (value: number) => {
-    if (activeChart === "count")
-      return new Intl.NumberFormat("ja-JP").format(value);
-    if (value >= 100000000)
-      return `${new Intl.NumberFormat("ja-JP", { maximumFractionDigits: 1 }).format(value / 100000000)}億円`;
-    if (value >= 10000)
-      return `${new Intl.NumberFormat("ja-JP", { maximumFractionDigits: 0 }).format(value / 10000)}万円`;
-    return `${new Intl.NumberFormat("ja-JP").format(value)}円`;
+    if (activeChart === "count") return formatNumber(value);
+    return format円Large(value);
   };
 
   return (
@@ -153,7 +148,7 @@ export function SalesTrendChart({ data, params }: SalesTrendChartProps) {
             売上金額 (合計)
           </span>
           <span className="text-2xl font-black leading-none text-slate-400 group-data-[active=true]:text-indigo-700 sm:text-3xl">
-            {formatCurrency(totals.totalAmount)}
+            {format円(totals.totalAmount)}
           </span>
         </button>
 
@@ -229,7 +224,7 @@ export function SalesTrendChart({ data, params }: SalesTrendChartProps) {
                     : d;
                 startTransition(() =>
                   router.push(
-                    `/order?startDate=${dateFormatJPLocal(d)}&endDate=${dateFormatJPLocal(end)}`,
+                    `/order?startDate=${formatDateJpLocal(d)}&endDate=${formatDateJpLocal(end)}`,
                   ),
                 );
               }}
