@@ -19,7 +19,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { AnalysisParams, formatCurrency } from "@/lib/analysis-utils";
+import { AnalysisParams } from "@/lib/analysis-utils";
+import { format円 } from "@/lib/formatters";
 
 import type { RankingData } from "./得意先Ranking";
 
@@ -96,7 +97,7 @@ export function ProductRanking({ data, params }: ProductRankingProps) {
                     indicator="line"
                     formatter={(value) => (
                       <span className="font-mono font-bold text-slate-700">
-                        {formatCurrency(Number(value))}
+                        {format円(Number(value))}
                       </span>
                     )}
                   />
@@ -123,7 +124,7 @@ export function ProductRanking({ data, params }: ProductRankingProps) {
                   offset={8}
                   className="fill-slate-500"
                   fontSize={11}
-                  formatter={(val: number) => formatCurrency(val)}
+                  formatter={(val: number) => format円(val)}
                 />
               </Bar>
             </BarChart>

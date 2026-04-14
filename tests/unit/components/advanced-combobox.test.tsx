@@ -28,7 +28,13 @@ type Item = { id: string; name: string; price: number };
 const columns: ColumnDef<Item>[] = [
   { header: "名前", accessorKey: "name" },
   { header: "ID", accessorKey: "id", visible: false },
-  { header: "価格", accessorKey: "price", isCurrency: true, align: "right" },
+  {
+    header: "価格",
+    accessorKey: "price",
+    align: "right",
+    formatter: (v) => `¥${Number(v).toLocaleString()}`,
+    cellClassName: "font-mono",
+  },
 ];
 
 const items: Item[] = [
@@ -169,7 +175,7 @@ describe("AdvancedCombobox", () => {
       });
     });
 
-    it("isCurrency の列は ¥フォーマットで表示されること", async () => {
+    it("formatter が指定された列は書式付きで表示されること", async () => {
       render(
         <AdvancedCombobox
           placeholder="検索..."

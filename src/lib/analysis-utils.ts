@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { dateStringSchema } from "@/db/model/dateStringSchema";
+import { formatDateJpLocal } from "@/lib/formatters";
 
 // 基本的な型定義
 export type AnalysisPreset = "week" | "month" | "year";
@@ -43,34 +44,6 @@ export const analysisParamsSchema = z
 export type AnalysisParams = z.infer<typeof analysisParamsSchema>;
 
 // =============================================
-// 書式変換ヘルパー
-// =============================================
-
-// Dateオブジェクトを yyyy-MM-dd 形式の文字列に変換
-export const dateFormatJPLocal = (d: Date): string => {
-  if (isNaN(d.getTime())) return "";
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
-
-// 数値を 3桁区切り（#,##0）にフォーマット
-export const formatNumber = (value: number): string =>
-  new Intl.NumberFormat("ja-JP").format(value);
-
-// 通貨（日本円）フォーマット。大きな数値は 万円/億円 単位に丸める
-export const formatCurrency = (val: number): string => {
-  if (val >= 100000000) {
-    return `${formatNumber(val / 100000000)}億円`;
-  }
-  if (val >= 10000) {
-    return `${formatNumber(val / 10000)}万円`;
-  }
-  return `${formatNumber(val)}円`;
-};
-
-// =============================================
 // 分析用初期条件取得
 // =============================================
 
@@ -103,8 +76,8 @@ export const getAnalysisDefaults = (preset: AnalysisPreset) => {
 
   return {
     duration: {
-      from: dateFormatJPLocal(from),
-      to: dateFormatJPLocal(to),
+      from: formatDateJpLocal(from),
+      to: formatDateJpLocal(to),
     } as AnalysisDuration,
     interval: getIntervalByPreset(preset),
   };
@@ -124,7 +97,7 @@ export const generateEmptyTrendData = (
   const current = new Date(start);
 
   while (current <= end) {
-    const periodStr = dateFormatJPLocal(current);
+    const periodStr = formatDateJpLocal(current);
     result.push({
       period: periodStr,
       totalAmount: 0,
@@ -171,24 +144,24 @@ export const calculateAnalysisParams = (
         const dToW = new Date(dFrom);
         dToW.setDate(dFrom.getDate() + 6);
         newDuration = {
-          from: dateFormatJPLocal(dFrom),
-          to: dateFormatJPLocal(dToW),
+          from: formatDateJpLocal(dFrom),
+          to: formatDateJpLocal(dToW),
         };
         break;
       case "month":
         const nextM = new Date(dFrom.getFullYear(), dFrom.getMonth() + step, 1);
         const nextE = new Date(nextM.getFullYear(), nextM.getMonth() + 1, 0);
         newDuration = {
-          from: dateFormatJPLocal(nextM),
-          to: dateFormatJPLocal(nextE),
+          from: formatDateJpLocal(nextM),
+          to: formatDateJpLocal(nextE),
         };
         break;
       case "year":
         const nextY = new Date(dFrom.getFullYear() + step, 0, 1);
         const nextYE = new Date(nextY.getFullYear(), 11, 31);
         newDuration = {
-          from: dateFormatJPLocal(nextY),
-          to: dateFormatJPLocal(nextYE),
+          from: formatDateJpLocal(nextY),
+          to: formatDateJpLocal(nextYE),
         };
         break;
     }
