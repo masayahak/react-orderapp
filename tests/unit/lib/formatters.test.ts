@@ -12,15 +12,15 @@ import {
 
 describe("formatJpy", () => {
   it("整数をIntl通貨形式にフォーマットすること", () => {
-    expect(formatJpy.format(1000)).toBe("￥1,000");
+    expect(formatJpy(1000)).toBe("￥1,000");
   });
 
   it("0を￥0にフォーマットすること", () => {
-    expect(formatJpy.format(0)).toBe("￥0");
+    expect(formatJpy(0)).toBe("￥0");
   });
 
   it("大きな数値に3桁区切りが適用されること", () => {
-    expect(formatJpy.format(1234567)).toBe("￥1,234,567");
+    expect(formatJpy(1234567)).toBe("￥1,234,567");
   });
 });
 

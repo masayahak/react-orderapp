@@ -50,7 +50,7 @@ const productColumns: ColumnDef<ProductSearchRes>[] = [
     accessorKey: "単価",
     width: "100px",
     align: "right",
-    formatter: (v) => formatJpy.format(Number(v)),
+    formatter: (v) => formatJpy(Number(v)),
     cellClassName: "font-mono",
   },
 ];
@@ -354,7 +354,7 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                         <Input
                           readOnly
                           tabIndex={-1}
-                          value={formatJpy.format(
+                          value={formatJpy(
                             Number(watchDetails?.[index]?.単価) || 0,
                           )}
                           className="h-9 bg-slate-50 border-none font-mono text-right text-xs"
@@ -377,7 +377,7 @@ export function OrderForm({ serverDate, initialData, mode }: OrderFormProps) {
                         <Input
                           readOnly
                           tabIndex={-1}
-                          value={formatJpy.format(
+                          value={formatJpy(
                             (Number(watchDetails?.[index]?.単価) || 0) *
                               (Number(watchDetails?.[index]?.数量) || 0),
                           )}

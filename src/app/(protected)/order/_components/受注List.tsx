@@ -226,7 +226,7 @@ export function OrderList({
                     {order.得意先名}
                   </TableCell>
                   <TableCell className="text-right font-bold text-slate-900">
-                    {formatJpy.format(order.合計金額)}
+                    {formatJpy(order.合計金額)}
                   </TableCell>
                   <TableCell className="text-center">
                     {/* 確認・修正ボタンに遷移処理を追加 */}

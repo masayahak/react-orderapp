@@ -1,8 +1,9 @@
 // ￥1,234 形式（Intl 通貨フォーマット）
-export const formatJpy = new Intl.NumberFormat("ja-JP", {
-  style: "currency",
-  currency: "JPY",
-});
+export const formatJpy = (value: number): string =>
+  new Intl.NumberFormat("ja-JP", {
+    style: "currency",
+    currency: "JPY",
+  }).format(value);
 
 // 1,234 形式（3桁区切り）
 export const formatNumber = (value: number): string =>

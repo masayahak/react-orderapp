@@ -77,7 +77,7 @@ export function AdvancedCombobox<T>({
   const [selected, setSelected] = useState<T | null>(initialValue || null);
 
   // 受け取った columns の定義から、表示対象の取得を定義する
-  // なお 再レンダリングされても、columns が変わらない限り再定義する必要はないのでメモ化
+  // なお 再レンダリングされても、columns が変わらない限り再定義は不要なのでメモ化
   const visibleColumns = useMemo(
     () => columns.filter((col) => col.visible !== false),
     [columns],
