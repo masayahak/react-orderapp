@@ -20,8 +20,6 @@
 !.yarn/versions
 
 # testing
-/coverage/
-/playwright-report/
 /tests-results/
 
 # next.js
