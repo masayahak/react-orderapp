@@ -14,7 +14,7 @@ test.describe("受注管理", () => {
     await expect(page.locator("th:has-text('受注ID')")).toBeVisible();
     await expect(page.locator("th:has-text('得意先名')")).toBeVisible();
     await expect(page.locator("th:has-text('合計金額')")).toBeVisible();
-    await expect(page.getByRole("button", { name: "新規受注" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "新規受注" })).toBeVisible();
   });
 
   test("新規受注登録 → 登録成功", async ({ page }) => {
@@ -23,7 +23,7 @@ test.describe("受注管理", () => {
 
     // 得意先を選択
     await page.locator('button[role="combobox"]:has-text("得意先を検索...")').dispatchEvent("click");
-    await page.fill('[placeholder="検索キーワードを入力..."]', "TEST得意先");
+    await page.fill('[placeholder="検索キーワードを入力…"]', "TEST得意先");
     const customerItem = page
       .locator('[cmdk-item], [role="option"]')
       .filter({ hasText: "TEST得意先" })
@@ -39,7 +39,7 @@ test.describe("受注管理", () => {
 
     // 商品選択（"ザク" はDBに存在確認済み）
     await page.locator('button[role="combobox"]:has-text("CD検索...")').dispatchEvent("click");
-    await page.fill('[placeholder="検索キーワードを入力..."]', "ザク");
+    await page.fill('[placeholder="検索キーワードを入力…"]', "ザク");
     // "ザク" を含む項目が表示されるまで待機（初期の全件リストと区別するため）
     const productItem = page
       .locator('[role="option"], [cmdk-item]')

@@ -9,6 +9,9 @@
 # migrations
 /migrations/
 
+# playwright
+/playwright-report/
+
 # dependencies
 /node_modules
 /.pnp
