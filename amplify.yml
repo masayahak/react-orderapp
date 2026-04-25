@@ -6,11 +6,17 @@ frontend:
         - npm ci
     build:
       commands:
+        - echo "DATABASE_URL=$DATABASE_URL" > .env.production
+        - echo "BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET" >> .env.production
+        - echo "BETTER_AUTH_URL=$BETTER_AUTH_URL" >> .env.production
+        - echo "NEXT_PUBLIC_BETTER_AUTH_URL=$NEXT_PUBLIC_BETTER_AUTH_URL" >> .env.production
+        - echo "PAGE_ROW_COUNT=$PAGE_ROW_COUNT" >> .env.production
         - npm run build
+        - cp .env.production .next/.env.production # ← これが必須
   artifacts:
     baseDirectory: .next
     files:
-      - '**/*'
+      - "**/*"
   cache:
     paths:
       - node_modules/**/*
