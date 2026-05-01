@@ -3,5 +3,6 @@
     "src/app/**": {
       "maxDuration": 60
     }
-  }
+  },
+  "ignoreCommand": "[ \"$VERCEL_GIT_COMMIT_REF\" != \"main\" ]"
 }
