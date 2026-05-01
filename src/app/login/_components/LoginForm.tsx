@@ -3,8 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -44,12 +43,6 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
-
-  // マウント時に遷移先をプリフェッチして高速化
-  useEffect(() => {
-    router.prefetch("/");
-  }, [router]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -70,10 +63,10 @@ export function LoginForm({
       },
       {
         onSuccess: () => {
-          router.push("/");
-
-          // 画面遷移が完了するまで「くるくる」を維持するため、
-          // ここでは setIsLoading(false) を意図的に呼ばない
+          // router.push() は Router Cache を参照するため、未ログイン時の prefetch が
+          // あると stale エントリを使いダッシュボードへ遷移しない。
+          // window.location.href でハードナビゲーションしてキャッシュをバイパスする。
+          window.location.href = "/";
         },
         onError: (ctx) => {
           toast.error("ログインに失敗しました: " + ctx.error.message);
