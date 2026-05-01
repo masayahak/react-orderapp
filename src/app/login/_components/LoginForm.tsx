@@ -85,6 +85,16 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/30">
+          <div className="bg-white rounded-xl shadow-xl px-10 py-8 flex flex-col items-center gap-4 max-w-sm w-full mx-4">
+            <Loader2 className="size-10 animate-spin text-indigo-600" />
+            <p className="text-sm text-slate-600 text-center">
+              認証DBへ接続中です。しばらくお待ち下さい。
+            </p>
+          </div>
+        </div>
+      )}
       <Card>
         <CardHeader>
           <CardTitle>受注管理アプリ デモ</CardTitle>
@@ -140,11 +150,7 @@ export function LoginForm({
                 />
                 <Field>
                   <Button type="submit" disabled={isLoading}>
-                    {isLoading ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      "ログイン"
-                    )}
+                    ログイン
                   </Button>
                   <FieldDescription className="text-center">
                     初めてのご利用ですか？{" "}
