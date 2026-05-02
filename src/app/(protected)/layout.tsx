@@ -15,6 +15,12 @@ export default async function ProtectedLayout({
 }) {
   return (
     <>
+      {/* 
+        認証状態を確認してNavを表示している
+        DB接続が必要なので、ここをSuspenseしないと
+        childrenの中でどれだけSuspenseしていても
+        children全体のレンダリングが始まらない
+       */}
       <Suspense fallback={<NavigationSkeleton />}>
         <NavigationServer />
       </Suspense>

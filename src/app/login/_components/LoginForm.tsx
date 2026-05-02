@@ -83,7 +83,8 @@ export function LoginForm({
           <div className="bg-white rounded-xl shadow-xl px-10 py-8 flex flex-col items-center gap-4 max-w-sm w-full mx-4">
             <Loader2 className="size-10 animate-spin text-indigo-600" />
             <p className="text-sm text-slate-600 text-center">
-              認証DBへ接続中です。しばらくお待ち下さい。
+              コールドスタンバイの認証DBへ接続中です。
+              起動までしばらくお待ち下さい。
             </p>
           </div>
         </div>
@@ -127,7 +128,11 @@ export function LoginForm({
                             type="button"
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                             onClick={() => setShowPassword(!showPassword)}
-                            aria-label={showPassword ? "パスワードを非表示" : "パスワードを表示"}
+                            aria-label={
+                              showPassword
+                                ? "パスワードを非表示"
+                                : "パスワードを表示"
+                            }
                           >
                             {showPassword ? (
                               <EyeOff className="size-4" aria-hidden="true" />
