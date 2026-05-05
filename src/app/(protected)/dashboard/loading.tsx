@@ -1,18 +1,14 @@
+import { Loader2 } from "lucide-react";
+
 export default function DashboardLoading() {
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] bg-slate-50/30 overflow-hidden">
-      <div className="px-3 pt-3 pb-2 shrink-0">
-        <div className="h-10 rounded-lg bg-slate-200 animate-pulse" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/30">
+      <div className="bg-white rounded-xl shadow-xl px-10 py-8 flex flex-col items-center gap-4 max-w-sm w-full mx-4">
+        <Loader2 className="size-10 animate-spin text-indigo-600" />
+        <p className="text-sm text-slate-600 text-center">
+          データを読み込んでいます。しばらくお待ち下さい。
+        </p>
       </div>
-      <main className="flex-1 min-h-0 px-3 pb-2">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 h-full">
-          <div className="lg:col-span-8 h-full min-h-0 rounded-xl bg-slate-200 animate-pulse" />
-          <div className="lg:col-span-4 flex flex-col gap-3 h-full min-h-0">
-            <div className="flex-1 min-h-0 rounded-xl bg-slate-200 animate-pulse" />
-            <div className="flex-1 min-h-0 rounded-xl bg-slate-200 animate-pulse" />
-          </div>
-        </div>
-      </main>
     </div>
   );
 }
